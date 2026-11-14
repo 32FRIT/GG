@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07130d">
-  <meta name="description" content="GG — لعبة كروت كرة القدم: اختار 11 لاعب وابني فريقك">
-  <title>GG — ألعاب الكورة</title>
+  <meta name="description" content="GG">
+  <title>GG</title>
   <link rel="icon" type="image/png" href="./Icon.png">
   <link rel="apple-touch-icon" href="./Icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -137,6 +137,20 @@
       line-height: 1.1
     }
 
+    .brand-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex: 1;
+      min-width: 0
+    }
+
+    .brand-heading h1 {
+      font-size: clamp(15px, 5.2vw, 20px);
+      white-space: nowrap
+    }
+
     .brand span {
       font-size: 12px;
       color: var(--mu);
@@ -187,7 +201,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-top: 14px;
+      margin: 0;
       position: relative;
       background: rgba(46, 224, 138, .13);
       color: var(--ac);
@@ -196,6 +210,38 @@
       padding: 5px 12px;
       font-size: 12px;
       font-weight: 700;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      position: relative;
+      z-index: 1
+    }
+
+    .help-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid rgba(46, 224, 138, .4);
+      border-radius: 50%;
+      background: rgba(46, 224, 138, .12);
+      color: var(--ac);
+      font-size: 19px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform .12s ease, background .15s ease
+    }
+
+    .help-icon:active {
+      transform: scale(.92);
+      background: rgba(46, 224, 138, .22)
     }
 
     /* ---------- buttons ---------- */
@@ -238,6 +284,13 @@
       background: rgba(255, 255, 255, .05)
     }
 
+    .btn.sell {
+      color: var(--bad);
+      border: 1px solid rgba(255, 93, 93, .45);
+      background: rgba(255, 93, 93, .08);
+      box-shadow: none
+    }
+
     .btn.w {
       width: 100%
     }
@@ -247,6 +300,87 @@
       min-height: 40px;
       font-size: 13.5px;
       border-radius: 11px
+    }
+
+    .wallet-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin: 0 0 12px;
+      padding: 10px 14px;
+      border: 1px solid rgba(245, 196, 81, .3);
+      border-radius: 13px;
+      background: rgba(245, 196, 81, .08);
+      color: var(--gold);
+      font-weight: 800
+    }
+
+    .wallet-badge b {
+      direction: ltr;
+      font-variant-numeric: tabular-nums
+    }
+
+    .brand-wallet {
+      flex: 0 0 auto;
+      gap: 4px;
+      margin: 0;
+      padding: 6px 9px;
+      font-size: 12px
+    }
+
+    .squad-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px
+    }
+
+    .squad-topbar .wallet-badge {
+      flex: 1;
+      margin: 0
+    }
+
+    .squad-formation-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .squad-formation-title .sec-title {
+      min-width: 0;
+      margin: 20px 0 10px
+    }
+
+    .squad-formation-title .btn {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      font-size: 11px
+    }
+
+    .coach-management-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    .coach-management-row #club-coach {
+      flex: 1;
+      min-width: 0;
+      justify-content: flex-start;
+      text-align: right
+    }
+
+    .coach-collection-actions {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 6px
+    }
+
+    .coach-collection-actions .btn {
+      padding-inline: 9px;
+      font-size: 11px
     }
 
     /* ---------- mode cards ---------- */
@@ -434,6 +568,7 @@
 
     .pitch {
       display: grid;
+      position: relative;
       gap: clamp(6px, 2vw, 10px);
       padding: clamp(10px, 3vw, 16px) clamp(6px, 2vw, 12px);
       border: 1px solid rgba(46, 224, 138, .22);
@@ -442,6 +577,38 @@
       background:
         linear-gradient(90deg, transparent 49.7%, rgba(255, 255, 255, .1) 49.7% 50.3%, transparent 50.3%),
         repeating-linear-gradient(0deg, #123a26 0 42px, #103321 42px 84px);
+    }
+
+    .squad-overall {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 66px;
+      height: 42px;
+      border: 1px solid rgba(245, 196, 81, .65);
+      border-radius: 12px;
+      background: rgba(7, 19, 13, .94);
+      box-shadow: 0 5px 16px rgba(0, 0, 0, .35), 0 0 12px rgba(245, 196, 81, .16);
+      color: var(--gold);
+      direction: ltr
+    }
+
+    .squad-overall b {
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums
+    }
+
+    .squad-overall span {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .04em
     }
 
     .pitch-row {
@@ -462,6 +629,18 @@
       text-align: center
     }
 
+    .pitch-player.has-player-card {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .pitch-player.has-player-card > .fc {
+      width: 90%;
+      margin-inline: auto
+    }
+
     .pitch-player small {
       display: block;
       color: var(--ac);
@@ -476,6 +655,317 @@
       font-size: clamp(8px, 2.7vw, 11px);
       text-overflow: ellipsis;
       white-space: nowrap
+    }
+
+    .squad-slot {
+      color: var(--tx);
+      font-family: inherit;
+      cursor: pointer
+    }
+
+    .squad-slot.empty {
+      border-style: dashed;
+      border-color: rgba(46, 224, 138, .55);
+      color: var(--ac)
+    }
+
+    .squad-slot.selected,
+    .bench-slot.selected {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      box-shadow: 0 0 16px rgba(245, 196, 81, .3)
+    }
+
+    .squad-action-panel {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid rgba(245, 196, 81, .3);
+      border-radius: 14px;
+      background: rgba(245, 196, 81, .08);
+      animation: overlay-in .18s ease both
+    }
+
+    .squad-action-panel p {
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 700
+    }
+
+    .sale-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 5px 12px;
+      margin-bottom: 10px;
+      color: var(--mu);
+      font-size: 11px;
+      font-weight: 700
+    }
+
+    .sale-breakdown b {
+      color: var(--tx);
+      font-variant-numeric: tabular-nums
+    }
+
+    .sale-breakdown .loss b {
+      color: var(--bad)
+    }
+
+    .squad-action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .squad-action-buttons .btn {
+      flex: 1 1 calc(50% - 8px);
+      min-width: 0;
+      padding-inline: 8px;
+      font-size: 12px
+    }
+
+    .setup-confirmation {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid rgba(46, 224, 138, .35);
+      border-radius: 12px;
+      background: rgba(46, 224, 138, .06)
+    }
+
+    .setup-confirmation p,
+    .setup-confirmation small {
+      margin: 0;
+      color: var(--mu);
+      font-size: 11px
+    }
+
+    .setup-confirmation strong {
+      color: var(--ac);
+      font-variant-numeric: tabular-nums
+    }
+
+    .setup-confirmation small {
+      color: var(--bad)
+    }
+
+    .bench-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: start;
+      gap: 10px;
+      margin-top: 10px
+    }
+
+    .bench-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      min-width: 0;
+      min-height: 52px;
+      padding: 5px 3px;
+      border: 1px dashed rgba(46, 224, 138, .45);
+      border-radius: 9px;
+      background: var(--card);
+      color: var(--tx);
+      cursor: pointer
+    }
+
+    .bench-slot small,
+    .bench-slot b {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .bench-slot small {
+      color: var(--mu);
+      font-size: 9px
+    }
+
+    .bench-slot b {
+      margin-top: 2px;
+      color: var(--ac);
+      font-size: 10px
+    }
+
+    .bench-slot.owned-slot {
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer
+    }
+
+    .bench-slot.owned-slot small {
+      font-size: 9px;
+      text-align: center
+    }
+
+    .bench-slot .fc,
+    .player-market-card .fc {
+      width: 100%;
+    }
+
+    .bench-slot .fc {
+      width: 90%;
+      margin-inline: auto;
+      pointer-events: none;
+    }
+
+    .market-filters {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+      margin-bottom: 12px
+    }
+
+    .market-filters .formation-option {
+      min-height: 42px;
+      padding: 4px 2px
+    }
+
+    .market-filters small {
+      font-size: 10px;
+      font-weight: 900
+    }
+
+    .market-search {
+      width: 100%;
+      margin-top: 12px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--tx);
+      font: inherit;
+      font-size: 14px;
+      text-align: start;
+    }
+
+    .market-search::placeholder {
+      color: var(--mu);
+      opacity: 1
+    }
+
+    .market-search:focus {
+      outline: none;
+      border-color: var(--ac);
+      box-shadow: 0 0 0 3px rgba(46, 224, 138, .12)
+    }
+
+    .market-search[hidden],
+    [data-market-search-item][hidden],
+    [data-market-empty][hidden] {
+      display: none
+    }
+
+    .market-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px
+    }
+
+    .market-search-empty {
+      grid-column: 1 / -1
+    }
+
+    .market-list.player-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .market-item.player-market-card {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .player-market-card .fc {
+      width: 100%;
+    }
+
+    .player-market-card .market-price {
+      width: 100%;
+      max-width: none;
+      margin-top: auto;
+    }
+
+    .player-market-card .market-item-price {
+      padding: 4px 0;
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center
+    }
+
+    .market-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card)
+    }
+
+    .market-item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .market-item-info b,
+    .market-item-info small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .market-item-info small {
+      margin-top: 2px;
+      color: var(--mu);
+      font-size: 11px
+    }
+
+    .owned-formation-row {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: stretch
+    }
+
+    .owned-formation-row .formation-option {
+      margin: 0
+    }
+
+    .owned-formation-row > .btn {
+      white-space: nowrap
+    }
+
+    .market-price {
+      flex: 0 1 118px;
+      min-width: 0;
+      max-width: 118px;
+      font-size: 11px;
+      line-height: 1.2;
+      white-space: normal;
+      overflow-wrap: anywhere
+    }
+
+    .market-price.owned:disabled {
+      opacity: 1;
+      color: var(--ac);
+      border-color: rgba(46, 224, 138, .4)
     }
 
     .rating-compare {
@@ -506,8 +996,8 @@
     }
 
     .coach-compare-item .fcwrap {
-      width: 100%;
-      max-width: 190px;
+      width: 90px;
+      max-width: 100%;
       margin: 0 auto
     }
 
@@ -664,6 +1154,42 @@
       padding-top: 6cqw;
     }
 
+    .fc-player-silhouette {
+      position: absolute;
+      left: 50%;
+      bottom: 24%;
+      width: 58%;
+      height: 43%;
+      transform: translateX(-50%);
+      z-index: 0;
+      color: var(--c1);
+      opacity: .24;
+    }
+
+    .fc-player-silhouette::before,
+    .fc-player-silhouette::after {
+      content: "";
+      position: absolute;
+      background: currentColor;
+    }
+
+    .fc-player-silhouette::before {
+      top: 0;
+      left: 37%;
+      width: 26%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+    }
+
+    .fc-player-silhouette::after {
+      bottom: 0;
+      left: 5%;
+      width: 90%;
+      height: 69%;
+      border-radius: 46% 46% 8% 8%;
+      clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);
+    }
+
     .fc-name {
       margin-top: auto;
       font-size: 9.4cqw;
@@ -678,6 +1204,12 @@
       position: relative;
       z-index: 1;
       text-shadow: 0 1px 0 rgba(255, 255, 255, .12);
+    }
+
+    .fc.squad-player-card .fc-name,
+    .fc.bench-player-card .fc-name,
+    .fc.formation-player-card .fc-name {
+      font-size: 10.4cqw
     }
 
     .fc-rule {
@@ -1196,13 +1728,50 @@
       }
     }
 
-    @media (max-width:360px) {
+    @media (max-width:390px) {
       #app {
-        padding-inline: calc(12px + var(--sar)) calc(12px + var(--sal))
+        padding-inline: calc(8px + var(--sar)) calc(8px + var(--sal))
       }
 
       .fc {
         border-radius: 12px
+      }
+
+      .pitch {
+        padding-inline: 3px
+      }
+
+      .pitch-row {
+        gap: 2px
+      }
+
+      .pitch-player.has-player-card > .fc,
+      .bench-slot .fc {
+        width: 100%
+      }
+
+      .fc.squad-player-card .fc-era,
+      .fc.squad-player-card .fc-rule,
+      .fc.squad-player-card .fc-meta,
+      .fc.bench-player-card .fc-era,
+      .fc.bench-player-card .fc-rule,
+      .fc.bench-player-card .fc-meta,
+      .fc.formation-player-card .fc-era,
+      .fc.formation-player-card .fc-rule,
+      .fc.formation-player-card .fc-meta {
+        display: none
+      }
+
+      .fc.squad-player-card .fc-top i,
+      .fc.bench-player-card .fc-top i,
+      .fc.formation-player-card .fc-top i {
+        font-size: 7px
+      }
+
+      .fc.squad-player-card .fc-name,
+      .fc.bench-player-card .fc-name,
+      .fc.formation-player-card .fc-name {
+        font-size: clamp(8px, 13cqw, 10px)
       }
 
       .coach-compare {
@@ -1230,380 +1799,45 @@
 
 <body>
   <div id="app" aria-live="polite"></div>
+  <script src="./fut-data.js"></script>
   <script>
     /* ================= DATA ================= */
-    const RAW = `بوفون|G|إيطاليا|يوفنتوس|2000s|92
-كاسياس|G|إسبانيا|ريال مدريد|2000s|91
-أوليفر كان|G|ألمانيا|بايرن ميونخ|2000s|90
-نوير|G|ألمانيا|بايرن ميونخ|2010s|92
-دي خيا|G|إسبانيا|مانشستر يونايتد|2010s|88
-كورتوا|G|بلجيكا|ريال مدريد|2020s|90
-أليسون|G|البرازيل|ليفربول|2020s|89
-ياشين|G|روسيا|دينامو موسكو|L|95
-مالديني|D|إيطاليا|ميلان|2000s|93
-كانافارو|D|إيطاليا|ريال مدريد|2000s|90
-ريو فرديناند|D|إنجلترا|مانشستر يونايتد|2000s|90
-بويول|D|إسبانيا|برشلونة|2000s|91
-روبرتو كارلوس|D|البرازيل|ريال مدريد|2000s|91
-راموس|D|إسبانيا|ريال مدريد|2010s|91
-مارسيلو|D|البرازيل|ريال مدريد|2010s|89
-داني ألفيس|D|البرازيل|برشلونة|2010s|88
-ماركينيوس|D|البرازيل|باريس سان جيرمان|2010s|89
-فان دايك|D|هولندا|ليفربول|2020s|90
-أشرف حكيمي|D|المغرب|باريس سان جيرمان|2020s|87
-بيكنباور|D|ألمانيا|بايرن ميونخ|L|96
-زيدان|M|فرنسا|ريال مدريد|2000s|96
-بيرلو|M|إيطاليا|ميلان|2000s|91
-جيرارد|M|إنجلترا|ليفربول|2000s|90
-لامبارد|M|إنجلترا|تشيلسي|2000s|90
-إنييستا|M|إسبانيا|برشلونة|2010s|93
-تشافي|M|إسبانيا|برشلونة|2010s|93
-مودريتش|M|كرواتيا|ريال مدريد|2010s|91
-كروس|M|ألمانيا|ريال مدريد|2010s|90
-دي بروين|M|بلجيكا|مانشستر سيتي|2020s|91
-رودري|M|إسبانيا|مانشستر سيتي|2020s|91
-بيلينغهام|M|إنجلترا|ريال مدريد|2020s|88
-مارادونا|M|الأرجنتين|نابولي|L|98
-رونالدو الظاهرة|F|البرازيل|إنتر ميلان|2000s|95
-رونالدينيو|F|البرازيل|برشلونة|2000s|94
-هنري|F|فرنسا|أرسنال|2000s|92
-إبراهيموفيتش|F|السويد|إنتر ميلان|2000s|90
-ميسي|F|الأرجنتين|برشلونة|2010s|98
-كريستيانو رونالدو|F|البرتغال|ريال مدريد|2010s|97
-نيمار|F|البرازيل|برشلونة|2010s|92
-سواريز|F|أوروغواي|برشلونة|2010s|90
-ليفاندوفسكي|F|بولندا|بايرن ميونخ|2020s|92
-بنزيما|F|فرنسا|ريال مدريد|2020s|91
-محمد صلاح|F|مصر|ليفربول|2020s|91
-مبابي|F|فرنسا|باريس سان جيرمان|2020s|93
-هالاند|F|النرويج|مانشستر سيتي|2020s|92
-بيليه|F|البرازيل|سانتوس|L|98
-كرويف|F|هولندا|أياكس|L|96
-روبرت غرين|G|إنجلترا|وست هام|2000s|68
-مايكل دوسون|D|إنجلترا|توتنهام|2000s|70
-ريان بيرتراند|D|إنجلترا|تشيلسي|2000s|72
-فيل جونز|D|إنجلترا|مانشستر يونايتد|2010s|68
-أمبروزيني|M|إيطاليا|ميلان|2000s|73
-جاك ويلشير|M|إنجلترا|أرسنال|2010s|71
-شيكابالا|M|مصر|الزمالك|2010s|76
-ميدو|F|مصر|توتنهام|2000s|70
-أديبايور|F|توغو|توتنهام|2000s|72
-أفشة|F|مصر|الأهلي|2020s|74
-بالوتيلي|F|إيطاليا|مانشستر سيتي|2010s|78
-توريس|F|إسبانيا|تشيلسي|2010s|77
-ديفيد جيمس|G|إنجلترا|بورتسموث|2000s|72
-بول روبنسون|G|إنجلترا|توتنهام|2000s|71
-ريكاردو|G|البرتغال|سبورتنغ لشبونة|2000s|73
-هوغو لوريس|G|فرنسا|توتنهام|2010s|87
-دوناروما|G|إيطاليا|باريس سان جيرمان|2020s|87
-فان در سار|G|هولندا|مانشستر يونايتد|2000s|85
-ليليان ثورام|D|فرنسا|يوفنتوس|2000s|85
-غاري نيفيل|D|إنجلترا|مانشستر يونايتد|2000s|84
-جيمي كاراغر|D|إنجلترا|ليفربول|2000s|83
-أشلي كول|D|إنجلترا|تشيلسي|2000s|86
-جوردي ألبا|D|إسبانيا|برشلونة|2010s|86
-ديفيد لويز|D|البرازيل|تشيلسي|2010s|85
-محمد النني|M|مصر|أرسنال|2010s|74
-حسام غالي|M|مصر|توتنهام|2000s|70
-رمضان صبحي|M|مصر|ستوك سيتي|2010s|70
-أبو تريكة|M|مصر|الأهلي|2000s|84
-مايكل كاريك|M|إنجلترا|مانشستر يونايتد|2000s|85
-ديفيد سيلفا|M|إسبانيا|مانشستر سيتي|2010s|87
-فيراتي|M|إيطاليا|باريس سان جيرمان|2010s|86
-جيرمين ديفو|F|إنجلترا|توتنهام|2000s|74
-واين روني|F|إنجلترا|مانشستر يونايتد|2000s|87
-كارلوس تيفيز|F|الأرجنتين|مانشستر سيتي|2010s|84
-ترزيغيه|F|فرنسا|يوفنتوس|2000s|82
-ساديو ماني|F|السنغال|ليفربول|2010s|87`;
-
-    const EXTRA_RAW = `دينو زوف|G|إيطاليا|يوفنتوس|L|97
-غوردون بانكس|G|إنجلترا|ستوك سيتي|L|97
-بيتر شمايكل|G|الدنمارك|مانشستر يونايتد|L|96
-ريكاردو زامورا|G|إسبانيا|إسبانيول|L|96
-سيب ماير|G|ألمانيا|بايرن ميونخ|L|96
-كارلوس ألبرتو توريس|D|البرازيل|سانتوس|L|97
-نيتون سانتوس|D|البرازيل|بوتافوغو|L|96
-بوبي مور|D|إنجلترا|وست هام|L|97
-فرانكو باريزي|D|إيطاليا|ميلان|L|97
-أليساندرو كوستاكورتا|D|إيطاليا|ميلان|L|95
-غايتانو شيريا|D|إيطاليا|يوفنتوس|L|96
-دانييل باساريلا|D|الأرجنتين|ريفر بليت|L|96
-رود كرول|D|هولندا|أياكس|L|96
-رونالد كومان|D|هولندا|برشلونة|L|96
-جياشينتو فاكيتي|D|إيطاليا|إنتر ميلان|L|96
-خوسيه سانتاماريا|D|أوروغواي|ريال مدريد|L|95
-ماتياس زامر|D|ألمانيا|بوروسيا دورتموند|L|95
-ألفريدو دي ستيفانو|M|الأرجنتين|ريال مدريد|L|98
-ميشيل بلاتيني|M|فرنسا|يوفنتوس|L|98
-زيكو|M|البرازيل|فلامنغو|L|97
-سقراط|M|البرازيل|كورينثيانز|L|96
-باولو روبرتو فالكاو|M|البرازيل|روما|L|96
-لوثار ماتيوس|M|ألمانيا|إنتر ميلان|L|97
-ديدي|M|البرازيل|ريال مدريد|L|96
-ريفيلينو|M|البرازيل|فلومينينسي|L|96
-جاني ريفيرا|M|إيطاليا|ميلان|L|96
-بوبي تشارلتون|M|إنجلترا|مانشستر يونايتد|L|98
-يوهان نيسكينز|M|هولندا|أياكس|L|96
-روبرتو باجيو|M|إيطاليا|يوفنتوس|L|97
-بول جاسكوين|M|إنجلترا|لاتسيو|L|95
-غيورغي هاجي|M|رومانيا|غلطة سراي|L|96
-ديان سافيسيفيتش|M|الجبل الأسود|ميلان|L|95
-باولو روسي|M|إيطاليا|يوفنتوس|L|96
-رود خوليت|M|هولندا|ميلان|L|97
-عمر سيفوري|M|الأرجنتين|يوفنتوس|L|96
-فيرينتس بوشكاش|F|المجر|ريال مدريد|L|98
-غارينشا|F|البرازيل|بوتافوغو|L|98
-أوزيبيو|F|البرتغال|بنفيكا|L|98
-جورج بست|F|أيرلندا الشمالية|مانشستر يونايتد|L|97
-غيرد مولر|F|ألمانيا|بايرن ميونخ|L|98
-جاييرزينيو|F|البرازيل|بوتافوغو|L|97
-روماريو|F|البرازيل|برشلونة|L|97
-ريفالدو|F|البرازيل|برشلونة|L|97
-جورج ويا|F|ليبيريا|ميلان|L|96
-هريستو ستويتشكوف|F|بلغاريا|برشلونة|L|96
-دينيس بيركامب|F|هولندا|أرسنال|L|96
-ماركو فان باستن|F|هولندا|ميلان|L|98
-هوغو سانشيز|F|المكسيك|ريال مدريد|L|96
-كيني دالغليش|F|اسكتلندا|ليفربول|L|97
-كارل هاينز رومينيغه|F|ألمانيا|بايرن ميونخ|L|97
-بيتر تشيك|G|التشيك|تشيلسي|2000s|90
-كيلور نافاس|G|كوستاريكا|ريال مدريد|2010s|89
-يان أوبلاك|G|سلوفينيا|أتلتيكو مدريد|2020s|91
-مارك أندريه تير شتيغن|G|ألمانيا|برشلونة|2020s|89
-إيدرسون|G|البرازيل|مانشستر سيتي|2020s|89
-سمير هاندانوفيتش|G|سلوفينيا|إنتر ميلان|2010s|88
-خوليو سيزار|G|البرازيل|إنتر ميلان|2000s|90
-ديدا|G|البرازيل|ميلان|2000s|89
-بيبي رينا|G|إسبانيا|ليفربول|2000s|88
-إيميليانو مارتينيز|G|الأرجنتين|أستون فيلا|2020s|89
-مايك مينيان|G|فرنسا|ميلان|2020s|89
-فيكتور فالديز|G|إسبانيا|برشلونة|2000s|88
-جون تيري|D|إنجلترا|تشيلسي|2000s|91
-نيمانيا فيديتش|D|صربيا|مانشستر يونايتد|2000s|90
-جورجيو كيلليني|D|إيطاليا|يوفنتوس|2010s|90
-ليوناردو بونوتشي|D|إيطاليا|يوفنتوس|2010s|89
-باتريس إيفرا|D|فرنسا|مانشستر يونايتد|2000s|88
-مايكون|D|البرازيل|إنتر ميلان|2000s|89
-خافيير زانيتي|D|الأرجنتين|إنتر ميلان|2000s|90
-فينسنت كومباني|D|بلجيكا|مانشستر سيتي|2010s|89
-ديفيد ألابا|D|النمسا|بايرن ميونخ|2020s|89
-روبن دياز|D|البرتغال|مانشستر سيتي|2020s|90
-أندرو روبرتسون|D|اسكتلندا|ليفربول|2020s|88
-ترينت ألكسندر أرنولد|D|إنجلترا|ليفربول|2020s|90
-جيرارد بيكيه|D|إسبانيا|برشلونة|2010s|91
-تياغو سيلفا|D|البرازيل|تشيلسي|2020s|90
-ريكاردو كارفاليو|D|البرتغال|تشيلسي|2000s|89
-داني كارفاخال|D|إسبانيا|ريال مدريد|2020s|89
-رافاييل فاران|D|فرنسا|ريال مدريد|2010s|89
-أليساندرو نيستا|D|إيطاليا|ميلان|2000s|92
-كولو توريه|D|ساحل العاج|أرسنال|2000s|88
-فيليب لام|D|ألمانيا|بايرن ميونخ|2010s|91
-ماتس هوملز|D|ألمانيا|بايرن ميونخ|2010s|89
-كيبلير بيبي|D|البرتغال|ريال مدريد|2010s|90
-مارسيل ديسايي|D|فرنسا|تشيلسي|2000s|89
-ويليام ساليبا|D|فرنسا|أرسنال|2020s|89
-دييغو غودين|D|أوروغواي|أتلتيكو مدريد|2010s|89
-كاكا|M|البرازيل|ميلان|2000s|93
-تشابي ألونسو|M|إسبانيا|ريال مدريد|2010s|90
-سيسك فابريغاس|M|إسبانيا|برشلونة|2010s|89
-باستيان شفاينشتايغر|M|ألمانيا|بايرن ميونخ|2010s|90
-يايا توريه|M|ساحل العاج|مانشستر سيتي|2010s|90
-سيرجيو بوسكيتس|M|إسبانيا|برشلونة|2010s|90
-باتريك فييرا|M|فرنسا|أرسنال|2000s|91
-كلود ماكيليلي|M|فرنسا|تشيلسي|2000s|89
-مايكل إيسيان|M|غانا|تشيلسي|2000s|89
-مايكل بالاك|M|ألمانيا|تشيلسي|2000s|90
-مسعود أوزيل|M|ألمانيا|أرسنال|2010s|90
-أنخيل دي ماريا|M|الأرجنتين|باريس سان جيرمان|2020s|89
-برونو فيرنانديز|M|البرتغال|مانشستر يونايتد|2020s|90
-برناردو سيلفا|M|البرتغال|مانشستر سيتي|2020s|89
-ديكلان رايس|M|إنجلترا|أرسنال|2020s|89
-جمال موسيالا|M|ألمانيا|بايرن ميونخ|2020s|90
-بيدري|M|إسبانيا|برشلونة|2020s|89
-فيديريكو فالفيردي|M|أوروغواي|ريال مدريد|2020s|90
-مارتن أوديغارد|M|النرويج|أرسنال|2020s|89
-نغولو كانتي|M|فرنسا|تشيلسي|2010s|90
-بول بوغبا|M|فرنسا|مانشستر يونايتد|2010s|89
-ديفيد بيكهام|M|إنجلترا|ريال مدريد|2000s|92
-ويسلي شنايدر|M|هولندا|إنتر ميلان|2010s|90
-خوان رومان ريكيلمي|M|الأرجنتين|فياريال|2000s|89
-جونينيو بيرنامبوكانو|M|البرازيل|ليون|2000s|88
-بافل نيدفيد|M|التشيك|يوفنتوس|2000s|91
-روي كوستا|M|البرتغال|ميلان|2000s|89
-ديكو|M|البرتغال|برشلونة|2000s|90
-سانتي كازورلا|M|إسبانيا|أرسنال|2010s|88
-خاميس رودريغيز|M|كولومبيا|ريال مدريد|2010s|88
-صامويل إيتو|F|الكاميرون|برشلونة|2000s|92
-ديدييه دروغبا|F|ساحل العاج|تشيلسي|2000s|92
-روبن فان بيرسي|F|هولندا|أرسنال|2010s|91
-سيرخيو أغويرو|F|الأرجنتين|مانشستر سيتي|2010s|92
-هاري كين|F|إنجلترا|بايرن ميونخ|2020s|92
-سون هيونغ مين|F|كوريا الجنوبية|توتنهام|2020s|89
-فينيسيوس جونيور|F|البرازيل|ريال مدريد|2020s|92
-رودريغو|F|البرازيل|ريال مدريد|2020s|89
-بوكايو ساكا|F|إنجلترا|أرسنال|2020s|89
-فيل فودين|F|إنجلترا|مانشستر سيتي|2020s|89
-غاريث بيل|F|ويلز|ريال مدريد|2010s|91
-دافيد فيا|F|إسبانيا|برشلونة|2010s|91
-إدينسون كافاني|F|أوروغواي|باريس سان جيرمان|2010s|90
-أنطوان غريزمان|F|فرنسا|أتلتيكو مدريد|2020s|90
-آريين روبن|F|هولندا|بايرن ميونخ|2010s|91
-فرانك ريبيري|F|فرنسا|بايرن ميونخ|2010s|90
-توماس مولر|F|ألمانيا|بايرن ميونخ|2010s|90
-راؤول غونزاليس|F|إسبانيا|ريال مدريد|2000s|91
-رود فان نيستلروي|F|هولندا|مانشستر يونايتد|2000s|91
-أندري شيفتشينكو|F|أوكرانيا|ميلان|2000s|92
-هرنان كريسبو|F|الأرجنتين|إنتر ميلان|2000s|90
-فرانشيسكو توتي|F|إيطاليا|روما|2000s|92
-أليساندرو ديل بييرو|F|إيطاليا|يوفنتوس|2000s|91
-ميروسلاف كلوزه|F|ألمانيا|بايرن ميونخ|2010s|89
-أليكسيس سانشيز|F|تشيلي|أرسنال|2010s|89
-تشيرو إيموبيلي|F|إيطاليا|لاتسيو|2020s|88
-لاوتارو مارتينيز|F|الأرجنتين|إنتر ميلان|2020s|90
-فيكتور أوسيمين|F|نيجيريا|نابولي|2020s|89
-خفيتشا كفاراتسخيليا|F|جورجيا|نابولي|2020s|89
-لامين يامال|F|إسبانيا|برشلونة|2020s|90
-رافينيا|F|البرازيل|برشلونة|2020s|89
-عثمان ديمبيلي|F|فرنسا|باريس سان جيرمان|2020s|89
-جوليان ألفاريز|F|الأرجنتين|أتلتيكو مدريد|2020s|89
-براد فريدل|G|الولايات المتحدة|بلاكبيرن روفرز|2000s|82
-شاي غيفن|G|أيرلندا|نيوكاسل يونايتد|2000s|83
-جو هارت|G|إنجلترا|مانشستر سيتي|2010s|85
-تيم هاوارد|G|الولايات المتحدة|إيفرتون|2010s|84
-كلاوديو برافو|G|تشيلي|برشلونة|2010s|85
-بيرند لينو|G|ألمانيا|أرسنال|2020s|83
-أوناي سيمون|G|إسبانيا|أتلتيك بلباو|2020s|85
-جوردان بيكفورد|G|إنجلترا|إيفرتون|2020s|84
-روي باتريسيو|G|البرتغال|روما|2020s|83
-فويتشيخ شتشيسني|G|بولندا|يوفنتوس|2020s|86
-ألفونس أريولا|G|فرنسا|وست هام|2020s|82
-كاسبر شمايكل|G|الدنمارك|ليستر سيتي|2010s|84
-سيزار أزبيليكويتا|D|إسبانيا|تشيلسي|2010s|86
-غاري كاهيل|D|إنجلترا|تشيلسي|2010s|83
-بير ميرتساكر|D|ألمانيا|أرسنال|2010s|82
-جون ستونز|D|إنجلترا|مانشستر سيتي|2020s|87
-بن وايت|D|إنجلترا|أرسنال|2020s|85
-جول كوندي|D|فرنسا|برشلونة|2020s|86
-لوكاس هيرنانديز|D|فرنسا|بايرن ميونخ|2020s|85
-إريك أبيدال|D|فرنسا|برشلونة|2000s|85
-غايل كليشي|D|فرنسا|أرسنال|2000s|82
-كيران تريبيير|D|إنجلترا|نيوكاسل يونايتد|2020s|85
-أليكس ساندرو|D|البرازيل|يوفنتوس|2010s|85
-ستيفان دي فري|D|هولندا|إنتر ميلان|2020s|86
-توبي ألدرفيريلد|D|بلجيكا|توتنهام|2010s|86
-جوردان هندرسون|M|إنجلترا|ليفربول|2010s|85
-جيمس ميلنر|M|إنجلترا|ليفربول|2010s|84
-آرون رامسي|M|ويلز|أرسنال|2010s|84
-ديلي آلي|M|إنجلترا|توتنهام|2010s|84
-كريستيان إريكسن|M|الدنمارك|توتنهام|2010s|87
-جاك غريليش|M|إنجلترا|مانشستر سيتي|2020s|86
-هاكان تشالهان أوغلو|M|تركيا|إنتر ميلان|2020s|87
-إيفان راكيتيتش|M|كرواتيا|برشلونة|2010s|87
-غوتي|M|إسبانيا|ريال مدريد|2000s|85
-ميكيل أرتيتا|M|إسبانيا|أرسنال|2000s|82
-راميريز|M|البرازيل|تشيلسي|2010s|83
-نابي كيتا|M|غينيا|ليفربول|2010s|82
-يوري تيليمانس|M|بلجيكا|أستون فيلا|2020s|86
-أوليفييه جيرو|F|فرنسا|ميلان|2020s|86
-إدين دجيكو|F|البوسنة والهرسك|إنتر ميلان|2020s|85
-غونزالو هيغواين|F|الأرجنتين|يوفنتوس|2010s|87
-روميلو لوكاكو|F|بلجيكا|إنتر ميلان|2020s|87
-ممفيس ديباي|F|هولندا|برشلونة|2020s|85
-بيير إيميريك أوباميانغ|F|الغابون|أرسنال|2020s|87
-ماركوس راشفورد|F|إنجلترا|مانشستر يونايتد|2020s|86
-رحيم ستيرلينغ|F|إنجلترا|تشيلسي|2020s|87
-رياض محرز|F|الجزائر|مانشستر سيتي|2020s|86
-ديوغو جوتا|F|البرتغال|ليفربول|2020s|86
-غابرييل جيسوس|F|البرازيل|أرسنال|2020s|85
-جواو فيليكس|F|البرتغال|برشلونة|2020s|84
-أسـمير بيغوفيتش|G|البوسنة والهرسك|ستوك سيتي|2010s|73
-سكوت كارسون|G|إنجلترا|مانشستر سيتي|2020s|68
-كيبا أريزابالاغا|G|إسبانيا|تشيلسي|2020s|74
-فريزر فورستر|G|إنجلترا|توتنهام|2020s|72
-أرتور بوروتش|G|بولندا|ساوثهامبتون|2010s|73
-لوريس كاريوس|G|ألمانيا|ليفربول|2010s|69
-كوستيل بانتليمون|G|رومانيا|مانشستر سيتي|2010s|70
-جو لويس|G|إنجلترا|نورويتش سيتي|2010s|67
-واين هينيسي|G|ويلز|كريستال بالاس|2010s|72
-أليكس مكارثي|G|إنجلترا|ساوثهامبتون|2020s|71
-فينسنت إنياما|G|نيجيريا|ليل|2010s|74
-مارتن ستكلنبرغ|G|هولندا|فولهام|2010s|73
-فيل باردسلي|D|إنجلترا|سندرلاند|2010s|71
-تايتوس برامبل|D|إنجلترا|نيوكاسل يونايتد|2000s|68
-جون أوشي|D|أيرلندا|مانشستر يونايتد|2000s|74
-ويس براون|D|إنجلترا|مانشستر يونايتد|2000s|73
-فابيو أوريليو|D|البرازيل|ليفربول|2000s|72
-جوليون ليسكوت|D|إنجلترا|مانشستر سيتي|2010s|74
-داني سيمبسون|D|إنجلترا|ليستر سيتي|2010s|72
-جون فلاناغان|D|إنجلترا|ليفربول|2010s|68
-فيليب سينديروس|D|سويسرا|أرسنال|2000s|70
-أندريه سانتوس|D|البرازيل|أرسنال|2010s|69
-خوسيه إنريكي|D|إسبانيا|ليفربول|2010s|73
-لوكاس نيل|D|أستراليا|وست هام|2000s|72
-إيمانويل إيبوي|D|ساحل العاج|أرسنال|2000s|73
-توم هادلستون|M|إنجلترا|توتنهام|2000s|73
-جوي بارتون|M|إنجلترا|نيوكاسل يونايتد|2010s|72
-جيرمين جيناس|M|إنجلترا|توتنهام|2000s|72
-تشارلي آدم|M|اسكتلندا|ليفربول|2010s|72
-دارين فليتشر|M|اسكتلندا|مانشستر يونايتد|2000s|74
-شارل نزوغبيا|M|فرنسا|أستون فيلا|2010s|73
-ستيوارت داونينغ|M|إنجلترا|ليفربول|2010s|74
-توم كليفرلي|M|إنجلترا|مانشستر يونايتد|2010s|72
-أندرسون|M|البرازيل|مانشستر يونايتد|2000s|71
-حاتم بن عرفة|M|فرنسا|نيوكاسل يونايتد|2010s|74
-عادل تاعرابت|M|المغرب|كوينز بارك رينجرز|2010s|74
-بيبي|M|البرتغال|مانشستر يونايتد|2010s|68
-مامادو نيانغ|F|السنغال|مارسيليا|2000s|73
-إميل هيسكي|F|إنجلترا|ليفربول|2000s|74
-مروان الشماخ|F|المغرب|أرسنال|2010s|72
-أفونسو ألفيش|F|البرازيل|ميدلسبره|2000s|72
-روكي سانتا كروز|F|باراغواي|مانشستر سيتي|2000s|74
-بيتر كراوتش|F|إنجلترا|ليفربول|2000s|74
-بنجاني موارواري|F|زيمبابوي|مانشستر سيتي|2000s|72
-بوبي زامورا|F|إنجلترا|فولهام|2000s|73
-فيديريكو ماكيدا|F|إيطاليا|مانشستر يونايتد|2010s|70
-شين لونغ|F|أيرلندا|ساوثهامبتون|2010s|74
-جو ألفيس|F|البرازيل|مانشستر سيتي|2000s|71
-إريك لاميلا|F|الأرجنتين|توتنهام|2010s|74
-مباي نيانغ|F|السنغال|ميلان|2010s|73`;
-
-    const P = `${RAW}\n${EXTRA_RAW}`.split("\n").filter(Boolean).map(l => {
-      const a = l.split("|");
-      return { n: a[0], p: a[1], nat: a[2], club: a[3], era: a[4], r: +a[5] };
-    });
-    const COACHES = [
-      ["أليكس فيرغسون", "legendary", 99], ["بيب غوارديولا", "legendary", 99],
-      ["كارلو أنشيلوتي", "legendary", 98], ["جوزيه مورينيو", "legendary", 98],
-      ["أرسين فينغر", "legendary", 97], ["يورغن كلوب", "legendary", 97],
-      ["يوهان كرويف", "legendary", 99], ["رينوس ميخيلس", "legendary", 97],
-      ["أريغو ساكي", "legendary", 97], ["بوب بيزلي", "legendary", 97],
-      ["فيسنتي ديل بوسكي", "legendary", 96], ["يوب هاينكس", "legendary", 96],
-      ["أوتمار هيتسفيلد", "legendary", 96], ["مارتشيلو ليبي", "legendary", 96],
-      ["فابيو كابيلو", "legendary", 95], ["لويس فان خال", "legendary", 95],
-      ["زين الدين زيدان", "legendary", 96], ["دييغو سيميوني", "legendary", 95],
-      ["لويس إنريكي", "legendary", 95], ["تيلي سانتانا", "legendary", 95],
-      ["توماس توخيل", "regular", 89], ["أنطونيو كونتي", "regular", 89],
-      ["روبرتو مانشيني", "regular", 88], ["رافاييل بينيتيز", "regular", 88],
-      ["أوناي إيمري", "regular", 89], ["ماوريسيو بوكيتينو", "regular", 87],
-      ["ميكيل أرتيتا", "regular", 87], ["بريندان رودجرز", "regular", 85],
-      ["لوران بلان", "regular", 86], ["روبرتو دي زيربي", "regular", 86],
-      ["غراهام بوتر", "regular", 83], ["ديفيد مويس", "regular", 84],
-      ["لوتشيانو سباليتي", "regular", 89], ["كلاوديو رانييري", "regular", 88],
-      ["ماركو روزه", "regular", 84], ["إدي هاو", "regular", 84],
-      ["ماسيميليانو أليغري", "regular", 88], ["إريك تن هاغ", "regular", 83],
-      ["جوليان ناغلسمان", "regular", 88], ["مارسيلو بيلسا", "regular", 87],
-      ["غاري نيفيل", "weak", 60], ["فرانك دي بور", "weak", 65],
-      ["ستيف كين", "weak", 60], ["بول إينس", "weak", 64],
-      ["توني آدامز", "weak", 62], ["آلان شيرر", "weak", 60],
-      ["جون كارفر", "weak", 61], ["ريمي غارد", "weak", 64],
-      ["بوب برادلي", "weak", 65], ["فرانك لامبارد", "weak", 69],
-      ["واين روني", "weak", 65], ["ستيف مكلارين", "weak", 68],
-      ["جانفرانكو زولا", "weak", 68], ["تيري كونور", "weak", 60],
-      ["برايان روبسون", "weak", 67],
-      ["غلين ريدر", "weak", 63], ["كريس هاتشينغز", "weak", 60],
-      ["فيل نيفيل", "weak", 63], ["كلارنس سيدورف", "weak", 68],
-      ["دييغو مارادونا", "weak", 64]
-    ].map(([n, tier, r]) => ({ n, tier, r }));
+    const P = FUT_DATA.players.map(player => ({
+      n: player.n,
+      p: player.p,
+      nat: player.nat,
+      club: player.club,
+      era: player.era,
+      r: player.r,
+      price: player.price,
+      suggestedPrice: player.suggestedPrice,
+      rarity: player.rarity,
+      isIcon: player.isIcon,
+      eaId: player.eaId
+    }));
+    if (P.length !== 500 || P.some(player => player.r < 80 || !player.p)) {
+      throw new Error('The imported player catalog must contain 500 players rated 80 or higher.');
+    }
+    if (P.some(player => player.price === null &&
+      (!Number.isSafeInteger(player.suggestedPrice) || player.suggestedPrice <= 0))) {
+      throw new Error('Every player without a market price must have a suggested price.');
+    }
+    const COACHES = FUT_DATA.coaches.map(coach => ({
+      n: coach.n,
+      tier: coach.tier,
+      r: coach.r,
+      quality: coach.quality,
+      nation: coach.nat,
+      league: coach.league,
+      club: coach.club,
+      price: coach.price,
+      suggestedPrice: coach.suggestedPrice
+    }));
+    if (COACHES.length !== 513) throw new Error('The imported manager catalog must contain 513 managers.');
+    if (COACHES.some(coach => coach.price === null &&
+      (!Number.isSafeInteger(coach.suggestedPrice) || coach.suggestedPrice <= 0))) {
+      throw new Error('Every manager without a market price must have a suggested price.');
+    }
     const COACH_TIER = {
       legendary: { name: "أسطوري", color: "var(--gold)" },
       regular: { name: "عادي", color: "var(--ac)" },
@@ -1645,6 +1879,25 @@
     };
     const POS_NAME = { G: "حارس مرمى", D: "مدافع", M: "لاعب وسط", F: "مهاجم" };
     const POS_SHORT = { G: "GK", D: "DF", M: "MF", F: "FW" };
+    const MATCH_REWARDS = { win: 20000, draw: 10000, loss: 5000 };
+    const CLUB_CPU_REWARDS = { win: 500, draw: 200 };
+    const ONLINE_CLUB_UPSET_CHANCE = { 1: 0.1, 2: 0.05, 3: 0.02 };
+    const STARTING_COINS = 5000000;
+    const FORMATION_PRICE = 100000;
+    const SALE_PRICE_PERCENT = 70;
+    const COMPUTER_DIFFICULTIES = [
+      { id: "easy", name: "سهل", min: 80, max: 84, target: 82, coachTarget: 72 },
+      { id: "normal", name: "متوسط", min: 85, max: 88, target: 86, coachTarget: 80 },
+      { id: "hard", name: "صعب", min: 89, max: 94, target: 91, coachTarget: 89 }
+    ];
+    const formatCoins = amount => amount.toLocaleString("en-US");
+    const cardSalePrice = card => Number.isSafeInteger(card.price) && card.price > 0
+      ? Math.floor(card.price * SALE_PRICE_PERCENT / 100)
+      : null;
+    const MARKET_PRICE_SNAPSHOT = FUT_DATA.snapshot.split("-").reverse().join("/");
+    const MARKET_PRICE_PLATFORM = FUT_DATA.pricePlatform.toUpperCase();
+    const coachPrice = coach => coach.price;
+    const BENCH_SLOT_POSITIONS = ["G", "D", "M", "F", ...Array(8).fill(null)];
 
     /* ================= HELPERS ================= */
     const app = document.getElementById("app");
@@ -1662,6 +1915,255 @@
       toastT = setTimeout(() => d.remove(), 1800);
     }
     function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms) } catch (e) { } }
+
+    const GUEST_PROGRESS_KEY = "gg_guest_progress_v1";
+    function emptyGuestProgress() {
+      return {
+        version: 7,
+        record: { played: 0, wins: 0, draws: 0, losses: 0, bestRating: 0 },
+        lastTeam: null,
+        coins: STARTING_COINS,
+        club: null
+      };
+    }
+
+    function validGuestRecord(record) {
+      const counts = record && [record.played, record.wins, record.draws, record.losses];
+      return !!(counts && counts.every(value => Number.isSafeInteger(value) && value >= 0) &&
+        Number.isInteger(record.bestRating) && record.bestRating >= 0 && record.bestRating <= 99 &&
+        record.wins + record.draws + record.losses === record.played);
+    }
+
+    function validLastTeam(lastTeam) {
+      return lastTeam === null || !!(lastTeam &&
+        Array.isArray(lastTeam.names) && lastTeam.names.length === 11 &&
+        lastTeam.names.every(name => P.some(player => player.n === name)) &&
+        FORMATIONS.some(formation => formation.id === lastTeam.formation) &&
+        COACHES.some(coach => coach.n === lastTeam.coach) &&
+        Number.isInteger(lastTeam.rating) && lastTeam.rating >= 1 && lastTeam.rating <= 99);
+    }
+
+    function validCostTable(table, keys) {
+      if (!table || typeof table !== "object" || Array.isArray(table)) return false;
+      const entries = Object.entries(table);
+      return entries.length === keys.length &&
+        keys.every(key => Object.prototype.hasOwnProperty.call(table, key)) &&
+        entries.every(([key, value]) => keys.includes(key) && Number.isSafeInteger(value) && value >= 0);
+    }
+
+    function clubSetupCostBreakdown(club) {
+      const sum = table => Object.values(table).reduce((total, cost) => total + cost, 0);
+      const players = sum(club.assetCosts.players);
+      const coaches = sum(club.assetCosts.coaches);
+      const formations = sum(club.assetCosts.formations);
+      return { players, coaches, formations, total: players + coaches + formations };
+    }
+
+    function validClub(club) {
+      if (club === null) return true;
+      if (!club || !FORMATIONS.some(formation => formation.id === club.formation) ||
+        typeof club.confirmed !== "boolean" ||
+        !Array.isArray(club.ownedFormations) ||
+        club.ownedFormations.some(id => !FORMATIONS.some(formation => formation.id === id)) ||
+        new Set(club.ownedFormations).size !== club.ownedFormations.length ||
+        !club.ownedFormations.includes(club.formation) ||
+        !Array.isArray(club.starters) || club.starters.length !== 11 ||
+        !Array.isArray(club.bench) || club.bench.length !== BENCH_SLOT_POSITIONS.length ||
+        !Array.isArray(club.coaches) ||
+        club.coaches.some(name => !COACHES.some(coach => coach.n === name)) ||
+        new Set(club.coaches).size !== club.coaches.length ||
+        (club.coach !== null && (!club.coaches.includes(club.coach) ||
+          !COACHES.some(coach => coach.n === club.coach)))) return false;
+
+      const starters = formationSlots(club.formation);
+      const names = [...club.starters, ...club.bench].filter(name => name !== null);
+      const costs = club.assetCosts;
+      if (names.some(name => !P.some(player => player.n === name)) ||
+        new Set(names).size !== names.length ||
+        !costs ||
+        !validCostTable(costs.players, names) ||
+        !validCostTable(costs.coaches, club.coaches) ||
+        !validCostTable(costs.formations, club.ownedFormations)) return false;
+      if (club.starters.some((name, index) => name !== null &&
+        P.find(player => player.n === name).p !== starters[index])) return false;
+      return club.bench.every((name, index) => name === null || BENCH_SLOT_POSITIONS[index] === null ||
+        P.find(player => player.n === name).p === BENCH_SLOT_POSITIONS[index]);
+    }
+
+    function sanitizeSavedClub(club) {
+      if (club === null) return null;
+      if (!club || !FORMATIONS.some(formation => formation.id === club.formation) ||
+        !Array.isArray(club.starters) || club.starters.length !== 11 ||
+        !Array.isArray(club.bench) || club.bench.length !== BENCH_SLOT_POSITIONS.length) return null;
+
+      const used = new Set();
+      const keepPlayer = (name, requiredPosition) => {
+        if (name === null) return null;
+        const player = P.find(item => item.n === name);
+        if (!player || (requiredPosition && player.p !== requiredPosition) || used.has(name)) return null;
+        used.add(name);
+        return name;
+      };
+      const positions = formationSlots(club.formation);
+      const ownedFormations = Array.isArray(club.ownedFormations)
+        ? [...new Set(club.ownedFormations.filter(id => FORMATIONS.some(formation => formation.id === id)))]
+        : [];
+      if (!ownedFormations.includes(club.formation)) ownedFormations.unshift(club.formation);
+      const activeCoach = COACHES.some(coach => coach.n === club.coach) ? club.coach : null;
+      const coaches = Array.isArray(club.coaches)
+        ? [...new Set(club.coaches.filter(name => COACHES.some(coach => coach.n === name)))]
+        : [];
+      if (activeCoach && !coaches.includes(activeCoach)) coaches.unshift(activeCoach);
+      const starters = club.starters.map((name, index) => keepPlayer(name, positions[index]));
+      const bench = club.bench.map((name, index) => keepPlayer(name, BENCH_SLOT_POSITIONS[index]));
+      const playerNames = [...starters, ...bench].filter(name => name !== null);
+      const savedCosts = club.assetCosts || {};
+      const costsFor = (table, keys, fallback) => Object.fromEntries(keys.map(key => {
+        const savedCost = table && table[key];
+        const defaultCost = fallback(key);
+        return [key, Number.isSafeInteger(savedCost) && savedCost >= 0
+          ? savedCost
+          : Number.isSafeInteger(defaultCost) && defaultCost >= 0 ? defaultCost : 0];
+      }));
+      const sanitized = {
+        formation: club.formation,
+        confirmed: typeof club.confirmed === "boolean" ? club.confirmed : true,
+        ownedFormations,
+        starters,
+        bench,
+        coaches,
+        coach: activeCoach,
+        assetCosts: {
+          players: costsFor(savedCosts.players, playerNames, name => P.find(player => player.n === name).price),
+          coaches: costsFor(savedCosts.coaches, coaches, name => coachPrice(COACHES.find(coach => coach.n === name))),
+          formations: costsFor(savedCosts.formations, ownedFormations,
+            id => id === ownedFormations[0] ? 0 : FORMATION_PRICE)
+        }
+      };
+      return validClub(sanitized) ? sanitized : null;
+    }
+
+    function loadGuestProgress() {
+      try {
+        const raw = localStorage.getItem(GUEST_PROGRESS_KEY);
+        if (!raw) return emptyGuestProgress();
+        const saved = JSON.parse(raw);
+        if (!saved || !validGuestRecord(saved.record)) {
+          console.warn("Saved guest progress is invalid; starting a new local record.");
+          toast("بيانات التقدم المحفوظ غير صالحة، بدأنا سجلًا جديدًا");
+          return emptyGuestProgress();
+        }
+        const lastTeam = validLastTeam(saved.lastTeam) ? saved.lastTeam : null;
+        const club = sanitizeSavedClub(saved.club);
+        if (saved.version === 1 || saved.version === 2) {
+          return {
+            version: 7,
+            record: saved.record,
+            lastTeam,
+            coins: STARTING_COINS,
+            club
+          };
+        }
+        if (![3, 4, 5, 6, 7].includes(saved.version) || !Number.isSafeInteger(saved.coins) || saved.coins < 0) {
+          console.warn("Saved guest progress is invalid; starting a new local record.");
+          toast("بيانات التقدم المحفوظ غير صالحة، بدأنا سجلًا جديدًا");
+          return emptyGuestProgress();
+        }
+        return {
+          version: 7,
+          record: saved.record,
+          lastTeam,
+          coins: saved.coins,
+          club
+        };
+      } catch (error) {
+        console.error("Could not load guest progress from this device.", error);
+        toast("تعذر تحميل التقدم المحفوظ من هذا الجهاز");
+        return emptyGuestProgress();
+      }
+    }
+
+    let guestProgress = loadGuestProgress();
+
+    function saveGuestProgress() {
+      try {
+        localStorage.setItem(GUEST_PROGRESS_KEY, JSON.stringify(guestProgress));
+        return true;
+      } catch (error) {
+        console.error("Could not save guest progress to this device.", error);
+        toast("تعذر حفظ التقدم على هذا الجهاز");
+        return false;
+      }
+    }
+
+    function snapshotClubProgress() {
+      const club = guestProgress.club;
+      return {
+        coins: guestProgress.coins,
+        club: club ? {
+          ...club,
+          ownedFormations: club.ownedFormations.slice(),
+          starters: club.starters.slice(),
+          bench: club.bench.slice(),
+          coaches: club.coaches.slice(),
+          assetCosts: {
+            players: { ...club.assetCosts.players },
+            coaches: { ...club.assetCosts.coaches },
+            formations: { ...club.assetCosts.formations }
+          }
+        } : null
+      };
+    }
+
+    function restoreClubProgress(snapshot) {
+      guestProgress.coins = snapshot.coins;
+      guestProgress.club = snapshot.club;
+    }
+
+    function commitClubProgress(snapshot) {
+      if (saveGuestProgress()) return true;
+      restoreClubProgress(snapshot);
+      return false;
+    }
+
+    function recordGuestMatch(match, goalsFor, goalsAgainst) {
+      const win = goalsFor > goalsAgainst;
+      const draw = goalsFor === goalsAgainst;
+      if (match.entry === "club" && match.mode === "ai") {
+        const reward = win ? CLUB_CPU_REWARDS.win : draw ? CLUB_CPU_REWARDS.draw : 0;
+        if (!reward) return;
+        const previousCoins = guestProgress.coins;
+        guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, previousCoins + reward);
+        if (!saveGuestProgress()) guestProgress.coins = previousCoins;
+        else toast(`مكافأة الكمبيوتر: +${(guestProgress.coins - previousCoins).toLocaleString("en-US")} 🪙`);
+        return;
+      }
+      if (match.mode !== "online") return;
+
+      const reward = win ? MATCH_REWARDS.win : draw ? MATCH_REWARDS.draw : MATCH_REWARDS.loss;
+      const previousCoins = guestProgress.coins;
+      const previousRecord = { ...guestProgress.record };
+      const previousTeam = guestProgress.lastTeam;
+      guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, guestProgress.coins + reward);
+      guestProgress.record.played++;
+      if (win) guestProgress.record.wins++;
+      else if (draw) guestProgress.record.draws++;
+      else guestProgress.record.losses++;
+      guestProgress.record.bestRating = Math.max(guestProgress.record.bestRating, match.avg);
+      guestProgress.lastTeam = {
+        names: match.names,
+        formation: match.formation,
+        coach: match.coach.n,
+        rating: match.avg
+      };
+      if (!saveGuestProgress()) {
+        guestProgress.coins = previousCoins;
+        guestProgress.record = previousRecord;
+        guestProgress.lastTeam = previousTeam;
+        return;
+      }
+      toast(`مكافأة المباراة: +${reward.toLocaleString("en-US")} 🪙`);
+    }
 
     /* ---- sound (only after a real user gesture) ---- */
     let AC = null, muted = true;
@@ -1691,11 +2193,35 @@
     let tmr = null, tEnd = 0, tCb = null;
     let phaseTimeout = null, advanceTimer = null, advanceAt = 0;
     let netHeartbeat = null, lastNetMessage = 0;
-    let peer = null, conn = null;
+    let teamRetryTimer = null, pendingTeamResult = null, localTeamResult = null;
+    let peer = null, conn = null, activeRoomType = "draft";
     let OPP = null;              // {avg,names,name}
     let OPPK = [], OPPS = [], OPPP = [];
 
+    function stopTeamResultRetry() {
+      clearInterval(teamRetryTimer);
+      teamRetryTimer = null;
+      pendingTeamResult = null;
+    }
+
+    function sendTeamResult(connection) {
+      if (!pendingTeamResult || conn !== connection || !connection.open) return;
+      try { connection.send(pendingTeamResult) }
+      catch (e) { handleOpponentDisconnect(connection) }
+    }
+
+    function publishTeamResult(connection, result) {
+      if (localTeamResult) return;
+      stopTeamResultRetry();
+      localTeamResult = result;
+      pendingTeamResult = result;
+      teamRetryTimer = setInterval(() => sendTeamResult(connection), 2000);
+      sendTeamResult(connection);
+    }
+
     function resetOpponent() {
+      stopTeamResultRetry();
+      localTeamResult = null;
       OPP = null;
       OPPK = [];
       OPPS = [];
@@ -1727,12 +2253,15 @@
     function handleOpponentDisconnect(connection) {
       if (conn !== connection) return;
       const inGame = !!S;
+      const returnScreen = activeRoomType === "club" || (S && S.entry === "club")
+        ? screenClubModes
+        : screenModes;
       cancelGameTimers();
       S = null;
       killNet();
       resetOpponent();
       toast(inGame ? "انقطع اتصال الخصم، انتهت المباراة" : "انقطع اتصال الخصم");
-      screenModes();
+      returnScreen();
     }
 
     function stopTimer() { if (tmr) { clearInterval(tmr); tmr = null } tCb = null }
@@ -1748,6 +2277,7 @@
       if (!button) return;
       button.onclick = () => {
         if (!confirm("متأكد إنك عايز تنسحب من المباراة؟")) return;
+        const returnScreen = S && S.entry === "club" ? screenClubModes : screenModes;
         if (conn && conn.open) {
           try { conn.send({ t: "resign" }) } catch (e) { }
         }
@@ -1755,7 +2285,7 @@
         S = null;
         killNet();
         resetOpponent();
-        screenModes();
+        returnScreen();
       };
     }
     function scheduleNextRound() {
@@ -1804,13 +2334,16 @@
       return "t-bronze";
     }
     function cardHTML(x, cls, extra) {
-      return `<div class="fc ${tier(x)} ${cls || ""}" ${extra || ""}>
+      const cardContent = `
     <div class="fc-top"><b>${x.r}</b><i>${POS_SHORT[x.p] || ""}</i></div>
     <div class="fc-era">${x.era === "L" ? "ICON" : esc(x.era)}</div>
     <div class="fc-mono">${esc(x.n.charAt(0))}</div>
+    <div class="fc-player-silhouette" aria-hidden="true"></div>
     <div class="fc-name">${esc(x.n)}</div>
     <div class="fc-rule"></div>
-    <div class="fc-meta">${esc(x.nat)}<br>${esc(x.club)}</div>
+    <div class="fc-meta">${esc(x.nat)}<br>${esc(x.club)}</div>`;
+      return `<div class="fc ${tier(x)} ${cls || ""}" ${extra || ""}>
+    ${cardContent}
   </div>`;
     }
     function backHTML(k, used) {
@@ -1821,34 +2354,1073 @@
     /* ================= SCREENS ================= */
     function screenHome() {
       cancelGameTimers(); killNet();
+      selectedSquadSlot = null;
       app.innerHTML = `
   <div class="brand">
     <div class="logo">GG</div>
-    <div><h1>ألعاب الكورة</h1><span>ابني فريق أحلامك</span></div>
+    <div class="brand-heading">
+      <h1>ابني فريق أحلامك</h1>
+      <div class="wallet-badge brand-wallet" aria-label="الكوينز"><span>🪙</span><b>${formatCoins(guestProgress.coins)}</b></div>
+    </div>
   </div>
   <div class="hero">
     <h2>اختار 11 لاعب<br>وابني فريقك</h2>
-    <div class="pill">⚽ ${P.length} لاعب · 🧢 ${COACHES.length} مدرب في الداتا</div>
+    <div class="hero-meta">
+      <div class="pill">⚽ ${P.length} لاعب · 🧢 ${COACHES.length} مدرب في الداتا</div>
+      <button class="help-icon" id="how" aria-label="إزاي تلعب" title="إزاي تلعب">؟</button>
+    </div>
   </div>
+  <button class="mode primary" id="my-team">
+    <div class="ic">👥</div>
+    <div class="tx"><b>تشكيلتي</b><small> إدارة فريقك </small></div>
+    <div class="arw">‹</div>
+  </button>
   <button class="mode primary" id="go">
     <div class="ic">🎯</div>
-    <div class="tx"><b>ابدأ اللعب</b><small>ضد الكمبيوتر أو مع صاحبك</small></div>
+    <div class="tx"><b>ابدأ اللعب</b></div>
     <div class="arw">‹</div>
   </button>
-  <button class="mode" id="how">
-    <div class="ic">📖</div>
-    <div class="tx"><b>إزاي تلعب</b><small>قواعد اللعبة في 30 ثانية</small></div>
-    <div class="arw">‹</div>
-  </button>
-  <div class="foot">GG · ألعاب الكورة</div>`;
+  <button class="btn g w mt" id="record">السجل</button>
+  <div class="foot">GG </div>`;
       $("go").onclick = () => { buzz(8); screenModes() };
       $("how").onclick = screenHow;
-      $("snd").onclick = () => {
-        muted = !muted;
-        try { localStorage.setItem("gg_muted", String(muted)) } catch (e) { }
-        if (!muted) beep(700, .1, "sine", .06);
-        screenHome();
+      $("record").onclick = screenRecord;
+      $("my-team").onclick = screenMyTeam;
+    }
+
+    function screenRecord() {
+      const { record, lastTeam } = guestProgress;
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">سجل مبارياتي</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <div class="sec-title">إحصائيات المباريات</div>
+  <div class="rows">
+    <div class="row"><span class="n">إجمالي المباريات</span><span class="v">${record.played}</span></div>
+    <div class="row"><span class="n">فوز</span><span class="v">${record.wins}</span></div>
+    <div class="row"><span class="n">تعادل</span><span class="v">${record.draws}</span></div>
+    <div class="row"><span class="n">خسارة</span><span class="v">${record.losses}</span></div>
+    <div class="row"><span class="n">أعلى تقييم فريق</span><span class="v">${record.bestRating || "—"}</span></div>
+  </div>
+  ${lastTeam ? `
+  ${formationHTML(lastTeam.names.map(name => P.find(player => player.n === name)).filter(Boolean), lastTeam.formation, "آخر فريق أونلاين")}
+  <div class="rows">
+    <div class="row"><span class="n">المدرب</span><span class="v">${esc(lastTeam.coach)}</span></div>
+    <div class="row"><span class="n">التقييم</span><span class="v">${lastTeam.rating}</span></div>
+  </div>` : `<div class="rows"><div class="row"><span class="n">لسه مفيش مباريات أونلاين محفوظة على الجهاز.</span></div></div>`}
+  <button class="btn w mt" id="play">العب</button>`;
+      $("bk").onclick = screenHome;
+      $("play").onclick = screenModes;
+    }
+
+    let marketContext = { position: "ALL", target: null, returnTo: "home", query: "" };
+    let showBench = false;
+    let selectedSquadSlot = null;
+    document.addEventListener("click", event => {
+      if (!showBench || !(event.target instanceof Element)) return;
+      if (event.target.closest(".bench-grid") || event.target.closest("#bench-toggle")) return;
+      showBench = false;
+      if ($("bench-toggle")) screenMyTeam();
+    });
+
+    function openMarket(position, target, returnTo) {
+      marketContext = { position: position === "ANY" ? "ALL" : position, target, returnTo, query: "" };
+      screenMarket();
+    }
+
+    function screenClubFormations() {
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">اختار تشكيلتك</span><span class="cnt">الخطة الأولى مجانية</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
+  <p class="note">اختار تشكيلتك الأولى مجانًا. تقدر تشتري تشكيلات إضافية من السوق مقابل ${formatCoins(FORMATION_PRICE)} 🪙 لكل تشكيلة.</p>
+  <div class="formation-grid mt">
+    ${FORMATIONS.map(formation => `<button class="formation-option" data-club-formation="${formation.id}">
+      <b>${formation.id}</b><small>${formation.name}</small>
+    </button>`).join("")}
+  </div>`;
+      $("bk").onclick = screenHome;
+      app.querySelectorAll("[data-club-formation]").forEach(button => {
+        button.onclick = () => {
+          if (guestProgress.club) return screenMyTeam();
+          const previous = snapshotClubProgress();
+          selectedSquadSlot = null;
+          guestProgress.club = {
+            formation: button.dataset.clubFormation,
+            confirmed: false,
+            ownedFormations: [button.dataset.clubFormation],
+            starters: Array(11).fill(null),
+            bench: Array(12).fill(null),
+            coaches: [],
+            coach: null,
+            assetCosts: {
+              players: {},
+              coaches: {},
+              formations: { [button.dataset.clubFormation]: 0 }
+            }
+          };
+          if (!commitClubProgress(previous)) return screenClubFormations();
+          screenMyTeam();
+        };
+      });
+    }
+
+    function arrangeClubForFormation(club, formationId) {
+      const inventory = [...club.starters, ...club.bench]
+        .filter(Boolean)
+        .map(name => P.find(player => player.n === name))
+        .filter(Boolean);
+      const remaining = new Set(inventory.map(player => player.n));
+      const takePlayer = position => {
+        const player = inventory.find(item => remaining.has(item.n) && item.p === position);
+        if (!player) return null;
+        remaining.delete(player.n);
+        return player.n;
       };
+      const starters = formationSlots(formationId).map(takePlayer);
+      const bench = Array(BENCH_SLOT_POSITIONS.length).fill(null);
+
+      BENCH_SLOT_POSITIONS.forEach((position, index) => {
+        if (position) bench[index] = takePlayer(position);
+      });
+      BENCH_SLOT_POSITIONS.forEach((position, index) => {
+        if (position === null) bench[index] = takeAnyPlayer();
+      });
+
+      function takeAnyPlayer() {
+        const player = inventory.find(item => remaining.has(item.n));
+        if (!player) return null;
+        remaining.delete(player.n);
+        return player.n;
+      }
+
+      return { starters, bench };
+    }
+
+    function switchClubFormation(formationId) {
+      const club = guestProgress.club;
+      if (!club || !club.ownedFormations.includes(formationId)) {
+        return toast("التشكيلة دي مش مملوكة");
+      }
+      if (club.formation === formationId) return screenMyTeam();
+
+      const previous = snapshotClubProgress();
+      const lineup = arrangeClubForFormation(club, formationId);
+      club.formation = formationId;
+      club.starters = lineup.starters;
+      club.bench = lineup.bench;
+      selectedSquadSlot = null;
+      showBench = false;
+      if (!commitClubProgress(previous)) return screenMyTeam();
+      toast(`تم تغيير التشكيلة إلى ${formationId}`);
+      screenMyTeam();
+    }
+
+    function returnOwnedClubFormation(formationId) {
+      const club = guestProgress.club;
+      if (!club || !club.ownedFormations.includes(formationId)) return toast("التشكيلة غير موجودة");
+      if (club.formation === formationId) return toast("غيّر خطتك الحالية الأول قبل إرجاعها");
+      if (club.ownedFormations.length <= 1) return toast("لازم تفضل عندك تشكيلة واحدة على الأقل");
+      const refund = club.assetCosts.formations[formationId];
+      if (!Number.isSafeInteger(refund) || refund < 0) return toast("قيمة استرداد الخطة غير متاحة");
+      if (!club.confirmed && refund === 0) return toast("الخطة الأولى المجانية تفضل متاحة لحد التأكيد");
+      if (club.confirmed && guestProgress.coins > Number.MAX_SAFE_INTEGER - refund) {
+        return toast("رصيدك وصل للحد الأقصى للكوينز");
+      }
+
+      const previous = snapshotClubProgress();
+      club.ownedFormations = club.ownedFormations.filter(id => id !== formationId);
+      delete club.assetCosts.formations[formationId];
+      if (club.confirmed) guestProgress.coins += refund;
+      if (!commitClubProgress(previous)) return screenOwnedClubFormations();
+      toast(club.confirmed
+        ? `تم إرجاع الخطة · استرداد ${formatCoins(refund)} 🪙`
+        : "تمت إزالة الخطة قبل التأكيد بدون خصم");
+      screenOwnedClubFormations();
+    }
+
+    function selectDraftFreeFormation(formationId) {
+      const club = guestProgress.club;
+      if (!club || club.confirmed) return toast("اختيار الخطة المجاني متاح قبل التأكيد فقط");
+      if (club.ownedFormations.includes(formationId)) return switchClubFormation(formationId);
+      const freeIndex = club.ownedFormations.findIndex(id => club.assetCosts.formations[id] === 0);
+      if (freeIndex === -1) return toast("الخطة المجانية غير موجودة");
+
+      const previous = snapshotClubProgress();
+      const oldFreeFormation = club.ownedFormations[freeIndex];
+      club.ownedFormations[freeIndex] = formationId;
+      delete club.assetCosts.formations[oldFreeFormation];
+      club.assetCosts.formations[formationId] = 0;
+      const lineup = arrangeClubForFormation(club, formationId);
+      club.formation = formationId;
+      club.starters = lineup.starters;
+      club.bench = lineup.bench;
+      selectedSquadSlot = null;
+      showBench = false;
+      if (!commitClubProgress(previous)) return screenOwnedClubFormations();
+      toast(`تم تغيير الخطة مجانًا قبل التأكيد إلى ${formationId}`);
+      screenMyTeam();
+    }
+
+    function screenOwnedClubFormations() {
+      const club = guestProgress.club;
+      if (!club) return screenClubFormations();
+      const draft = !club.confirmed;
+      const freeFormationId = draft
+        ? club.ownedFormations.find(id => club.assetCosts.formations[id] === 0)
+        : null;
+      const visibleFormations = draft ? FORMATIONS.map(formation => formation.id) : club.ownedFormations;
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">تغيير التشكيلة</span><span class="cnt">${club.ownedFormations.length} تشكيلات</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <p class="note">${draft
+    ? "اختار أي خطة مجانًا للتجهيز الأول. الخطط الإضافية تقدر تضيفها من السوق بسعرها الظاهر."
+    : "لاعبوك هيتوزعوا تلقائيًا حسب مراكزهم. تقدر ترجع أي خطة غير مستخدمة وتسترد سعرها المدفوع بالكامل."}</p>
+  <div class="formation-grid mt">
+    ${visibleFormations.map(id => {
+        const formation = formationById(id);
+        const owned = club.ownedFormations.includes(id);
+        const active = owned && id === club.formation;
+        const refund = owned ? club.assetCosts.formations[id] : null;
+        if (!owned && draft && freeFormationId) {
+          return `<button class="formation-option" data-select-free-formation="${id}">
+            <b dir="ltr">${formation.id}</b><small>${formation.name} · اختيار مجاني</small>
+          </button>`;
+        }
+        if (!owned) return "";
+        return `<div class="owned-formation-row">
+          <button class="formation-option ${active ? "active" : ""}" data-switch-club-formation="${id}" ${active ? "disabled" : ""}>
+            <b dir="ltr">${formation.id}</b><small>${formation.name} · ${active ? "الحالية" : "تبديل"}</small>
+          </button>
+          ${active || (!club.confirmed && refund === 0) ? "" : `<button class="btn g sm" data-return-formation="${id}">${club.confirmed ? `إرجاع · ${formatCoins(refund)} 🪙` : "إزالة"}</button>`}
+        </div>`;
+      }).join("")}
+  </div>
+  <button class="btn w" id="buy-formation">شراء تشكيلة من السوق · ${formatCoins(FORMATION_PRICE)} 🪙</button>`;
+      $("bk").onclick = screenMyTeam;
+      $("buy-formation").onclick = () => openMarket("FORMATION", null, "team");
+      app.querySelectorAll("[data-switch-club-formation]").forEach(button => {
+        button.onclick = () => switchClubFormation(button.dataset.switchClubFormation);
+      });
+      app.querySelectorAll("[data-return-formation]").forEach(button => {
+        button.onclick = () => returnOwnedClubFormation(button.dataset.returnFormation);
+      });
+      app.querySelectorAll("[data-select-free-formation]").forEach(button => {
+        button.onclick = () => selectDraftFreeFormation(button.dataset.selectFreeFormation);
+      });
+    }
+
+    function squadPitchHTML(club) {
+      const formation = formationById(club.formation);
+      const slots = formationSlots(formation.id);
+      const starters = club.starters.map(name => P.find(player => player.n === name)).filter(Boolean);
+      const coach = COACHES.find(item => item.n === club.coach);
+      const baseRating = starters.length
+        ? Math.round(starters.reduce((sum, player) => sum + player.r, 0) / starters.length)
+        : null;
+      const overall = baseRating === null
+        ? null
+        : coach ? coachAdjustedPower(baseRating, coach) : baseRating;
+      const ratingDetails = `${starters.length}/11 لاعبين · ${coach ? `مدرب ${coach.n}` : "بدون مدرب"}`;
+      const offsets = {
+        G: 0,
+        D: 1,
+        M: 1 + slots.filter(position => position === "D").length,
+        F: 1 + slots.filter(position => position === "D").length + slots.filter(position => position === "M").length
+      };
+      const used = { G: 0, D: 0, M: 0, F: 0 };
+      const rows = formation.lines.map(([position, count]) => {
+        const players = Array.from({ length: count }, () => {
+          const index = offsets[position] + used[position]++;
+          const name = club.starters[index];
+          const player = name && P.find(item => item.n === name);
+          const selected = selectedSquadSlot && selectedSquadSlot.area === "starter" && selectedSquadSlot.index === index;
+          return `<button class="pitch-player squad-slot ${player ? "has-player-card" : "empty"} ${selected ? "selected" : ""}"
+            data-squad-slot="starter" data-index="${index}" data-position="${position}" aria-pressed="${!!selected}"
+            aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[position]}`}">
+            ${player ? cardHTML(player, "squad-player-card") : `<small>${POS_SHORT[position]}</small><b>＋ إضافة</b>`}
+          </button>`;
+        }).join("");
+        return `<div class="pitch-row">${players}</div>`;
+      }).join("");
+      return `<div class="squad-formation-title">
+          <div class="sec-title">التشكيلة الأساسية · <b dir="ltr">${formation.id}</b></div>
+        ${club.ownedFormations.length > 1 || !club.confirmed ? `<button class="btn g sm" id="change-club-formation">${club.confirmed ? "تغيير الخطة" : "اختيار الخطة"}</button>` : ""}
+        </div>
+        <div class="pitch">${rows}
+          <div class="squad-overall" title="${esc(ratingDetails)}" aria-label="التقييم الكلي OVR: ${overall === null ? "غير متاح" : overall}">
+            <b>${overall === null ? "—" : overall}</b><span>OVR</span>
+          </div>
+        </div>`;
+    }
+
+    function squadSlotPlayer(slot) {
+      return guestProgress.club[slot.area === "starter" ? "starters" : "bench"][slot.index];
+    }
+
+    function squadSlotPosition(slot) {
+      return slot.area === "starter"
+        ? formationSlots(guestProgress.club.formation)[slot.index]
+        : BENCH_SLOT_POSITIONS[slot.index];
+    }
+
+    function canPlayerUseSlot(playerName, slot) {
+      const requiredPosition = squadSlotPosition(slot);
+      const player = P.find(item => item.n === playerName);
+      return !!player && (!requiredPosition || player.p === requiredPosition);
+    }
+
+    function firstEmptySquadSlot(area, playerName) {
+      const slots = area === "starter"
+        ? formationSlots(guestProgress.club.formation)
+        : BENCH_SLOT_POSITIONS;
+      const occupied = guestProgress.club[area === "starter" ? "starters" : "bench"];
+      const player = P.find(item => item.n === playerName);
+      if (!player) return null;
+      let index = slots.findIndex((position, i) =>
+        position === player.p && occupied[i] === null);
+      if (index === -1 && area === "bench") {
+        index = slots.findIndex((position, i) => position === null && occupied[i] === null);
+      }
+      return index === -1 ? null : { area, index };
+    }
+
+    function moveSelectedSquadPlayer(target) {
+      if (!selectedSquadSlot || !target) return;
+      const source = selectedSquadSlot;
+      if (source.area === target.area && source.index === target.index) {
+        selectedSquadSlot = null;
+        return screenMyTeam();
+      }
+      const sourceName = squadSlotPlayer(source);
+      const targetName = squadSlotPlayer(target);
+      if (!sourceName || !canPlayerUseSlot(sourceName, target) ||
+        (targetName && !canPlayerUseSlot(targetName, source))) {
+        toast("المركز غير مناسب للاعب");
+        return;
+      }
+
+      const sourceKey = source.area === "starter" ? "starters" : "bench";
+      const targetKey = target.area === "starter" ? "starters" : "bench";
+      guestProgress.club[targetKey][target.index] = sourceName;
+      guestProgress.club[sourceKey][source.index] = targetName || null;
+      selectedSquadSlot = null;
+      showBench = source.area === "bench" || target.area === "bench";
+      saveGuestProgress();
+      toast(targetName ? "تم تبديل اللاعبين" : "تم نقل اللاعب");
+      screenMyTeam();
+    }
+
+    function reservePlayersForSlot(target) {
+      if (!guestProgress.club || target.area !== "starter") return [];
+      return guestProgress.club.bench
+        .map((name, index) => ({ player: name && P.find(item => item.n === name), index }))
+        .filter(item => item.player && canPlayerUseSlot(item.player.n, target));
+    }
+
+    function screenReserveChoices(target) {
+      const candidates = reservePlayersForSlot(target);
+      if (!candidates.length) {
+        return openMarket(squadSlotPosition(target), {
+          kind: "player",
+          area: target.area,
+          index: target.index,
+          position: squadSlotPosition(target)
+        }, "team");
+      }
+
+      const position = squadSlotPosition(target);
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">اختار من الاحتياطي</span><span class="cnt">${POS_NAME[position]}</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <p class="note">عندك ${candidates.length} لاعب مناسب للمركز ده في الاحتياطي.</p>
+  <div class="market-list player-grid">
+    ${candidates.map(({ player, index }) => `<div class="market-item player-market-card">
+      ${cardHTML(player, "reserve-choice-card")}
+      <button class="btn sm" data-use-reserve="${index}">إضافة للتشكيلة</button>
+    </div>`).join("")}
+  </div>
+  <button class="btn g w mt" id="reserve-market">شراء لاعب من السوق</button>`;
+      $("bk").onclick = screenMyTeam;
+      $("reserve-market").onclick = () => openMarket(position, {
+        kind: "player",
+        area: target.area,
+        index: target.index,
+        position
+      }, "team");
+      app.querySelectorAll("[data-use-reserve]").forEach(button => {
+        button.onclick = () => {
+          const currentTarget = { area: target.area, index: target.index };
+          if (squadSlotPlayer(currentTarget) !== null) {
+            toast("المكان لم يعد فارغًا");
+            return screenMyTeam();
+          }
+          selectedSquadSlot = { area: "bench", index: Number(button.dataset.useReserve) };
+          moveSelectedSquadPlayer(currentTarget);
+        };
+      });
+    }
+
+    function handleSquadSlotTap(area, index, position) {
+      const target = { area, index };
+      if (!selectedSquadSlot) {
+        if (squadSlotPlayer(target)) {
+          selectedSquadSlot = target;
+          if (area === "bench") showBench = true;
+          return screenMyTeam();
+        }
+        if (area === "starter" && reservePlayersForSlot(target).length) {
+          return screenReserveChoices(target);
+        }
+        openMarket(position || "ANY", {
+          kind: "player",
+          area,
+          index,
+          position: position || null
+        }, "team");
+        return;
+      }
+      moveSelectedSquadPlayer(target);
+    }
+
+    function moveSelectedPlayerBetweenSquadAreas() {
+      if (!selectedSquadSlot) return;
+      const destination = selectedSquadSlot.area === "starter" ? "bench" : "starter";
+      const playerName = squadSlotPlayer(selectedSquadSlot);
+      const target = firstEmptySquadSlot(destination, playerName);
+      if (!target) return toast("مفيش مكان مناسب وفاضي");
+      moveSelectedSquadPlayer(target);
+    }
+
+    function openSquadPlayerSwap() {
+      if (!selectedSquadSlot || !guestProgress.club) return;
+      const slot = { ...selectedSquadSlot };
+      const playerName = squadSlotPlayer(slot);
+      const player = P.find(item => item.n === playerName);
+      if (!player) return toast("اللاعب المحدد غير موجود");
+      openMarket(player.p, {
+        kind: "player",
+        area: slot.area,
+        index: slot.index,
+        position: player.p,
+        replaceName: player.n
+      }, "team");
+    }
+
+    function removeDraftSquadPlayer() {
+      const club = guestProgress.club;
+      if (!club || club.confirmed || !selectedSquadSlot) return toast("لا يمكن إزالة اللاعب بعد التأكيد");
+      const slot = { ...selectedSquadSlot };
+      const key = slot.area === "starter" ? "starters" : "bench";
+      const playerName = club[key][slot.index];
+      if (!playerName) return toast("اللاعب لم يعد في هذا المكان");
+      club[key][slot.index] = null;
+      delete club.assetCosts.players[playerName];
+      selectedSquadSlot = null;
+      showBench = slot.area === "bench";
+      saveGuestProgress();
+      toast("تمت إزالة اللاعب بدون خصم");
+      screenMyTeam();
+    }
+
+    function squadSelectionHTML() {
+      if (!selectedSquadSlot) return "";
+      const playerName = squadSlotPlayer(selectedSquadSlot);
+      if (!playerName) {
+        selectedSquadSlot = null;
+        return "";
+      }
+      const player = P.find(item => item.n === playerName);
+      const destination = selectedSquadSlot.area === "starter" ? "الاحتياطي" : "التشكيلة الأساسية";
+      const hasTarget = !!firstEmptySquadSlot(
+        selectedSquadSlot.area === "starter" ? "bench" : "starter",
+        playerName
+      );
+      return `<div class="squad-action-panel">
+        <p>${esc(playerName)}${guestProgress.club.confirmed ? "" : " · تعديل مجاني قبل التأكيد"}</p>
+        <div class="squad-action-buttons">
+          <button class="btn" id="auto-squad-move" ${hasTarget ? "" : "disabled"}>نقله إلى ${destination}</button>
+          <button class="btn g" id="swap-selected-player">تبديل اللاعب</button>
+          ${guestProgress.club.confirmed ? "" : `<button class="btn g" id="remove-draft-player">إزالة قبل التأكيد</button>`}
+          <button class="btn g" id="cancel-squad-selection">إلغاء</button>
+        </div>
+      </div>`;
+    }
+
+    function screenMyTeam() {
+      if (!guestProgress.club) return screenClubFormations();
+      if (selectedSquadSlot && selectedSquadSlot.area === "bench") showBench = true;
+      const club = guestProgress.club;
+      const setupCost = club.confirmed ? null : clubSetupCostBreakdown(club);
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">تشكيلتي</span><span class="cnt" dir="ltr">${formationById(club.formation).id}</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <div class="squad-topbar">
+    <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
+    <button class="btn g sm" id="team-market">السوق</button>
+  </div>
+  ${squadPitchHTML(club)}
+  ${squadSelectionHTML()}
+  <button class="btn g w mt" id="bench-toggle" aria-expanded="${showBench}">${showBench ? "إخفاء الاحتياطي" : "عرض الاحتياطي · 12"}</button>
+  ${showBench ? `<p class="note mt">بديل لكل مركز رئيسي، و8 أماكن مرنة.</p><div class="bench-grid">
+    ${BENCH_SLOT_POSITIONS.map((position, index) => {
+        const name = club.bench[index];
+      const player = name && P.find(item => item.n === name);
+        const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
+        const selected = selectedSquadSlot && selectedSquadSlot.area === "bench" && selectedSquadSlot.index === index;
+      return `<button class="bench-slot ${player ? "owned-slot" : ""} ${selected ? "selected" : ""}"
+          data-squad-slot="bench" data-index="${index}" data-position="${position || "ANY"}" aria-pressed="${!!selected}">
+        ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `<small>${label}</small><b>＋ إضافة</b>`}
+        </button>`;
+      }).join("")}
+  </div>` : ""}
+  <div class="sec-title">المدرب الحالي</div>
+  <div class="coach-management-row">
+    <button class="btn g" id="club-coach">${club.coach ? esc(club.coach) : "＋ إضافة مدرب"}</button>
+    <button class="btn" id="club-coaches">المدربين · ${club.coaches.length}</button>
+  </div>
+  ${setupCost ? `<div class="setup-confirmation">
+    <b>تجهيز مجاني قبل التأكيد</b>
+    <p>غيّر اللاعبين أو المدرب أو الخطط براحتك؛ مفيش كوينز هتتخصم قبل التأكيد.</p>
+    <div>إجمالي الأسعار عند التأكيد: <strong>${formatCoins(setupCost.total)} 🪙</strong></div>
+    ${guestProgress.coins < setupCost.total ? `<small>رصيدك الحالي ${formatCoins(guestProgress.coins)}؛ عدّل اختياراتك قبل التأكيد.</small>` : ""}
+    <button class="btn w" id="confirm-club-setup">مراجعة وتأكيد التشكيلة</button>
+  </div>` : ""}
+  `;
+      $("bk").onclick = screenHome;
+      $("bench-toggle").onclick = () => { showBench = !showBench; screenMyTeam() };
+      if ($("cancel-squad-selection")) {
+        $("cancel-squad-selection").onclick = () => { selectedSquadSlot = null; screenMyTeam() };
+        $("auto-squad-move").onclick = moveSelectedPlayerBetweenSquadAreas;
+        $("swap-selected-player").onclick = openSquadPlayerSwap;
+        if ($("remove-draft-player")) $("remove-draft-player").onclick = removeDraftSquadPlayer;
+      }
+      $("club-coach").onclick = () => openMarket("COACH", { kind: "coach" }, "team");
+      $("club-coaches").onclick = screenClubCoaches;
+      if ($("change-club-formation")) $("change-club-formation").onclick = screenOwnedClubFormations;
+      if ($("confirm-club-setup")) $("confirm-club-setup").onclick = openClubSetupConfirmation;
+      $("team-market").onclick = () => openMarket("ALL", null, "team");
+      app.querySelectorAll("[data-squad-slot]").forEach(button => {
+        button.onclick = () => handleSquadSlotTap(
+          button.dataset.squadSlot,
+          Number(button.dataset.index),
+          button.dataset.position === "ANY" ? null : button.dataset.position
+        );
+      });
+    }
+
+    function openClubSetupConfirmation() {
+      const club = guestProgress.club;
+      if (!club || club.confirmed) return screenMyTeam();
+      if (!getClubMatchSetup(true)) return;
+
+      const costs = clubSetupCostBreakdown(club);
+      if (!Number.isSafeInteger(costs.total) || guestProgress.coins < costs.total) {
+        return toast(`الرصيد غير كافٍ · تحتاج ${formatCoins(costs.total)} 🪙`);
+      }
+
+      const overlay = document.createElement("div");
+      overlay.className = "pick-overlay sale-overlay";
+      overlay.innerHTML = `
+        <div class="pick-dialog" role="dialog" aria-modal="true" aria-labelledby="setup-confirm-title">
+          <div class="pick-dialog-title" id="setup-confirm-title">تأكيد التشكيلة</div>
+          <div class="sale-breakdown">
+            <span>اللاعبون: <b>${formatCoins(costs.players)} 🪙</b></span>
+            <span>المدربون: <b>${formatCoins(costs.coaches)} 🪙</b></span>
+            <span>الخطط الإضافية: <b>${formatCoins(costs.formations)} 🪙</b></span>
+            <span>الإجمالي: <b>${formatCoins(costs.total)} 🪙</b></span>
+            <span>الرصيد بعد التأكيد: <b>${formatCoins(guestProgress.coins - costs.total)} 🪙</b></span>
+          </div>
+          <p>بعد التأكيد هتتطبق قواعد التشكيلة والمشتريات.</p>
+          <div class="pick-actions">
+            <button class="btn" type="button" data-confirm-setup>تأكيد وخصم المبلغ</button>
+            <button class="btn g" type="button" data-cancel-setup>رجوع للتعديل</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const close = () => overlay.remove();
+      overlay.addEventListener("click", event => {
+        if (event.target === overlay) close();
+      });
+      overlay.querySelector("[data-cancel-setup]").onclick = close;
+      overlay.querySelector("[data-confirm-setup]").onclick = () => {
+        if (guestProgress.club !== club || club.confirmed) {
+          close();
+          return screenMyTeam();
+        }
+        const currentCosts = clubSetupCostBreakdown(club);
+        if (!Number.isSafeInteger(currentCosts.total) || guestProgress.coins < currentCosts.total) {
+          close();
+          return toast("رصيد الكوينز لم يعد كافيًا");
+        }
+        const previous = snapshotClubProgress();
+        guestProgress.coins -= currentCosts.total;
+        club.confirmed = true;
+        if (!commitClubProgress(previous)) {
+          close();
+          return screenMyTeam();
+        }
+        close();
+        toast("تم تأكيد التشكيلة وخصم أسعار الاختيارات");
+        screenMyTeam();
+      };
+    }
+
+    function findPlayerSlot(player, target) {
+      const club = guestProgress.club;
+      if (!club) return null;
+      const positions = formationSlots(club.formation);
+      if (target && target.kind === "player") {
+        const key = target.area === "starter" ? "starters" : "bench";
+        const slots = club[key];
+        const index = target.index;
+        const replacing = target.replaceName && slots[index] === target.replaceName;
+        if (!Number.isInteger(index) || index < 0 || index >= slots.length ||
+          (slots[index] !== null && !replacing)) return null;
+        const required = key === "starters" ? positions[index] : BENCH_SLOT_POSITIONS[index];
+        if (required && required !== player.p) return null;
+        return { key, index };
+      }
+
+      const starterIndex = positions.findIndex((position, index) =>
+        position === player.p && club.starters[index] === null);
+      if (starterIndex !== -1) return { key: "starters", index: starterIndex };
+      const reserveIndex = BENCH_SLOT_POSITIONS.findIndex((position, index) =>
+        position === player.p && club.bench[index] === null);
+      if (reserveIndex !== -1) return { key: "bench", index: reserveIndex };
+      const flexibleIndex = BENCH_SLOT_POSITIONS.findIndex((position, index) =>
+        position === null && club.bench[index] === null);
+      return flexibleIndex === -1 ? null : { key: "bench", index: flexibleIndex };
+    }
+
+    function buyMarketPlayer(player) {
+      const club = guestProgress.club;
+      const ownedPlayers = club ? [...club.starters, ...club.bench].filter(Boolean) : [];
+      if (!Number.isSafeInteger(player.price) || player.price <= 0) return toast("سعر اللاعب محتاج تحديد");
+      if (ownedPlayers.includes(player.n)) return toast("اللاعب مملوك بالفعل");
+      const slot = findPlayerSlot(player, marketContext.target);
+      if (!slot) return toast("مفيش مكان متاح للاعب في تشكيلتك");
+      const target = marketContext.target;
+      const oldName = target && target.replaceName;
+      const oldCost = oldName && club.assetCosts.players[oldName];
+      if (oldName && (!Number.isSafeInteger(oldCost) || oldCost < 0 ||
+        club[target.area === "starter" ? "starters" : "bench"][target.index] !== oldName)) {
+        return toast("اللاعب المحدد للتبديل لم يعد في مكانه");
+      }
+      const previous = snapshotClubProgress();
+      let swapDifference = null;
+      if (club.confirmed) {
+        const available = guestProgress.coins + (oldCost || 0);
+        if (!Number.isSafeInteger(available) || available < player.price) {
+          return toast("رصيد الكوينز غير كافٍ لتبديل اللاعب");
+        }
+        const nextCoins = available - player.price;
+        if (!Number.isSafeInteger(nextCoins)) return toast("رصيد الكوينز غير صالح");
+        guestProgress.coins = nextCoins;
+      }
+      if (oldName) swapDifference = player.price - oldCost;
+      if (oldName) delete club.assetCosts.players[oldName];
+      club[slot.key][slot.index] = player.n;
+      club.assetCosts.players[player.n] = player.price;
+      if (slot.key === "bench") showBench = true;
+      if (!commitClubProgress(previous)) return screenMarket();
+      toast(oldName
+        ? !club.confirmed ? "تم تبديل اللاعب مجانًا قبل التأكيد"
+          : swapDifference < 0
+            ? `تم تبديل اللاعب · استرداد ${formatCoins(-swapDifference)} 🪙`
+            : `تم تبديل اللاعب · خصم ${formatCoins(swapDifference)} 🪙`
+        : club.confirmed
+          ? `تم شراء ${player.n} · ${formatCoins(player.price)} 🪙`
+          : `تمت إضافة ${player.n} · السعر عند التأكيد ${formatCoins(player.price)} 🪙`);
+      screenMyTeam();
+    }
+
+    function buyMarketCoach(coach) {
+      const club = guestProgress.club;
+      const price = coachPrice(coach);
+      if (!club) return toast("اختار تشكيلتك الأول");
+      if (!Number.isSafeInteger(price) || price <= 0) return toast("سعر المدرب محتاج تحديد");
+      const target = marketContext.target;
+      const oldName = target && target.replaceName;
+      const oldCost = oldName ? club.assetCosts.coaches[oldName] : 0;
+      let swapDifference = null;
+      if (oldName) {
+        if (!club.coaches.includes(oldName) || !Number.isSafeInteger(oldCost) || oldCost < 0) {
+          return toast("المدرب المحدد للتبديل لم يعد في تشكيلتك");
+        }
+        if (club.coaches.includes(coach.n)) return toast("المدرب موجود بالفعل في مجموعتك");
+        swapDifference = price - oldCost;
+        if (club.confirmed) {
+          const available = guestProgress.coins + oldCost;
+          if (!Number.isSafeInteger(available) || available < price) {
+            return toast("رصيد الكوينز غير كافٍ لتبديل المدرب");
+          }
+        }
+      } else {
+        if (club.coaches.includes(coach.n)) return toast("المدرب مملوك بالفعل");
+        if (club.confirmed && guestProgress.coins < price) return toast("رصيد الكوينز غير كافٍ");
+      }
+      const previous = snapshotClubProgress();
+      if (club.confirmed) guestProgress.coins += oldCost - price;
+      if (oldName) {
+        club.coaches = club.coaches.filter(name => name !== oldName);
+        delete club.assetCosts.coaches[oldName];
+      }
+      club.coaches.push(coach.n);
+      club.assetCosts.coaches[coach.n] = price;
+      if (oldName || !club.coach) club.coach = coach.n;
+      if (!commitClubProgress(previous)) return screenMarket();
+      toast(oldName
+        ? !club.confirmed ? "تم تبديل المدرب مجانًا قبل التأكيد"
+          : swapDifference < 0
+            ? `تم تبديل المدرب · استرداد ${formatCoins(-swapDifference)} 🪙`
+            : `تم تبديل المدرب · خصم ${formatCoins(swapDifference)} 🪙`
+        : club.confirmed
+          ? `تم شراء ${coach.n} · ${formatCoins(price)} 🪙`
+          : `تمت إضافة ${coach.n} · السعر عند التأكيد ${formatCoins(price)} 🪙`);
+      if (marketContext.returnTo === "coaches") screenClubCoaches();
+      else screenMyTeam();
+    }
+
+    function buyMarketFormation(formation) {
+      const club = guestProgress.club;
+      if (!club) return toast("اختار تشكيلتك الأول");
+      if (!FORMATIONS.some(item => item.id === formation.id)) return toast("التشكيلة غير متاحة");
+      if (club.ownedFormations.includes(formation.id)) return toast("التشكيلة مملوكة بالفعل");
+      if (club.confirmed) {
+        if (guestProgress.coins < FORMATION_PRICE) return toast("رصيد الكوينز غير كافٍ");
+      }
+      const previous = snapshotClubProgress();
+      if (club.confirmed) guestProgress.coins -= FORMATION_PRICE;
+      club.ownedFormations.push(formation.id);
+      club.assetCosts.formations[formation.id] = FORMATION_PRICE;
+      if (!commitClubProgress(previous)) return screenMarket();
+      toast(club.confirmed
+        ? `تم شراء تشكيلة ${formation.id} · ${formatCoins(FORMATION_PRICE)} 🪙`
+        : `تمت إضافة تشكيلة ${formation.id} · السعر عند التأكيد ${formatCoins(FORMATION_PRICE)} 🪙`);
+      screenMyTeam();
+    }
+
+    function openCardSaleDialog(card, onConfirm) {
+      const salePrice = cardSalePrice(card);
+      if (salePrice === null || salePrice <= 0) {
+        toast("سعر البيع غير متاح");
+        return;
+      }
+      if (guestProgress.coins > Number.MAX_SAFE_INTEGER - salePrice) {
+        toast("رصيدك وصل للحد الأقصى للكوينز");
+        return;
+      }
+      const loss = card.price - salePrice;
+      const returnFocus = document.activeElement;
+      const overlay = document.createElement("div");
+      overlay.className = "pick-overlay sale-overlay";
+      overlay.innerHTML = `
+        <div class="pick-dialog" role="dialog" aria-modal="true" aria-labelledby="sale-dialog-title">
+          <div class="pick-dialog-title" id="sale-dialog-title">تأكيد بيع الكارت</div>
+          <h3>${esc(card.n)}</h3>
+          <div class="sale-breakdown">
+            <span>السعر الحالي: <b>${formatCoins(card.price)} 🪙</b></span>
+            <span class="loss">الخسارة: <b>${formatCoins(loss)} 🪙</b></span>
+            <span>هتستلم: <b>${formatCoins(salePrice)} 🪙</b></span>
+          </div>
+          <div class="pick-actions">
+            <button class="btn" type="button" data-confirm-sale>تأكيد البيع</button>
+            <button class="btn g" type="button" data-cancel-sale>إلغاء</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const close = () => {
+        overlay.remove();
+        document.removeEventListener("keydown", handleKeydown);
+        if (returnFocus instanceof HTMLElement && returnFocus.isConnected) returnFocus.focus();
+      };
+      const handleKeydown = event => {
+        if (event.key === "Escape") close();
+      };
+      overlay.addEventListener("click", event => {
+        if (event.target === overlay) close();
+      });
+      overlay.querySelector("[data-cancel-sale]").onclick = close;
+      overlay.querySelector("[data-confirm-sale]").onclick = () => {
+        close();
+        onConfirm(salePrice);
+      };
+      document.addEventListener("keydown", handleKeydown);
+      overlay.querySelector("[data-confirm-sale]").focus();
+    }
+
+    function sellOwnedSquadPlayer(player) {
+      const club = guestProgress.club;
+      if (!club || !club.confirmed || !player) return toast("لا يمكن البيع قبل تأكيد التشكيلة");
+      const starterIndex = club.starters.indexOf(player.n);
+      const benchIndex = club.bench.indexOf(player.n);
+      const slot = starterIndex >= 0
+        ? { area: "starter", index: starterIndex }
+        : benchIndex >= 0 ? { area: "bench", index: benchIndex } : null;
+      if (!slot) return toast("اللاعب غير موجود في تشكيلتك");
+      openCardSaleDialog(player, salePrice => {
+        const currentClub = guestProgress.club;
+        const key = slot.area === "starter" ? "starters" : "bench";
+        if (!currentClub || !currentClub.confirmed || currentClub[key][slot.index] !== player.n) {
+          return toast("اللاعب لم يعد في هذا المكان");
+        }
+        if (guestProgress.coins > Number.MAX_SAFE_INTEGER - salePrice) {
+          return toast("رصيدك وصل للحد الأقصى للكوينز");
+        }
+        const previous = snapshotClubProgress();
+        currentClub[key][slot.index] = null;
+        delete currentClub.assetCosts.players[player.n];
+        guestProgress.coins += salePrice;
+        selectedSquadSlot = null;
+        showBench = slot.area === "bench";
+        if (!commitClubProgress(previous)) return screenMyTeam();
+        toast(`تم بيع ${player.n} · +${formatCoins(salePrice)} 🪙`);
+        screenMyTeam();
+      });
+    }
+
+    function sellClubCoach(coachIndex) {
+      const club = guestProgress.club;
+      const coach = COACHES[coachIndex];
+      if (!club || !coach || !club.coaches.includes(coach.n)) {
+        return toast("المدرب غير موجود في مجموعتك");
+      }
+      openCardSaleDialog(coach, salePrice => {
+        const currentClub = guestProgress.club;
+        if (!currentClub || !currentClub.coaches.includes(coach.n)) {
+          return toast("المدرب لم يعد في مجموعتك");
+        }
+        if (guestProgress.coins > Number.MAX_SAFE_INTEGER - salePrice) {
+          return toast("رصيدك وصل للحد الأقصى للكوينز");
+        }
+        const previous = snapshotClubProgress();
+        currentClub.coaches = currentClub.coaches.filter(name => name !== coach.n);
+        delete currentClub.assetCosts.coaches[coach.n];
+        if (currentClub.coach === coach.n) currentClub.coach = currentClub.coaches[0] || null;
+        guestProgress.coins += salePrice;
+        if (!commitClubProgress(previous)) return screenClubCoaches();
+        toast(`تم بيع ${coach.n} · +${formatCoins(salePrice)} 🪙`);
+        screenClubCoaches();
+      });
+    }
+
+    function selectClubCoach(coach) {
+      const club = guestProgress.club;
+      if (!club || !club.coaches.includes(coach.n)) return toast("المدرب غير موجود في مجموعتك");
+      if (club.coach === coach.n) return toast("المدرب الحالي بالفعل");
+      club.coach = coach.n;
+      saveGuestProgress();
+      toast(`المدرب الحالي: ${coach.n}`);
+      screenMyTeam();
+    }
+
+    function openClubCoachSwap() {
+      const club = guestProgress.club;
+      if (!club || !club.coach) return toast("اختار مدربك الأول");
+      openMarket("COACH", { kind: "coach", replaceName: club.coach }, "coaches");
+    }
+
+    function removeDraftClubCoach(coachIndex) {
+      const club = guestProgress.club;
+      const coach = COACHES[coachIndex];
+      if (!club || club.confirmed || !coach || !club.coaches.includes(coach.n)) {
+        return toast("لا يمكن إزالة المدرب من هنا");
+      }
+      const previous = snapshotClubProgress();
+      club.coaches = club.coaches.filter(name => name !== coach.n);
+      delete club.assetCosts.coaches[coach.n];
+      if (club.coach === coach.n) club.coach = club.coaches[0] || null;
+      if (!commitClubProgress(previous)) return screenClubCoaches();
+      toast(`تمت إزالة ${coach.n} قبل التأكيد`);
+      screenClubCoaches();
+    }
+
+    function screenClubCoaches() {
+      const club = guestProgress.club;
+      if (!club) return screenMyTeam();
+      const coaches = club.coaches
+        .map(name => COACHES.find(coach => coach.n === name))
+        .filter(Boolean);
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">مدربو تشكيلتي</span><span class="cnt">${coaches.length} مدرب</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  ${coaches.length ? `<div class="rows">${coaches.map(coach => {
+        const salePrice = cardSalePrice(coach);
+        const canSell = salePrice !== null && salePrice > 0;
+        const action = !club.confirmed
+          ? `<button class="btn g sm" data-remove-draft-coach="${COACHES.indexOf(coach)}">إزالة</button>`
+          : club.coach === coach.n
+            ? `<button class="btn g sm" disabled>الحالي</button>`
+            : `<button class="btn g sm sell" data-sell-coach="${COACHES.indexOf(coach)}" ${canSell ? "" : "disabled"}>بيع</button>`;
+        return `<div class="row">
+      <span class="n">${esc(coach.n)} · تقييم ${coach.r}${club.coach === coach.n ? " · الحالي" : ""}</span>
+      <div class="coach-collection-actions">
+        <button class="btn g sm" data-select-coach="${COACHES.indexOf(coach)}" ${club.coach === coach.n ? "disabled" : ""}>
+          ${club.coach === coach.n ? "الحالي" : "اختيار"}
+        </button>
+        ${action}
+      </div>
+    </div>`;
+      }).join("")}</div>` : `<p class="note">لسه ماعندكش مدربين. أضف مدربًا من السوق.</p>`}
+  <button class="btn g w mt" id="swap-club-coach" ${club.coach ? "" : "disabled"}>تبديل المدرب الحالي</button>
+  <button class="btn w mt" id="add-club-coach">إضافة مدربين من السوق</button>`;
+      $("bk").onclick = screenMyTeam;
+      $("add-club-coach").onclick = () => openMarket("COACH", { kind: "coach" }, "coaches");
+      $("swap-club-coach").onclick = openClubCoachSwap;
+      app.querySelectorAll("[data-select-coach]").forEach(button => {
+        button.onclick = () => selectClubCoach(COACHES[Number(button.dataset.selectCoach)]);
+      });
+      app.querySelectorAll("[data-sell-coach]").forEach(button => {
+        button.onclick = () => sellClubCoach(Number(button.dataset.sellCoach));
+      });
+      app.querySelectorAll("[data-remove-draft-coach]").forEach(button => {
+        button.onclick = () => removeDraftClubCoach(Number(button.dataset.removeDraftCoach));
+      });
+    }
+
+    function screenMarket() {
+      const { target, returnTo } = marketContext;
+      const position = target && target.kind === "coach" ? "COACH" : marketContext.position;
+      const isCoachMarket = position === "COACH";
+      const isFormationMarket = position === "FORMATION";
+      const ownedPlayers = guestProgress.club
+        ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean)
+        : [];
+      const items = isCoachMarket ? COACHES :
+        isFormationMarket ? FORMATIONS :
+          P.filter(player => position === "ALL" || player.p === position);
+      const filters = target && (target.kind === "coach" || target.position)
+        ? `<div class="sec-title">${target.kind === "coach" ? "المدربين فقط" : `${POS_SHORT[target.position]} فقط`}</div>`
+        : `<div class="formation-grid market-filters">
+            ${[["ALL", "ALL", "كل المراكز"], ["G", "GK", "حراس"], ["D", "DF", "دفاع"], ["M", "MF", "وسط"], ["F", "FW", "هجوم"], ["COACH", "CO", "مدربون"], ["FORMATION", "خطط", "التشكيلات"]]
+          .map(([value, label, title]) => `<button class="formation-option ${position === value ? "active" : ""}" data-market-filter="${value}" aria-label="${title}" title="${title}"><small>${label}</small></button>`).join("")}
+          </div>`;
+      const marketItems = isCoachMarket
+        ? items.map(coach => {
+          const price = coachPrice(coach);
+          const owned = guestProgress.club && guestProgress.club.coaches.includes(coach.n);
+          const hasPrice = Number.isSafeInteger(price) && price > 0;
+          const replacing = target && target.replaceName;
+          const refund = replacing && guestProgress.club
+            ? guestProgress.club.assetCosts.coaches[target.replaceName] || 0
+            : 0;
+          const available = guestProgress.coins + refund;
+          const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
+            Number.isSafeInteger(available) && available >= price;
+          const label = owned ? "OWNED" : !guestProgress.club ? "اختار تشكيلتك" :
+            !hasPrice ? "محتاج تسعير" : !canAfford ? "رصيد غير كافٍ" :
+              `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "إضافة"} · ${formatCoins(price)} 🪙`;
+          const difference = price - refund;
+          const priceText = hasPrice
+            ? `السعر ${formatCoins(price)}${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `فرق ${formatCoins(difference)}`}` : ""}`
+            : `بدون سعر حاليًا · المقترح ${formatCoins(coach.suggestedPrice)}`;
+          return `<div class="market-item" data-market-search-item>
+            <div class="market-item-info"><b>${esc(coach.n)}</b><small>${COACH_TIER[coach.tier].name} · تقييم ${coach.r} · ${priceText}</small></div>
+            <button class="btn g sm market-price ${owned ? "owned" : ""}" data-buy-coach="${COACHES.indexOf(coach)}" ${owned || !guestProgress.club || !hasPrice || !canAfford ? "disabled" : ""}>${label}</button>
+          </div>`;
+        }).join("")
+        : isFormationMarket
+          ? items.map(formation => {
+            const owned = guestProgress.club && guestProgress.club.ownedFormations.includes(formation.id);
+            const active = guestProgress.club && guestProgress.club.formation === formation.id;
+            const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
+              guestProgress.coins >= FORMATION_PRICE;
+            const label = active ? "الخطة الحالية" : owned ? "مملوكة" :
+              !guestProgress.club ? "اختار تشكيلتك" : !canAfford ? "رصيد غير كافٍ" :
+                `${guestProgress.club.confirmed ? "شراء" : "إضافة"} · ${formatCoins(FORMATION_PRICE)} 🪙`;
+            return `<div class="market-item" data-market-search-item>
+              <div class="market-item-info"><b dir="ltr">${formation.id}</b><small>${esc(formation.name)} · السعر ${formatCoins(FORMATION_PRICE)} 🪙</small></div>
+              <button class="btn g sm market-price ${owned ? "owned" : ""}" data-buy-formation="${FORMATIONS.indexOf(formation)}"
+                ${active || owned || !guestProgress.club || !canAfford ? "disabled" : ""}>${label}</button>
+            </div>`;
+          }).join("")
+          : items.map(player => {
+          const owned = ownedPlayers.includes(player.n);
+          const slot = owned ? null : findPlayerSlot(player, target);
+          const hasPrice = Number.isSafeInteger(player.price) && player.price > 0;
+          const replacing = target && target.kind === "player" && target.replaceName;
+          const refund = replacing && guestProgress.club
+            ? guestProgress.club.assetCosts.players[target.replaceName] || 0
+            : 0;
+          const available = guestProgress.coins + refund;
+          const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
+            Number.isSafeInteger(available) && available >= player.price;
+          const difference = player.price - refund;
+          const salePrice = cardSalePrice(player);
+          const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
+            salePrice !== null && salePrice > 0;
+          const label = owned ? canSellOwned ? `بيع · ${formatCoins(salePrice)} 🪙` : "مملوك" :
+            !guestProgress.club ? "اختار تشكيلتك" :
+            !hasPrice ? `مقترح · ${formatCoins(player.suggestedPrice)}` : !slot ? "لا يوجد مكان" :
+              !canAfford ? "رصيد غير كافٍ" :
+                `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "اختيار"} · ${formatCoins(player.price)} 🪙`;
+          const actionAttribute = canSellOwned
+            ? `data-sell-market-player="${P.indexOf(player)}"`
+            : `data-buy-player="${P.indexOf(player)}"`;
+          const disabled = canSellOwned
+            ? ""
+            : owned || !slot || !hasPrice || !canAfford ? "disabled" : "";
+          return `<div class="market-item player-market-card" data-market-search-item>
+            ${cardHTML(player, "market-player-card")}
+            <small class="market-item-price">${hasPrice
+              ? `السعر ${formatCoins(player.price)} 🪙${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `الفرق ${formatCoins(difference)}`}` : ""}`
+              : `السعر غير متاح · المقترح ${formatCoins(player.suggestedPrice)} 🪙`}</small>
+            <button class="btn g sm market-price ${owned && !canSellOwned ? "owned" : ""}" ${actionAttribute} ${disabled}>${label}</button>
+          </div>`;
+        }).join("");
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">السوق</span><span class="cnt">${isCoachMarket ? "المدربين" : isFormationMarket ? "التشكيلات" : "اللاعبين"}</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
+  ${filters}
+  <input class="market-search" id="market-search" type="search" dir="auto"
+    placeholder="${isCoachMarket ? "ابحث باسم المدرب..." : isFormationMarket ? "ابحث باسم التشكيلة أو الخطة..." : "ابحث باسم اللاعب أو النادي..."}"
+    aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}">
+  <div class="market-list ${!isCoachMarket && !isFormationMarket ? "player-grid" : ""}" id="market-list">
+    ${marketItems
+      ? marketItems
+      : `<div class="rows" data-market-empty><div class="row"><span class="n">مفيش عناصر متاحة في القسم ده.</span></div></div>`}
+    <div class="rows market-search-empty" id="market-search-empty" hidden><div class="row"><span class="n">مفيش نتائج مطابقة للبحث.</span></div></div>
+  </div>`;
+      $("bk").onclick = returnTo === "coaches" ? screenClubCoaches :
+        returnTo === "team" ? screenMyTeam : screenHome;
+      const marketSearch = $("market-search");
+      const applyMarketSearch = () => {
+        marketContext.query = marketSearch.value;
+        const query = marketSearch.value.trim().toLocaleLowerCase();
+        const items = [...app.querySelectorAll("[data-market-search-item]")];
+        let hasMatch = false;
+        items.forEach(item => {
+          const matches = !query || item.textContent.toLocaleLowerCase().includes(query);
+          item.hidden = !matches;
+          if (matches) hasMatch = true;
+        });
+        const emptyMarket = app.querySelector("[data-market-empty]");
+        if (emptyMarket) emptyMarket.hidden = !!query;
+        $("market-search-empty").hidden = !query || hasMatch;
+      };
+      marketSearch.oninput = applyMarketSearch;
+      applyMarketSearch();
+      app.querySelectorAll("[data-market-filter]").forEach(button => {
+        button.onclick = () => {
+          marketContext.position = button.dataset.marketFilter;
+          screenMarket();
+        };
+      });
+      app.querySelectorAll("[data-buy-player]").forEach(button => {
+        button.onclick = () => buyMarketPlayer(P[Number(button.dataset.buyPlayer)]);
+      });
+      app.querySelectorAll("[data-sell-market-player]").forEach(button => {
+        button.onclick = () => sellOwnedSquadPlayer(P[Number(button.dataset.sellMarketPlayer)]);
+      });
+      app.querySelectorAll("[data-buy-coach]").forEach(button => {
+        button.onclick = () => buyMarketCoach(COACHES[Number(button.dataset.buyCoach)]);
+      });
+      app.querySelectorAll("[data-buy-formation]").forEach(button => {
+        button.onclick = () => buyMarketFormation(FORMATIONS[Number(button.dataset.buyFormation)]);
+      });
     }
 
     function screenHow() {
@@ -1877,6 +3449,13 @@
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">طريقة اللعب</span><span class="cnt">اختار المود</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
+  <div class="sec-title">العب بالتشكيلة اللي بنيتها</div>
+  <button class="mode primary" id="mClub">
+    <div class="ic">🏟️</div>
+    <div class="tx"><b>مباريات تشكيلتي</b><small>استخدم لاعبيك ومدربك والبدلاء</small></div>
+    <div class="arw">‹</div>
+  </button>
+  <div class="sec-title">الدرفت السريع بالكروت</div>
   <div class="sec-title">وقت كل اختيار</div>
   <div style="display:flex;gap:8px;margin-bottom:18px">
     ${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" style="flex:1" data-t="${s}">${s} ثانية</button>`).join("")}
@@ -1898,9 +3477,142 @@
   </button>`;
       $("bk").onclick = screenHome;
       app.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { TM = +b.dataset.t; screenModes() });
+      $("mClub").onclick = screenClubModes;
       $("mAi").onclick = () => screenFormations(startAIGame);
       $("mRoom").onclick = () => screenFormations(screenRoom);
       $("mOn").onclick = () => screenFormations(() => hostRoom("lobby", true));
+    }
+
+    function screenClubModes() {
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">مباريات تشكيلتي</span><span class="cnt" dir="ltr">${guestProgress.club ? formationById(guestProgress.club.formation).id : "—"}</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <p class="note">لازم تكمل 11 لاعبًا أساسيًا، و4 بدلاء للمراكز، وتختار مدربًا قبل اللعب. الاحتياطي المرن اختياري.</p>
+  <button class="mode primary" id="clubCpu">
+    <div class="ic">🤖</div>
+    <div class="tx"><b>ضد الكمبيوتر</b><small>اختار مستوى المنافس</small></div>
+    <div class="arw">‹</div>
+  </button>
+  <button class="mode" id="clubFriend">
+    <div class="ic">👥</div>
+    <div class="tx"><b>العب مع صاحبك</b><small>اعمل غرفة أو ادخل بكود</small></div>
+    <div class="arw">‹</div>
+  </button>
+  <button class="mode" id="clubOnline">
+    <div class="ic">🌐</div>
+    <div class="tx"><b>العب أونلاين</b><small>قابل لاعبًا عشوائيًا بتشكيلته</small></div>
+    <div class="arw">‹</div>
+  </button>`;
+      $("bk").onclick = screenModes;
+      $("clubCpu").onclick = screenClubDifficulties;
+      $("clubFriend").onclick = () => screenRoom("club");
+      $("clubOnline").onclick = () => {
+        if (!getClubMatchSetup()) return;
+        hostRoom("club-lobby", true, "club");
+      };
+    }
+
+    function screenClubDifficulties() {
+      app.innerHTML = `
+  <div class="hdr"><div class="l"><span class="pos">مستوى الكمبيوتر</span><span class="cnt">العب بتشكيلتك</span></div>
+  <button class="btn g sm" id="bk">رجوع</button></div>
+  <p class="note">الكمبيوتر هيكوّن 11 لاعبًا وتشكيلة ومدربًا حسب المستوى.</p>
+  <div class="formation-grid">
+    ${COMPUTER_DIFFICULTIES.map(level => `<button class="formation-option" data-club-level="${level.id}">
+      <b>${level.name}</b><small>تقييم لاعبين ${level.min}–${level.max}</small>
+    </button>`).join("")}
+  </div>`;
+      $("bk").onclick = screenClubModes;
+      app.querySelectorAll("[data-club-level]").forEach(button => {
+        button.onclick = () => startClubMatch("ai", button.dataset.clubLevel);
+      });
+    }
+
+    function getClubMatchSetup(allowUnconfirmed = false) {
+      const club = guestProgress.club;
+      if (!club) {
+        toast("اختار تشكيلتك الأول");
+        screenMyTeam();
+        return null;
+      }
+      if (!club.confirmed && !allowUnconfirmed) {
+        toast("أكد تشكيلتك واشتري اختياراتك قبل اللعب");
+        screenMyTeam();
+        return null;
+      }
+
+      const missingStarters = !Array.isArray(club.starters) || club.starters.length !== 11 ||
+        club.starters.some(name => !name);
+      const missingFixedBench = !Array.isArray(club.bench) ||
+        BENCH_SLOT_POSITIONS.some((position, index) => position !== null && !club.bench[index]);
+      if (missingStarters || missingFixedBench) {
+        selectedSquadSlot = null;
+        showBench = missingFixedBench;
+        const missing = [];
+        if (missingStarters) missing.push("الـ11 لاعب الأساسيين");
+        if (missingFixedBench) missing.push("البدلاء الأربعة الأساسيين");
+        toast(`كمّل ${missing.join(" و")} قبل اللعب`);
+        screenMyTeam();
+        return null;
+      }
+
+      const team = club.starters.map(name => P.find(player => player.n === name));
+      if (team.some(player => !player) || new Set(team.map(player => player.n)).size !== 11) {
+        toast("راجع لاعبي التشكيلة الأساسية قبل اللعب");
+        screenMyTeam();
+        return null;
+      }
+      const coach = COACHES.find(item => item.n === club.coach);
+      if (!coach) {
+        toast("اختار مدربك من السوق قبل اللعب");
+        screenMyTeam();
+        return null;
+      }
+      return { club, team, coach };
+    }
+
+    function startClubMatch(mode, difficulty) {
+      const setup = getClubMatchSetup();
+      if (!setup) {
+        if (mode === "online") killNet();
+        return;
+      }
+      const online = mode === "online";
+      const level = online ? null : COMPUTER_DIFFICULTIES.find(item => item.id === difficulty);
+      if (!online && !level) {
+        toast("اختار مستوى الكمبيوتر");
+        return screenClubDifficulties();
+      }
+      if (online && (!conn || !conn.open)) {
+        return netFail("الاتصال بالخصم غير جاهز", screenClubModes);
+      }
+
+      cancelGameTimers();
+      if (!online) killNet();
+      resetOpponent();
+      selectedFormation = setup.club.formation;
+      S = {
+        i: 11,
+        team: setup.team,
+        used: new Set(setup.team.map(player => player.n)),
+        pool: [],
+        shown: new Set(),
+        sw: 0,
+        phase: "match",
+        sel: null,
+        formation: setup.club.formation,
+        slots: formationSlots(setup.club.formation),
+        coach: setup.coach,
+        coachPool: [],
+        coachShown: new Set(),
+        coachSwap: 0,
+        mode: online ? "online" : "ai",
+        entry: "club",
+        difficulty: level ? level.id : null,
+        matchSeed: Math.floor(Math.random() * 0x100000000)
+      };
+      if (!online) OPP = aiClubTeam(level);
+      endGame();
     }
 
     function screenFormations(onContinue) {
@@ -1923,15 +3635,20 @@
 
     function startAIGame() {
       resetOpponent();
-      opponentFormation = FORMATIONS[Math.floor(Math.random() * FORMATIONS.length)].id;
+      const opponentFormations = FORMATIONS.filter(formation => formation.id !== selectedFormation);
+      opponentFormation = Math.random() < 0.05
+        ? selectedFormation
+        : opponentFormations[Math.floor(Math.random() * opponentFormations.length)].id;
       OPP = aiTeam(opponentFormation);
       OPPK = OPP.names.slice(); OPPS = OPP.sws.slice(); OPPP = OPP.pools.slice();
       startGame();
     }
 
-    function screenRoom() {
+    function screenRoom(gameType = "draft") {
+      const isClubMatch = gameType === "club";
+      const returnScreen = isClubMatch ? screenClubModes : screenModes;
       app.innerHTML = `
-  <div class="hdr"><div class="l"><span class="pos">غرفة مع صاحبك</span><span class="cnt">كود من 4 حروف</span></div>
+  <div class="hdr"><div class="l"><span class="pos">${isClubMatch ? "مباراة تشكيلتي مع صاحبك" : "غرفة مع صاحبك"}</span><span class="cnt">كود من 4 حروف</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <button class="mode primary" id="mk">
     <div class="ic">➕</div>
@@ -1941,17 +3658,21 @@
   <div class="sec-title">أو ادخل بكود</div>
   <input class="input" id="cd" placeholder="كود الغرفة" maxlength="4" inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false">
   <button class="btn w mt-s" id="jn">ادخل الغرفة</button>`;
-      $("bk").onclick = screenModes;
-      $("mk").onclick = () => hostRoom(Math.random().toString(36).slice(2, 6));
+      $("bk").onclick = returnScreen;
+      $("mk").onclick = () => {
+        if (isClubMatch && !getClubMatchSetup()) return;
+        hostRoom(Math.random().toString(36).slice(2, 6), false, gameType);
+      };
       $("jn").onclick = () => {
         const c = ($("cd").value || "").trim().toLowerCase();
         if (c.length !== 4) return toast("الكود 4 حروف");
-        joinRoom(c);
+        if (isClubMatch && !getClubMatchSetup()) return;
+        joinRoom(c, gameType);
       };
       $("cd").addEventListener("keydown", e => { if (e.key === "Enter") $("jn").click() });
     }
 
-    function screenWait(title, sub, code) {
+    function screenWait(title, sub, code, cancelScreen = screenModes) {
       app.innerHTML = `
   <div class="center" style="padding-top:40px">
     <div class="spin"></div>
@@ -1964,7 +3685,7 @@
     </div>`: ""}
     <button class="btn g w" id="cx" style="margin-top:24px">إلغاء</button>
   </div>`;
-      $("cx").onclick = () => { killNet(); screenModes() };
+      $("cx").onclick = () => { killNet(); cancelScreen() };
       const cp = $("cp");
       if (cp) cp.onclick = async () => {
         try { await navigator.clipboard.writeText(code.toUpperCase()); toast("تم نسخ الكود") }
@@ -1975,7 +3696,7 @@
     /* ================= GAME FLOW ================= */
     function startGame() {
       cancelGameTimers();
-      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1 };
+      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai" };
       round();
     }
 
@@ -2058,7 +3779,9 @@
         const players = Array.from({ length: count }, () => {
           const index = offsets[pos] + used[pos]++;
           const player = team[index];
-          return `<div class="pitch-player"><small>${POS_SHORT[pos]}</small><b>${player ? esc(player.n) : "—"}</b></div>`;
+          return player
+            ? `<div class="pitch-player has-player-card" aria-label="${esc(player.n)}">${cardHTML(player, "formation-player-card")}</div>`
+            : `<div class="pitch-player"><small>${POS_SHORT[pos]}</small><b>—</b></div>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
       }).join("");
@@ -2305,6 +4028,7 @@
     /* ================= END ================= */
     function endGame() {
       cancelGameTimers();
+      const returnToModeMenu = S.entry === "club" ? screenClubModes : screenModes;
       const baseAvg = Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11);
       const avg = coachAdjustedPower(baseAvg, S.coach);
       app.innerHTML = `
@@ -2342,14 +4066,36 @@
       <button class="btn" id="again" style="flex:1">العب تاني</button>
       <button class="btn g" id="hm" style="flex:1">الرئيسية</button>
     </div>`;
-      $("again").onclick = () => { killNet(); screenModes() };
+      $("again").onclick = () => { killNet(); returnToModeMenu() };
       $("hm").onclick = () => { killNet(); screenHome() };
       runMatch(avg);
     }
 
     function runMatch(me) {
       const box = $("match"); if (!box) return;
-      const mt = { avg: me, baseAvg: Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11), names: S.team.map(t => t.n), formation: S.formation, slots: S.slots, coach: S.coach };
+      const matchState = S;
+      const mt = {
+        avg: me,
+        baseAvg: Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11),
+        names: S.team.map(t => t.n),
+        formation: S.formation,
+        slots: S.slots,
+        coach: S.coach,
+        mode: S.mode,
+        entry: S.entry,
+        seed: S.entry === "club" ? S.matchSeed : undefined
+      };
+      if (conn && conn.open) {
+        publishTeamResult(conn, {
+          t: "team",
+          avg: mt.avg,
+          baseAvg: mt.baseAvg,
+          names: mt.names,
+          formation: mt.formation,
+          coach: mt.coach.n,
+          seed: mt.seed
+        });
+      }
       const oppFormation = $("opp-formation");
       if (oppFormation) {
         oppFormation.innerHTML = OPP
@@ -2383,10 +4129,6 @@
         }
         box.innerHTML = `<div class="rows"><div class="row"><span class="n">مستني الخصم يخلص فريقه...</span></div></div>`;
         window.__showOpp = () => { window.__showOpp = null; runMatch(me) };
-        if (conn && conn.open) {
-          try { conn.send({ t: "team", avg: me, baseAvg: mt.baseAvg, names: mt.names, formation: mt.formation, coach: mt.coach.n }) }
-          catch (e) { handleOpponentDisconnect(conn) }
-        }
         return;
       }
       const comparison = $("rating-compare");
@@ -2417,7 +4159,7 @@
     </div>`;
       let m = 0, a = 0, b = 0;
       const t = setInterval(() => {
-        if (!$("sc")) { clearInterval(t); return }
+        if (!$("sc") || S !== matchState) { clearInterval(t); return }
         m += 2;
         evs.filter(e => e.m <= m && e.m > m - 2).forEach(e => {
           if (e.me) a++; else b++;
@@ -2435,6 +4177,7 @@
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
           if (win) buzz([20, 60, 20]);
+          recordGuestMatch(mt, a, b);
         }
       }, 70);
     }
@@ -2460,14 +4203,31 @@
     }
     function simulate(me, opp) {
       const key = x => x.names.join(",") + "|" + x.avg + "|" + x.formation + "|" + (x.coach ? x.coach.n : "");
-      const mineFirst = key(me) <= key(opp);
+      const seedOf = x => Number.isSafeInteger(x.seed) && x.seed >= 0 && x.seed < 0x100000000
+        ? x.seed
+        : null;
+      const stableKey = x => `${key(x)}|${seedOf(x) === null ? "" : seedOf(x)}`;
+      const mineFirst = stableKey(me) <= stableKey(opp);
       const A = mineFirst ? me : opp, B = mineFirst ? opp : me;
-      const r = rng32(hs(key(A) + "#" + key(B)));
+      const bothSeeded = seedOf(A) !== null && seedOf(B) !== null;
+      const seedInput = bothSeeded
+        ? `${stableKey(A)}#${stableKey(B)}`
+        : `${key(A)}#${key(B)}`;
+      const r = rng32(hs(seedInput));
       const d = A.avg - B.avg;
       let ga = pois(Math.max(.35, 1.35 + d * .11), r);
       let gb = pois(Math.max(.35, 1.35 - d * .11), r);
-      if (d > 0 && ga <= gb) ga = gb + 1;
-      if (d < 0 && gb <= ga) gb = ga + 1;
+      const gap = Math.abs(d);
+      const upsetChance = me.entry === "club" && me.mode === "online" && bothSeeded
+        ? ONLINE_CLUB_UPSET_CHANCE[gap] || 0
+        : 0;
+      if (upsetChance > 0 && r() < upsetChance) {
+        if (d > 0) gb = Math.max(gb, ga + 1);
+        else ga = Math.max(ga, gb + 1);
+      } else {
+        if (d > 0 && ga <= gb) ga = gb + 1;
+        if (d < 0 && gb <= ga) gb = ga + 1;
+      }
       const pickScorer = x => {
         const slots = x.slots || formationSlots(x.formation);
         const w = x.names.map((n, k) => slots[k] === "F" ? 5 : slots[k] === "M" ? 2 : slots[k] === "D" ? 1 : 0);
@@ -2504,51 +4264,97 @@
       return { avg: coachAdjustedPower(baseAvg, coach), baseAvg, names, sws, pools, name: "الكمبيوتر", formation: formationId, slots, coach };
     }
 
+    function aiClubTeam(difficulty) {
+      const formation = FORMATIONS[Math.floor(Math.random() * FORMATIONS.length)];
+      const slots = formationSlots(formation.id);
+      const used = new Set();
+      const names = slots.map(position => {
+        const available = P.filter(player => player.p === position && !used.has(player.n));
+        const inRange = available.filter(player => player.r >= difficulty.min && player.r <= difficulty.max);
+        const candidates = inRange.length
+          ? inRange
+          : available.slice().sort((a, b) =>
+            Math.abs(a.r - difficulty.target) - Math.abs(b.r - difficulty.target)).slice(0, 10);
+        if (!candidates.length) throw new Error(`No computer players available for position ${position}.`);
+        const player = candidates[Math.floor(Math.random() * candidates.length)];
+        used.add(player.n);
+        return player.n;
+      });
+      const players = names.map(name => P.find(player => player.n === name));
+      const baseAvg = Math.round(players.reduce((sum, player) => sum + player.r, 0) / players.length);
+      const coachCandidates = COACHES.slice()
+        .sort((a, b) => Math.abs(a.r - difficulty.coachTarget) - Math.abs(b.r - difficulty.coachTarget))
+        .slice(0, 12);
+      const coach = coachCandidates[Math.floor(Math.random() * coachCandidates.length)];
+      return {
+        avg: coachAdjustedPower(baseAvg, coach),
+        baseAvg,
+        names,
+        name: `الكمبيوتر · ${difficulty.name}`,
+        formation: formation.id,
+        slots,
+        coach
+      };
+    }
+
     /* ================= NETWORK (PeerJS) ================= */
     function killNet() {
       stopNetMonitor();
+      stopTeamResultRetry();
+      localTeamResult = null;
       try { conn && conn.close() } catch (e) { }
       try { peer && peer.destroy() } catch (e) { }
       conn = null; peer = null;
+      activeRoomType = "draft";
     }
-    function netFail(msg) {
+    function netFail(msg, returnScreen = screenModes) {
       killNet();
       toast(msg || "مشكلة في الاتصال");
-      setTimeout(screenModes, 600);
+      setTimeout(returnScreen, 600);
     }
-    function hostRoom(code, lobby) {
+    function roomPeerId(code, gameType) {
+      return `${gameType === "club" ? "ggc-" : "ggf-"}${code}`;
+    }
+    function hostRoom(code, lobby, gameType = "draft") {
       resetOpponent();
-      if (typeof Peer === "undefined") return netFail("مكتبة الاتصال لسه بتحمّل، جرّب تاني");
+      const returnScreen = gameType === "club" ? screenClubModes : screenModes;
+      if (gameType === "club" && !getClubMatchSetup()) return;
+      if (typeof Peer === "undefined") return netFail("مكتبة الاتصال لسه بتحمّل، جرّب تاني", returnScreen);
       killNet();
-      try { peer = new Peer("ggf-" + code) } catch (e) { return netFail() }
+      activeRoomType = gameType;
+      try { peer = new Peer(roomPeerId(code, gameType)) } catch (e) { return netFail(undefined, returnScreen) }
       peer.on("open", () => {
-        if (lobby) screenWait("بندور على لاعب", "هنتوصل بأول لاعب متاح...");
-        else screenWait("الغرفة جاهزة", "ابعت الكود لصاحبك", code);
+        if (lobby) screenWait("بندور على لاعب", "هنتوصل بأول لاعب متاح...", undefined, returnScreen);
+        else screenWait("الغرفة جاهزة", "ابعت الكود لصاحبك", code, returnScreen);
       });
       peer.on("connection", c => {
         conn = c;
-        link(true);
+        link(true, gameType);
       });
       peer.on("error", e => {
-        if (lobby && e && e.type === "unavailable-id") joinRoom("lobby");
-        else netFail("مش قادر أفتح الغرفة");
+        if (lobby && e && e.type === "unavailable-id") joinRoom(code, gameType);
+        else netFail("مش قادر أفتح الغرفة", returnScreen);
       });
     }
-    function joinRoom(code) {
+    function joinRoom(code, gameType = "draft") {
       resetOpponent();
-      if (typeof Peer === "undefined") return netFail("مكتبة الاتصال لسه بتحمّل، جرّب تاني");
+      const returnScreen = gameType === "club" ? screenClubModes : screenModes;
+      if (gameType === "club" && !getClubMatchSetup()) return;
+      if (typeof Peer === "undefined") return netFail("مكتبة الاتصال لسه بتحمّل، جرّب تاني", returnScreen);
       killNet();
-      screenWait("بندخل الغرفة", "بنوصل بصاحبك...");
-      try { peer = new Peer() } catch (e) { return netFail() }
+      activeRoomType = gameType;
+      screenWait("بندخل الغرفة", "بنوصل بصاحبك...", undefined, returnScreen);
+      try { peer = new Peer() } catch (e) { return netFail(undefined, returnScreen) }
       peer.on("open", () => {
-        conn = peer.connect("ggf-" + code, { reliable: true });
-        link(false);
+        conn = peer.connect(roomPeerId(code, gameType), { reliable: true });
+        link(false, gameType);
       });
-      peer.on("error", () => netFail("مفيش غرفة بالكود ده"));
+      peer.on("error", () => netFail("مفيش غرفة بالكود ده", returnScreen));
     }
-    function link(isHost) {
+    function link(isHost, gameType = "draft") {
       if (!conn) return;
       const connection = conn;
+      const returnScreen = gameType === "club" ? screenClubModes : screenModes;
       connection.on("data", d => {
         if (!d || !d.t) return;
         lastNetMessage = Date.now();
@@ -2558,24 +4364,53 @@
           return;
         }
         if (d.t === "pong") return;
+        if (d.t === "team_ack") {
+          stopTeamResultRetry();
+          return;
+        }
+        if (d.t === "mode_error") {
+          netFail("نوع المباراة مختلف بين اللاعبين", returnScreen);
+          return;
+        }
         if (d.t === "resign") {
           cancelGameTimers();
           S = null;
           killNet();
           resetOpponent();
           toast("الخصم انسحب من المباراة");
-          screenModes();
+          returnScreen();
           return;
         }
         if (d.t === "hello" && isHost) {
-          opponentFormation = formationById(d.formation).id;
-          try { connection.send({ t: "cfg", tm: TM, formation: selectedFormation }) }
+          const remoteGameType = d.gameType === "club" ? "club" : "draft";
+          if (remoteGameType !== gameType) {
+            try { connection.send({ t: "mode_error" }) }
+            catch (e) { handleOpponentDisconnect(connection); return }
+            return netFail("نوع المباراة مختلف بين اللاعبين", returnScreen);
+          }
+          const formation = FORMATIONS.find(item => item.id === d.formation);
+          if (!formation) return netFail("خطة الخصم غير صالحة", returnScreen);
+          opponentFormation = formation.id;
+          if (gameType === "club") {
+            try { connection.send({ t: "club-ready" }) }
+            catch (e) { handleOpponentDisconnect(connection); return }
+            return startClubMatch("online");
+          }
+          try { connection.send({ t: "cfg", tm: TM, formation: selectedFormation, gameType }) }
           catch (e) { handleOpponentDisconnect(connection); return }
           startGame();
         }
+        if (d.t === "club-ready" && !isHost && gameType === "club") {
+          return startClubMatch("online");
+        }
         if (d.t === "cfg" && !isHost) {
+          if (gameType !== "draft" || (d.gameType && d.gameType !== "draft")) {
+            return netFail("نوع المباراة مختلف بين اللاعبين", returnScreen);
+          }
+          const formation = FORMATIONS.find(item => item.id === d.formation);
+          if (!formation) return netFail("خطة الخصم غير صالحة", returnScreen);
           TM = d.tm || TM;
-          opponentFormation = formationById(d.formation).id;
+          opponentFormation = formation.id;
           startGame();
         }
         if (d.t === "pick") {
@@ -2584,8 +4419,21 @@
         }
         if (d.t === "team") {
           const coach = COACHES.find(item => item.n === d.coach);
-          if (!coach) {
-            toast("وصلتنا بيانات مدرب غير معروفة من الخصم");
+          const formation = FORMATIONS.find(item => item.id === d.formation);
+          const team = Array.isArray(d.names) && d.names.length === 11
+            ? d.names.map(name => P.find(player => player.n === name))
+            : [];
+          const slots = formation ? formationSlots(formation.id) : [];
+          const validSeed = gameType !== "club" ||
+            Number.isSafeInteger(d.seed) && d.seed >= 0 && d.seed < 0x100000000;
+          const validTeam = !!coach && !!formation && team.length === 11 &&
+            team.every((player, index) => player && player.p === slots[index]) &&
+            new Set(d.names).size === 11 &&
+            Number.isSafeInteger(d.avg) && d.avg >= 1 && d.avg <= 99 &&
+            Number.isSafeInteger(d.baseAvg) && d.baseAvg >= 1 && d.baseAvg <= 99 &&
+            validSeed;
+          if (!validTeam) {
+            toast("بيانات فريق الخصم غير مكتملة، مش قادرين نعرض النتيجة");
             return;
           }
           OPP = {
@@ -2593,10 +4441,13 @@
             baseAvg: d.baseAvg,
             names: d.names,
             name: "الخصم",
-            formation: formationById(d.formation).id,
-            slots: formationSlots(d.formation),
-            coach
+            formation: formation.id,
+            slots,
+            coach,
+            seed: d.seed
           };
+          try { connection.send({ t: "team_ack" }) }
+          catch (e) { handleOpponentDisconnect(connection); return }
           if (window.__showOpp) window.__showOpp();
         }
       });
@@ -2606,7 +4457,10 @@
       });
       const go = () => {
         if (!isHost) {
-          try { connection.send({ t: "hello", formation: selectedFormation }) }
+          const formation = gameType === "club" && guestProgress.club
+            ? guestProgress.club.formation
+            : selectedFormation;
+          try { connection.send({ t: "hello", formation, gameType }) }
           catch (e) { handleOpponentDisconnect(connection) }
         }
       };
