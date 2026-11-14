@@ -1105,12 +1105,12 @@
 
     .fc-card-art {
       position: absolute;
-      top: 2%;
-      left: 50%;
-      width: 109%;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
       max-width: none;
-      height: auto;
-      transform: translateX(-50%);
+      object-fit: fill;
       pointer-events: none;
       user-select: none;
     }
