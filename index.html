@@ -2208,7 +2208,8 @@
     const POS_NAME = { G: "حارس مرمى", D: "مدافع", M: "لاعب وسط", F: "مهاجم" };
     const POS_SHORT = { G: "GK", D: "DF", M: "MF", F: "FW" };
     const MATCH_REWARDS = { win: 20000, draw: 10000, loss: 5000 };
-    const CLUB_CPU_REWARDS = { win: 500, draw: 200 };
+    /* Offline matches pay less than online matches, with a small loss reward. */
+    const OFFLINE_MATCH_REWARDS = { win: 10000, draw: 5000, loss: 2500 };
     /* Match engine: each side's goals are drawn from the rating gap, so the stronger
        team is only a favourite — draws and upsets stay possible at every gap. */
     const MATCH_BASE_EXPECTED_GOALS = 1.35;
@@ -2220,7 +2221,7 @@
     const MATCH_MAX_EFFECTIVE_GAP = 3;
     const MATCH_EDGE_AT_MAX_GAP = 0.6;
     const MATCH_GOALS_PER_RATING_POINT = MATCH_EDGE_AT_MAX_GAP / MATCH_MAX_EFFECTIVE_GAP;
-    const STARTING_COINS = 5000000;
+    const STARTING_COINS = 9000000;
     const FORMATION_PRICE = 100000;
     const SALE_PRICE_PERCENT = 70;
     const COMPUTER_DIFFICULTIES = [
@@ -2500,42 +2501,42 @@
     function recordGuestMatch(match, goalsFor, goalsAgainst) {
       const win = goalsFor > goalsAgainst;
       const draw = goalsFor === goalsAgainst;
-      if (match.entry === "club" && match.mode === "ai") {
-        const reward = win ? CLUB_CPU_REWARDS.win : draw ? CLUB_CPU_REWARDS.draw : 0;
-        if (!reward) return;
-        const previousCoins = guestProgress.coins;
-        guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, previousCoins + reward);
-        if (!saveGuestProgress()) guestProgress.coins = previousCoins;
-        else toast(`مكافأة الكمبيوتر: +${(guestProgress.coins - previousCoins).toLocaleString("en-US")} 🪙`);
-        return;
-      }
-      if (match.mode !== "online") return;
+      const online = match.mode === "online";
+      if (!online && match.mode !== "ai") return;
 
-      const reward = win ? MATCH_REWARDS.win : draw ? MATCH_REWARDS.draw : MATCH_REWARDS.loss;
+      const rewards = online ? MATCH_REWARDS : OFFLINE_MATCH_REWARDS;
+      const reward = win ? rewards.win : draw ? rewards.draw : rewards.loss;
       const previousCoins = guestProgress.coins;
-      const previousRecord = { ...guestProgress.record };
-      const previousTeam = guestProgress.lastTeam;
-      guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, guestProgress.coins + reward);
-      guestProgress.record.played++;
-      if (win) guestProgress.record.wins++;
-      else if (draw) guestProgress.record.draws++;
-      else guestProgress.record.losses++;
-      guestProgress.record.bestRating = Math.max(guestProgress.record.bestRating, match.avg);
-      guestProgress.lastTeam = {
-        names: match.names,
-        formation: match.formation,
-        coach: match.coach.n,
-        rating: match.avg
-      };
+      const previousRecord = online ? { ...guestProgress.record } : null;
+      const previousTeam = online ? guestProgress.lastTeam : null;
+      guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, previousCoins + reward);
+
+      if (online) {
+        guestProgress.record.played++;
+        if (win) guestProgress.record.wins++;
+        else if (draw) guestProgress.record.draws++;
+        else guestProgress.record.losses++;
+        guestProgress.record.bestRating = Math.max(guestProgress.record.bestRating, match.avg);
+        guestProgress.lastTeam = {
+          names: match.names,
+          formation: match.formation,
+          coach: match.coach.n,
+          rating: match.avg
+        };
+      }
+
       if (!saveGuestProgress()) {
         guestProgress.coins = previousCoins;
-        guestProgress.record = previousRecord;
-        guestProgress.lastTeam = previousTeam;
+        if (online) {
+          guestProgress.record = previousRecord;
+          guestProgress.lastTeam = previousTeam;
+        }
         return;
       }
-      toast(`مكافأة المباراة: +${reward.toLocaleString("en-US")} 🪙`);
+      toast(online
+        ? `مكافأة المباراة: +${reward.toLocaleString("en-US")} 🪙`
+        : `مكافأة الأوفلاين: +${reward.toLocaleString("en-US")} 🪙`);
     }
-
     /* ---- sound (only after a real user gesture) ---- */
     let AC = null, muted = true;
     try { muted = localStorage.getItem("gg_muted") !== "false" } catch (e) { }
