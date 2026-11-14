@@ -1521,21 +1521,36 @@
 
     /* hidden / back card */
     .fc.back {
-      background: repeating-linear-gradient(135deg, #0b1f16 0 9px, #0e271b 9px 18px);
+      background:
+        radial-gradient(ellipse at 50% 34%, rgba(46, 224, 138, .14), transparent 43%),
+        linear-gradient(155deg, #103320, #07170f 58%, #10281b);
       color: var(--ac);
       display: grid;
       place-items: center;
       border: 0;
       cursor: pointer;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(46, 224, 138, .18);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(46, 224, 138, .25);
       transition: transform .14s ease, box-shadow .18s ease, filter .18s ease;
     }
 
+    .fc.back::before {
+      content: "";
+      position: absolute;
+      inset: 6%;
+      z-index: 0;
+      border: 1px solid rgba(46, 224, 138, .2);
+      clip-path: polygon(50% 0, 100% 6%, 100% 91%, 50% 100%, 0 91%, 0 6%);
+      pointer-events: none;
+    }
+
     .fc.back span {
+      position: relative;
+      z-index: 1;
       font-size: 22cqw;
       font-weight: 900;
       letter-spacing: .06em;
-      opacity: .9
+      text-shadow: 0 0 22px rgba(46, 224, 138, .35);
+      opacity: .95
     }
 
     .fc.back:active {
