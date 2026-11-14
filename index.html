@@ -619,9 +619,9 @@
     }
 
     .pitch-player {
-      flex: 1 1 0;
+      flex: 0 0 clamp(58px, 16vw, 76px);
       min-width: 0;
-      max-width: 100px;
+      max-width: none;
       padding: clamp(5px, 1.7vw, 8px) 2px;
       border: 1px solid rgba(255, 255, 255, .14);
       border-radius: 10px;
@@ -637,7 +637,7 @@
     }
 
     .pitch-player.has-player-card > .fc {
-      width: 90%;
+      width: 100%;
       margin-inline: auto
     }
 
@@ -872,6 +872,30 @@
       grid-column: 1 / -1
     }
 
+    .market-meta {
+      margin: -4px 0 12px;
+      color: var(--mu);
+      font-size: 11px;
+      font-weight: 700
+    }
+
+    .field-label {
+      margin-bottom: 8px;
+      color: var(--mu);
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .timer-options {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px
+    }
+
+    .timer-options .btn {
+      flex: 1
+    }
+
     .market-list.player-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
@@ -891,9 +915,16 @@
       width: 100%;
     }
 
+    /* The grid cell is a column, so the row-layout flex basis (118px) must not
+       become the button height. */
     .player-market-card .market-price {
+      flex: 0 0 auto;
       width: 100%;
       max-width: none;
+      height: auto;
+      min-height: 40px;
+      padding-inline: 6px;
+      white-space: normal;
       margin-top: auto;
     }
 
@@ -1061,6 +1092,31 @@
       border: 1px solid rgba(255, 255, 255, .24);
       box-shadow: 0 8px 22px rgba(0, 0, 0, .32), inset 0 0 0 2px rgba(255, 255, 255, .07);
       transition: transform .16s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .fc.has-card-art {
+      padding: 0;
+      background: transparent;
+    }
+
+    .fc.has-card-art::after {
+      display: none;
+    }
+
+    .fc-card-art {
+      position: absolute;
+      top: 2%;
+      left: 50%;
+      width: 109%;
+      max-width: none;
+      height: auto;
+      transform: translateX(-50%);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .fc.has-card-art > :not(.fc-card-art) {
+      display: none;
     }
 
     .fc::after {
@@ -1234,6 +1290,233 @@
       overflow: hidden;
       position: relative;
       z-index: 1
+    }
+
+    /* ---------- coach card ---------- */
+    /* Coaches keep the family silhouette (hex clip, name plate, rating) but their
+       plate stays matte and the tier lives in the permit rail, keyline and tier word
+       instead of the player foil gradient. */
+    .fc.coach {
+      display: block;
+      padding: 0;
+      color: var(--tx);
+      border-color: rgba(255, 255, 255, .1);
+      background:
+        radial-gradient(115% 70% at 50% 0%, rgba(255, 255, 255, .07), transparent 62%),
+        linear-gradient(180deg, #102a1c, #0a1a12 56%, #07130d);
+      box-shadow: none;
+      filter: drop-shadow(0 0 1px var(--tier-soft)) drop-shadow(0 7px 16px rgba(0, 0, 0, .42));
+    }
+
+    .fc.coach[data-tier="legendary"] {
+      --tier: var(--gold);
+      --tier-soft: rgba(245, 196, 81, .55)
+    }
+
+    .fc.coach[data-tier="regular"] {
+      --tier: var(--ac);
+      --tier-soft: rgba(46, 224, 138, .55)
+    }
+
+    .fc.coach[data-tier="weak"] {
+      --tier: var(--bad);
+      --tier-soft: rgba(255, 93, 93, .55)
+    }
+
+    .fc-coach-pitch {
+      position: absolute;
+      inset: 10% 7% 25%;
+      z-index: 0;
+      opacity: .55;
+      background-image:
+        linear-gradient(to right, transparent calc(50% - .5px), rgba(238, 247, 241, .2) 50%, transparent calc(50% + .5px)),
+        repeating-linear-gradient(to bottom, rgba(238, 247, 241, .11) 0 1px, transparent 1px 25%),
+        radial-gradient(circle at 50% 46%, transparent 21%, rgba(238, 247, 241, .17) 22%, transparent 23%);
+      -webkit-mask-image: radial-gradient(88% 74% at 50% 34%, #000 26%, transparent 100%);
+      mask-image: radial-gradient(88% 74% at 50% 34%, #000 26%, transparent 100%)
+    }
+
+    .fc-coach-photo {
+      position: absolute;
+      left: 50%;
+      bottom: 22%;
+      z-index: 1;
+      width: 88%;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      object-fit: cover;
+      object-position: 50% 2%;
+      filter: contrast(1.05) saturate(1.02);
+      pointer-events: none;
+      user-select: none;
+      -webkit-mask-image: linear-gradient(transparent 0, #000 5%, #000 80%, transparent 99%);
+      mask-image: linear-gradient(transparent 0, #000 5%, #000 80%, transparent 99%)
+    }
+
+    .fc-coach-mono {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 62%;
+      color: var(--tier);
+      font-size: 42cqw;
+      font-weight: 900;
+      line-height: 1;
+      opacity: .22
+    }
+
+    .fc-coach-spine {
+      position: absolute;
+      top: 8%;
+      right: 0;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.3cqw;
+      width: 22%;
+      padding: 2.6cqw 3.4cqw 2.8cqw 2cqw;
+      border-top: 1px solid rgba(238, 247, 241, .12);
+      border-bottom: 1px solid rgba(238, 247, 241, .12);
+      border-left: 2px solid var(--tier);
+      background: linear-gradient(90deg, rgba(4, 15, 10, .34), rgba(4, 15, 10, .9));
+      direction: ltr
+    }
+
+    .fc-coach-rating {
+      color: var(--tier);
+      font-size: clamp(15px, 16.5cqw, 40px);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums
+    }
+
+    .fc-coach-rail {
+      width: 56%;
+      height: 1px;
+      background: rgba(238, 247, 241, .22)
+    }
+
+    .fc-coach-effect {
+      color: var(--tx);
+      font-size: clamp(8px, 6.2cqw, 14px);
+      font-weight: 800;
+      letter-spacing: -.01em;
+      font-variant-numeric: tabular-nums
+    }
+
+    .fc-coach-effect.up {
+      color: var(--gold)
+    }
+
+    .fc-coach-effect.down {
+      color: var(--bad)
+    }
+
+    .fc-coach-deviation {
+      position: relative;
+      width: 64%;
+      height: 1px;
+      margin-top: .8cqw;
+      background: rgba(238, 247, 241, .22)
+    }
+
+    .fc-coach-deviation::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      width: 1px;
+      height: 5px;
+      background: rgba(238, 247, 241, .42)
+    }
+
+    .fc-coach-deviation::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: var(--needle, 50%);
+      width: 2px;
+      height: 7px;
+      border-radius: 1px;
+      background: var(--tier)
+    }
+
+    .fc-coach-plate {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 9.5%;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      gap: .4cqw;
+      padding: 3.2cqw 8% 1cqw 6%;
+      background: linear-gradient(180deg, rgba(4, 15, 10, .04), rgba(4, 15, 10, .9) 44%);
+      direction: ltr;
+      text-align: start
+    }
+
+    .fc-coach-plate::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      inset-inline: 6%;
+      height: 1px;
+      background: var(--tier);
+      opacity: .5
+    }
+
+    .fc-coach-name {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: clamp(8px, 8.2cqw, 19px);
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: start;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2
+    }
+
+    .fc-coach-tier {
+      color: var(--tier);
+      font-size: clamp(7px, 4.8cqw, 10px);
+      font-weight: 800;
+      letter-spacing: .1em;
+      opacity: .95
+    }
+
+    @container (max-width: 150px) {
+      .fc-coach-tier,
+      .fc-coach-deviation {
+        display: none
+      }
+
+      .fc-coach-spine {
+        gap: .8px;
+        width: 26%;
+        padding: 2px 0 3px;
+        border-left-width: 1.5px
+      }
+
+      .fc-coach-plate {
+        bottom: 11%;
+        padding: 3px 5px 1px
+      }
+
+      .fc-coach-name {
+        white-space: nowrap;
+        -webkit-line-clamp: 1;
+        line-clamp: 1
+      }
+
+      .fc-coach-pitch {
+        opacity: .32
+      }
     }
 
     /* hidden / back card */
@@ -1617,6 +1900,17 @@
       font-variant-numeric: tabular-nums
     }
 
+    /* Rows that carry sentences instead of values must wrap instead of truncating. */
+    .rows-text .row {
+      align-items: flex-start
+    }
+
+    .rows-text .row .n {
+      overflow: visible;
+      line-height: 1.75;
+      white-space: normal
+    }
+
     /* ---------- misc ---------- */
     .input {
       width: 100%;
@@ -1800,8 +2094,16 @@
 <body>
   <div id="app" aria-live="polite"></div>
   <script src="./fut-data.js"></script>
+  <script src="./coach-art.js"></script>
+  <script src="./hi-cards.js"></script>
   <script>
     /* ================= DATA ================= */
+    /* A broken catalog used to leave a blank screen; show the reason instead. */
+    function fatalStartup(message) {
+      const target = document.getElementById("app");
+      if (target) target.innerHTML = `<div class="rows"><div class="row"><span class="n">${message}</span></div></div>`;
+      throw new Error(message);
+    }
     const P = FUT_DATA.players.map(player => ({
       n: player.n,
       p: player.p,
@@ -1816,15 +2118,20 @@
       eaId: player.eaId
     }));
     if (P.length !== 500 || P.some(player => player.r < 80 || !player.p)) {
-      throw new Error('The imported player catalog must contain 500 players rated 80 or higher.');
+      fatalStartup("بيانات اللاعبين غير مكتملة: محتاجين 500 لاعب بتقييم 80 أو أعلى.");
     }
     if (P.some(player => player.price === null &&
       (!Number.isSafeInteger(player.suggestedPrice) || player.suggestedPrice <= 0))) {
-      throw new Error('Every player without a market price must have a suggested price.');
+      fatalStartup("كل لاعب من غير سعر سوق لازم يكون له سعر مقترح.");
     }
+    /* The catalog ships a tier per manager; the rating is the fallback. */
+    const coachTierOf = coach => coach.tier === "legendary" || coach.tier === "regular" || coach.tier === "weak"
+      ? coach.tier
+      : coach.r >= 85 ? "legendary" : coach.r >= 79 ? "regular" : "weak";
     const COACHES = FUT_DATA.coaches.map(coach => ({
+      id: coach.id,
       n: coach.n,
-      tier: coach.tier,
+      tier: coachTierOf(coach),
       r: coach.r,
       quality: coach.quality,
       nation: coach.nat,
@@ -1833,24 +2140,28 @@
       price: coach.price,
       suggestedPrice: coach.suggestedPrice
     }));
-    if (COACHES.length !== 513) throw new Error('The imported manager catalog must contain 513 managers.');
+    if (COACHES.length < 40) fatalStartup("بيانات المدربين غير مكتملة.");
     if (COACHES.some(coach => coach.price === null &&
       (!Number.isSafeInteger(coach.suggestedPrice) || coach.suggestedPrice <= 0))) {
-      throw new Error('Every manager without a market price must have a suggested price.');
+      fatalStartup("كل مدرب من غير سعر سوق لازم يكون له سعر مقترح.");
     }
     const COACH_TIER = {
       legendary: { name: "أسطوري", color: "var(--gold)" },
       regular: { name: "عادي", color: "var(--ac)" },
       weak: { name: "ضعيف", color: "var(--bad)" }
     };
-    const coachMultiplier = coach => 1 + (coach.r - 80) * 0.005;
+    /* An 80-rated manager is the neutral benchmark; the catalog spans 75-90, so the
+       squad power swings between -3% and +6%. */
+    const COACH_NEUTRAL_RATING = 80;
+    const COACH_RATING_WEIGHT = 0.006;
+    const coachMultiplier = coach => 1 + (coach.r - COACH_NEUTRAL_RATING) * COACH_RATING_WEIGHT;
     const coachAdjustedPower = (base, coach) => Math.min(99, Math.max(1, Math.round(base * coachMultiplier(coach))));
     function mkCoachPool() {
       const pool = [
         shuffle(COACHES.filter(c => c.tier === "legendary"))[0],
         shuffle(COACHES.filter(c => c.tier === "regular"))[0],
         shuffle(COACHES.filter(c => c.tier === "weak"))[0]
-      ];
+      ].filter(Boolean);
       shuffle(COACHES).forEach(coach => {
         if (pool.length < 4 && !pool.some(existing => existing.n === coach.n)) pool.push(coach);
       });
@@ -1872,6 +2183,8 @@
     let selectedFormation = DEFAULT_FORMATION;
     let opponentFormation = DEFAULT_FORMATION;
     const formationById = id => FORMATIONS.find(f => f.id === id) || FORMATIONS[0];
+    const PLAYER_BY_NAME = new Map(P.map(player => [player.n, player]));
+    const COACH_BY_NAME = new Map(COACHES.map(coach => [coach.n, coach]));
     const formationSlots = id => {
       const counts = { G: 0, D: 0, M: 0, F: 0 };
       formationById(id).lines.forEach(([pos, count]) => { counts[pos] += count });
@@ -1881,7 +2194,17 @@
     const POS_SHORT = { G: "GK", D: "DF", M: "MF", F: "FW" };
     const MATCH_REWARDS = { win: 20000, draw: 10000, loss: 5000 };
     const CLUB_CPU_REWARDS = { win: 500, draw: 200 };
-    const ONLINE_CLUB_UPSET_CHANCE = { 1: 0.1, 2: 0.05, 3: 0.02 };
+    /* Match engine: each side's goals are drawn from the rating gap, so the stronger
+       team is only a favourite — draws and upsets stay possible at every gap. */
+    const MATCH_BASE_EXPECTED_GOALS = 1.35;
+    const MATCH_MIN_EXPECTED_GOALS = 0.35;
+    const MATCH_MAX_EXPECTED_GOALS = 3.2;
+    /* A rating gap above this counts as exactly this much, and at the cap the goal
+       expectancy swings by MATCH_EDGE_AT_MAX_GAP either way (≈1.95 vs 0.75 goals):
+       the better side stays a clear favourite without being guaranteed the result. */
+    const MATCH_MAX_EFFECTIVE_GAP = 3;
+    const MATCH_EDGE_AT_MAX_GAP = 0.6;
+    const MATCH_GOALS_PER_RATING_POINT = MATCH_EDGE_AT_MAX_GAP / MATCH_MAX_EFFECTIVE_GAP;
     const STARTING_COINS = 5000000;
     const FORMATION_PRICE = 100000;
     const SALE_PRICE_PERCENT = 70;
@@ -1990,11 +2313,44 @@
         P.find(player => player.n === name).p === BENCH_SLOT_POSITIONS[index]);
     }
 
+    /* Saves written before the catalog encoding fix hold names like "PelÃ©".
+       Repair them instead of silently dropping the card from the squad. */
+    function coherenceName(raw) {
+      if (typeof raw !== "string" || PLAYER_BY_NAME.has(raw) || COACH_BY_NAME.has(raw)) return raw;
+      const chars = [...raw];
+      if (!chars.some(char => char.charCodeAt(0) > 0x7F) ||
+        chars.some(char => char.charCodeAt(0) > 0xFF)) return raw;
+      try {
+        return new TextDecoder("utf-8", { fatal: true })
+          .decode(Uint8Array.from(chars, char => char.charCodeAt(0)));
+      } catch (error) {
+        return raw;
+      }
+    }
+
+    function normalizeSavedTeam(lastTeam) {
+      if (!lastTeam) return null;
+      const candidate = {
+        ...lastTeam,
+        names: Array.isArray(lastTeam.names) ? lastTeam.names.map(coherenceName) : lastTeam.names,
+        coach: coherenceName(lastTeam.coach)
+      };
+      return validLastTeam(candidate) ? candidate : null;
+    }
+
     function sanitizeSavedClub(club) {
       if (club === null) return null;
       if (!club || !FORMATIONS.some(formation => formation.id === club.formation) ||
         !Array.isArray(club.starters) || club.starters.length !== 11 ||
         !Array.isArray(club.bench) || club.bench.length !== BENCH_SLOT_POSITIONS.length) return null;
+
+      club = {
+        ...club,
+        starters: club.starters.map(coherenceName),
+        bench: club.bench.map(coherenceName),
+        coaches: Array.isArray(club.coaches) ? club.coaches.map(coherenceName) : club.coaches,
+        coach: coherenceName(club.coach)
+      };
 
       const used = new Set();
       const keepPlayer = (name, requiredPosition) => {
@@ -2053,7 +2409,7 @@
           toast("بيانات التقدم المحفوظ غير صالحة، بدأنا سجلًا جديدًا");
           return emptyGuestProgress();
         }
-        const lastTeam = validLastTeam(saved.lastTeam) ? saved.lastTeam : null;
+        const lastTeam = normalizeSavedTeam(saved.lastTeam);
         const club = sanitizeSavedClub(saved.club);
         if (saved.version === 1 || saved.version === 2) {
           return {
@@ -2326,6 +2682,17 @@
     }
 
     /* ================= CARD RENDER ================= */
+    const CARD_ART = {
+      1397: "./assets/1397-zinedine-zidane-1397-card.png",
+      190042: "./assets/190042-diego-maradona-190042-card.png",
+      231747: "./assets/231747-kylian-mbappe-84117827-card.png",
+      237067: "./assets/237067-pele-237067-card.png",
+      28130: "./assets/28130-ronaldinho-28130-card.png",
+      37576: "./assets/37576-ronaldo-37576-card.png",
+      168473: "./assets/168473-franz-beckenbauer-168473-card.png",
+      ...(typeof HI_CARD_ART !== "undefined" ? HI_CARD_ART : {})
+    };
+
     function tier(x) {
       if (x.era === "L") return "t-icon";
       if (x.r >= 90) return "t-elite";
@@ -2334,7 +2701,10 @@
       return "t-bronze";
     }
     function cardHTML(x, cls, extra) {
-      const cardContent = `
+      const cardArt = CARD_ART[x.eaId];
+      const cardContent = cardArt
+        ? `<img class="fc-card-art" src="${cardArt}" alt="كارت ${esc(x.n)}"><span class="sr">${esc(x.n)}</span>`
+        : `
     <div class="fc-top"><b>${x.r}</b><i>${POS_SHORT[x.p] || ""}</i></div>
     <div class="fc-era">${x.era === "L" ? "ICON" : esc(x.era)}</div>
     <div class="fc-mono">${esc(x.n.charAt(0))}</div>
@@ -2342,7 +2712,7 @@
     <div class="fc-name">${esc(x.n)}</div>
     <div class="fc-rule"></div>
     <div class="fc-meta">${esc(x.nat)}<br>${esc(x.club)}</div>`;
-      return `<div class="fc ${tier(x)} ${cls || ""}" ${extra || ""}>
+      return `<div class="fc ${tier(x)} ${cls || ""} ${cardArt ? "has-card-art" : ""}" ${extra || ""}>
     ${cardContent}
   </div>`;
     }
@@ -2406,7 +2776,7 @@
   <div class="rows">
     <div class="row"><span class="n">المدرب</span><span class="v">${esc(lastTeam.coach)}</span></div>
     <div class="row"><span class="n">التقييم</span><span class="v">${lastTeam.rating}</span></div>
-  </div>` : `<div class="rows"><div class="row"><span class="n">لسه مفيش مباريات أونلاين محفوظة على الجهاز.</span></div></div>`}
+  </div>` : `<div class="rows rows-text"><div class="row"><span class="n">لسه مفيش مباريات أونلاين محفوظة على الجهاز.</span></div></div>`}
   <button class="btn w mt" id="play">العب</button>`;
       $("bk").onclick = screenHome;
       $("play").onclick = screenModes;
@@ -3252,10 +3622,10 @@
         const action = !club.confirmed
           ? `<button class="btn g sm" data-remove-draft-coach="${COACHES.indexOf(coach)}">إزالة</button>`
           : club.coach === coach.n
-            ? `<button class="btn g sm" disabled>الحالي</button>`
+            ? ""
             : `<button class="btn g sm sell" data-sell-coach="${COACHES.indexOf(coach)}" ${canSell ? "" : "disabled"}>بيع</button>`;
         return `<div class="row">
-      <span class="n">${esc(coach.n)} · تقييم ${coach.r}${club.coach === coach.n ? " · الحالي" : ""}</span>
+      <span class="n">${esc(coach.n)} · تقييم ${coach.r}</span>
       <div class="coach-collection-actions">
         <button class="btn g sm" data-select-coach="${COACHES.indexOf(coach)}" ${club.coach === coach.n ? "disabled" : ""}>
           ${club.coach === coach.n ? "الحالي" : "اختيار"}
@@ -3288,8 +3658,10 @@
       const ownedPlayers = guestProgress.club
         ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean)
         : [];
-      const items = isCoachMarket ? COACHES :
-        isFormationMarket ? FORMATIONS :
+      /* Managers are listed best first so the elite names lead the market. */
+      const items = isCoachMarket
+        ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
+        : isFormationMarket ? FORMATIONS :
           P.filter(player => position === "ALL" || player.p === position);
       const filters = target && (target.kind === "coach" || target.position)
         ? `<div class="sec-title">${target.kind === "coach" ? "المدربين فقط" : `${POS_SHORT[target.position]} فقط`}</div>`
@@ -3309,15 +3681,16 @@
           const available = guestProgress.coins + refund;
           const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
             Number.isSafeInteger(available) && available >= price;
-          const label = owned ? "OWNED" : !guestProgress.club ? "اختار تشكيلتك" :
-            !hasPrice ? "محتاج تسعير" : !canAfford ? "رصيد غير كافٍ" :
-              `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "إضافة"} · ${formatCoins(price)} 🪙`;
+          const label = owned ? "مملوك" : !guestProgress.club ? "اختار تشكيلتك" :
+            !hasPrice ? "مقترح" : !canAfford ? "رصيد غير كافٍ" :
+              replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "إضافة";
           const difference = price - refund;
           const priceText = hasPrice
             ? `السعر ${formatCoins(price)}${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `فرق ${formatCoins(difference)}`}` : ""}`
             : `بدون سعر حاليًا · المقترح ${formatCoins(coach.suggestedPrice)}`;
-          return `<div class="market-item" data-market-search-item>
-            <div class="market-item-info"><b>${esc(coach.n)}</b><small>${COACH_TIER[coach.tier].name} · تقييم ${coach.r} · ${priceText}</small></div>
+          return `<div class="market-item player-market-card coach-market-card" data-market-search-item>
+            ${coachCardHTML(coach, "market-coach-card")}
+            <small class="market-item-price">${priceText}</small>
             <button class="btn g sm market-price ${owned ? "owned" : ""}" data-buy-coach="${COACHES.indexOf(coach)}" ${owned || !guestProgress.club || !hasPrice || !canAfford ? "disabled" : ""}>${label}</button>
           </div>`;
         }).join("")
@@ -3351,11 +3724,13 @@
           const salePrice = cardSalePrice(player);
           const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
             salePrice !== null && salePrice > 0;
+          /* The price already sits above the button, so the action label stays short
+             enough for the narrow grid column. */
           const label = owned ? canSellOwned ? `بيع · ${formatCoins(salePrice)} 🪙` : "مملوك" :
             !guestProgress.club ? "اختار تشكيلتك" :
-            !hasPrice ? `مقترح · ${formatCoins(player.suggestedPrice)}` : !slot ? "لا يوجد مكان" :
+            !hasPrice ? "مقترح" : !slot ? "لا يوجد مكان" :
               !canAfford ? "رصيد غير كافٍ" :
-                `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "اختيار"} · ${formatCoins(player.price)} 🪙`;
+                `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "اختيار"}`;
           const actionAttribute = canSellOwned
             ? `data-sell-market-player="${P.indexOf(player)}"`
             : `data-buy-player="${P.indexOf(player)}"`;
@@ -3374,11 +3749,12 @@
   <div class="hdr"><div class="l"><span class="pos">السوق</span><span class="cnt">${isCoachMarket ? "المدربين" : isFormationMarket ? "التشكيلات" : "اللاعبين"}</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
+  <div class="market-meta">أسعار ${MARKET_PRICE_SNAPSHOT} · ${MARKET_PRICE_PLATFORM}</div>
   ${filters}
   <input class="market-search" id="market-search" type="search" dir="auto"
     placeholder="${isCoachMarket ? "ابحث باسم المدرب..." : isFormationMarket ? "ابحث باسم التشكيلة أو الخطة..." : "ابحث باسم اللاعب أو النادي..."}"
     aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}">
-  <div class="market-list ${!isCoachMarket && !isFormationMarket ? "player-grid" : ""}" id="market-list">
+  <div class="market-list ${!isFormationMarket ? "player-grid" : ""}" id="market-list">
     ${marketItems
       ? marketItems
       : `<div class="rows" data-market-empty><div class="row"><span class="n">مفيش عناصر متاحة في القسم ده.</span></div></div>`}
@@ -3427,7 +3803,7 @@
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">إزاي تلعب</span><span class="cnt">القواعد</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
-  <div class="rows">
+  <div class="rows rows-text">
     <div class="row"><span class="n">١. اختار كارت من 4</span></div>
     <div class="row"><span class="n">كل مركز فيه 4 كروت مقلوبة — اختار واحد واكشفه.</span></div>
     <div class="row"><span class="n">٢. عندك تغيير واحد</span></div>
@@ -3437,7 +3813,7 @@
     <div class="row"><span class="n">٤. اختار مدربك من ٤ كروت بعد ما تكمل فريقك.</span></div>
     <div class="row"><span class="n">تقييم المدرب يزود أو يقلل قوة فريقك بالنسبة الموضحة على كارت المدرب.</span></div>
     <div class="row"><span class="n">٥. النتيجة</span></div>
-    <div class="row"><span class="n">قوة اللاعبين بعد تأثير المدرب تحدد قوة فريقك في المباراة.</span></div>
+    <div class="row"><span class="n">تقييم فريقك بيحدد فرصك في الفوز، لكن النتيجة بتتحسم في الملعب: التعادل أو الخسارة واردين حتى لو فريقك الأقوى.</span></div>
   </div>
   <button class="btn w mt" id="go">يلا نبدأ</button>`;
       $("bk").onclick = screenHome;
@@ -3456,9 +3832,9 @@
     <div class="arw">‹</div>
   </button>
   <div class="sec-title">الدرفت السريع بالكروت</div>
-  <div class="sec-title">وقت كل اختيار</div>
-  <div style="display:flex;gap:8px;margin-bottom:18px">
-    ${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" style="flex:1" data-t="${s}">${s} ثانية</button>`).join("")}
+  <div class="field-label">وقت كل اختيار</div>
+  <div class="timer-options">
+    ${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}">${s} ثانية</button>`).join("")}
   </div>
   <button class="mode primary" id="mAi">
     <div class="ic">🤖</div>
@@ -3758,7 +4134,7 @@
 
     function squadHTML() {
       return `<div class="squad">
-    <div class="lbl"><span>فريقك</span><span>${S.team.length} / 11</span></div>
+    <div class="lbl"><span>فريقك</span><span dir="ltr">${S.team.length} / 11</span></div>
     <div class="slots">
       ${S.slots.map((p, k) => {
         const t = S.team[k];
@@ -3789,16 +4165,27 @@
     }
 
     function coachCardHTML(coach, cls) {
-      const tier = COACH_TIER[coach.tier];
-      const effect = Math.round((coachMultiplier(coach) - 1) * 100);
-      const effectText = effect > 0 ? `+${effect}%` : `${effect}%`;
-      return `<div class="fc ${coach.tier === "legendary" ? "t-icon" : coach.tier === "regular" ? "t-elite" : "t-bronze"} ${cls || ""}">
-    <div class="fc-top"><b>${coach.r}</b><i>مدرب</i></div>
-    <div class="fc-era" style="color:${tier.color}">${tier.name}</div>
-    <div class="fc-mono">م</div>
-    <div class="fc-name">${esc(coach.n)}</div>
-    <div class="fc-rule"></div>
-    <div class="fc-meta">قوة الفريق<br>${effectText}</div>
+      const tierKey = COACH_TIER[coach.tier] ? coach.tier : "regular";
+      const tier = COACH_TIER[tierKey];
+      const effect = Math.round((coachMultiplier(coach) - 1) * 1000) / 10;
+      const effectText = `${effect > 0 ? "+" : effect < 0 ? "-" : ""}${Math.abs(effect).toFixed(1).replace(/\.0$/, "")}%`;
+      const needle = Math.max(6, Math.min(94, 50 + (effect / 6) * 44));
+      const art = typeof COACH_ART !== "undefined" ? COACH_ART[coach.id] : null;
+      return `<div class="fc coach ${cls || ""}" data-tier="${tierKey}" style="--needle:${needle.toFixed(1)}%">
+    <div class="fc-coach-pitch" aria-hidden="true"></div>
+    ${art
+      ? `<img class="fc-coach-photo" src="${art}" alt="مدرب ${esc(coach.n)}" loading="lazy" decoding="async">`
+      : `<div class="fc-coach-mono" aria-hidden="true">م</div>`}
+    <div class="fc-coach-spine">
+      <b class="fc-coach-rating">${coach.r}</b>
+      <span class="fc-coach-rail" aria-hidden="true"></span>
+      <span class="fc-coach-effect ${effect > 0 ? "up" : effect < 0 ? "down" : ""}" dir="ltr">${effectText}</span>
+      <span class="fc-coach-deviation" aria-hidden="true"></span>
+    </div>
+    <div class="fc-coach-plate">
+      <span class="fc-coach-name" dir="auto">${esc(coach.n)}</span>
+      <span class="fc-coach-tier">${tier.name}</span>
+    </div>
   </div>`;
     }
 
@@ -4056,7 +4443,7 @@
         <div class="fcwrap"><div class="fc back" aria-hidden="true"><span>؟</span></div></div>
       </div>
     </div>
-    <p class="note">قوة اللاعبين ${baseAvg} × تأثير المدرب ${coachMultiplier(S.coach).toFixed(3)} = <b>${avg}</b></p>
+    <p class="note">قوة اللاعبين ${baseAvg}، وتأثير المدرب ${coachMultiplier(S.coach).toFixed(3)}، فيصبح تقييم الفريق <b>${avg}</b>.</p>
     ${formationHTML(S.team, S.formation, "خطة فريقك")}
     <div id="opp-formation">
       <div class="sec-title">خطة الخصم</div>
@@ -4153,7 +4540,7 @@
         <span style="flex:1;text-align:right">أنت · ${me} · <b dir="ltr">${formationById(S.formation).id}</b> · ${esc(S.coach.n)}</span>
         <span style="flex:1;text-align:left">${esc(OPP.name)} · ${OPP.avg} · <b dir="ltr">${formationById(OPP.formation).id}</b> · ${esc(OPP.coach.n)}</span>
       </div>
-      <div class="score" id="sc" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
+      <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
       <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
@@ -4215,19 +4602,13 @@
         : `${key(A)}#${key(B)}`;
       const r = rng32(hs(seedInput));
       const d = A.avg - B.avg;
-      let ga = pois(Math.max(.35, 1.35 + d * .11), r);
-      let gb = pois(Math.max(.35, 1.35 - d * .11), r);
-      const gap = Math.abs(d);
-      const upsetChance = me.entry === "club" && me.mode === "online" && bothSeeded
-        ? ONLINE_CLUB_UPSET_CHANCE[gap] || 0
-        : 0;
-      if (upsetChance > 0 && r() < upsetChance) {
-        if (d > 0) gb = Math.max(gb, ga + 1);
-        else ga = Math.max(ga, gb + 1);
-      } else {
-        if (d > 0 && ga <= gb) ga = gb + 1;
-        if (d < 0 && gb <= ga) gb = ga + 1;
-      }
+      const effectiveGap = Math.max(-MATCH_MAX_EFFECTIVE_GAP,
+        Math.min(MATCH_MAX_EFFECTIVE_GAP, d));
+      const edge = effectiveGap * MATCH_GOALS_PER_RATING_POINT;
+      const clampGoals = value => Math.min(MATCH_MAX_EXPECTED_GOALS,
+        Math.max(MATCH_MIN_EXPECTED_GOALS, value));
+      const ga = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS + edge), r);
+      const gb = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS - edge), r);
       const pickScorer = x => {
         const slots = x.slots || formationSlots(x.formation);
         const w = x.names.map((n, k) => slots[k] === "F" ? 5 : slots[k] === "M" ? 2 : slots[k] === "D" ? 1 : 0);
@@ -4474,6 +4855,9 @@
 
     /* ================= BOOT ================= */
     screenHome();
+    // expose card renderers for QA/testing
+    window.coachCardHTML = coachCardHTML;
+    window.cardHTML = cardHTML;
   </script>
 </body>
 
