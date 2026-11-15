@@ -2598,6 +2598,9 @@
     const sfxGood = () => { beep(660, .1, "sine", .06); setTimeout(() => beep(990, .14, "sine", .06), 90) };
     const sfxBad = () => beep(180, .18, "sawtooth", .05);
     const sfxGoal = () => { beep(440, .1, "square", .05); setTimeout(() => beep(660, .1, "square", .05), 100); setTimeout(() => beep(880, .18, "square", .05), 200) };
+    const sfxWhistle = () => { beep(900, .08, "sine", .07); setTimeout(() => beep(1100, .12, "sine", .07), 90); setTimeout(() => beep(900, .18, "sine", .05), 200) };
+    const sfxYellow = () => { beep(440, .06, "square", .04); setTimeout(() => beep(330, .1, "square", .04), 70) };
+    const sfxRed = () => { beep(220, .1, "sawtooth", .06); setTimeout(() => beep(180, .18, "sawtooth", .06), 110) };
 
     /* ================= STATE ================= */
     let S = null;
@@ -2805,6 +2808,8 @@
     function screenHome() {
       cancelGameTimers(); killNet();
       selectedSquadSlot = null;
+      _navStack = [screenHome];
+      history.pushState({}, "");
       app.innerHTML = `
   <div class="brand">
     <div class="logo">GG</div>
@@ -2841,6 +2846,7 @@
     }
 
     function screenRecord() {
+      _origPush(screenRecord);
       const { record, lastTeam } = guestProgress;
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">سجل مبارياتي</span></div>
@@ -3303,6 +3309,7 @@
     function screenMyTeam() {
       if (!guestProgress.club) return screenClubFormations();
       if (selectedSquadSlot && selectedSquadSlot.area === "bench") showBench = true;
+      _origPush(screenMyTeam);
       const club = guestProgress.club;
       const setupCost = club.confirmed ? null : clubSetupCostBreakdown(club);
       app.innerHTML = `
@@ -3884,6 +3891,7 @@
     }
 
     function screenHow() {
+      _origPush(screenHow);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">إزاي تلعب</span><span class="cnt">القواعد</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -3906,6 +3914,7 @@
 
     function screenModes() {
       cancelGameTimers(); killNet();
+      _origPush(screenModes);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">طريقة اللعب</span><span class="cnt">اختار المود</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -3944,6 +3953,7 @@
     }
 
     function screenClubModes() {
+      _origPush(screenClubModes);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">مباريات تشكيلتي</span><span class="cnt" dir="ltr">${guestProgress.club ? formationById(guestProgress.club.formation).id : "—"}</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -3973,6 +3983,7 @@
     }
 
     function screenClubDifficulties() {
+      _origPush(screenClubDifficulties);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">مستوى الكمبيوتر</span><span class="cnt">العب بتشكيلتك</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -4077,6 +4088,7 @@
     }
 
     function screenFormations(onContinue) {
+      _origPush(() => screenFormations(onContinue));
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">اختار خطة فريقك</span><span class="cnt">الخطة هتحدد مراكز الكروت</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -4106,6 +4118,7 @@
     }
 
     function screenRoom(gameType = "draft") {
+      _origPush(() => screenRoom(gameType));
       const isClubMatch = gameType === "club";
       const returnScreen = isClubMatch ? screenClubModes : screenModes;
       app.innerHTML = `
@@ -4633,6 +4646,7 @@
       <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
+      sfxWhistle();
       let m = 0, a = 0, b = 0;
       const TICK_MS = Math.round(60000 / 90);
       const t = setInterval(() => {
@@ -4649,6 +4663,11 @@
           if (e.type === "goal") {
             if (e.me) a++; else b++;
             sfxGoal();
+            const sc = $("sc"); if (sc) { sc.style.transform = "scale(1.18)"; setTimeout(() => { if (sc) sc.style.transform = "" }, 300) }
+          } else if (e.type === "yellow") {
+            sfxYellow();
+          } else if (e.type === "red") {
+            sfxRed();
           }
           $("lg").insertAdjacentHTML("beforeend",
             `<div class="row" style="padding:8px 0;background:transparent;border-color:rgba(255,255,255,.06)">
@@ -4662,6 +4681,7 @@
           clearInterval(t);
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
+          sfxWhistle();
           if (win) buzz([20, 60, 20]);
           const mvpTeamLabel = motm.me ? "فريقك" : esc(OPP.name);
           $("lg").insertAdjacentHTML("beforeend",
@@ -4715,8 +4735,13 @@
         const team = side === "A" ? A : B;
         if (r() < 0.78) {
           const count = r() < 0.24 ? 2 : 1;
+          const yellowedPlayers = new Set();
           for (let i = 0; i < count; i++) {
-            ev.push({ m: 12 + Math.floor(r() * 76), s: side, type: "yellow", who: pickPlayer(team) });
+            const available = team.names.filter(n => !yellowedPlayers.has(n));
+            if (!available.length) break;
+            const who = available[Math.floor(r() * available.length)];
+            yellowedPlayers.add(who);
+            ev.push({ m: 12 + Math.floor(r() * 76), s: side, type: "yellow", who });
           }
         }
         if (r() < 0.075) {
@@ -5055,7 +5080,28 @@
       if (connection.open) onOpen(); else connection.on("open", onOpen);
     }
 
+    /* ================= NAVIGATION (Android back + iOS swipe) ================= */
+    let _navStack = [screenHome];
+    const _origPush = fn => { history.pushState({}, ""); _navStack.push(fn) };
+    window.addEventListener("popstate", () => {
+      if (_navStack.length > 1) _navStack.pop();
+      const prev = _navStack[_navStack.length - 1];
+      if (prev) prev();
+      else history.pushState({}, "");
+    });
+    let _swipeStartX = 0, _swipeStartY = 0;
+    document.addEventListener("touchstart", e => {
+      _swipeStartX = e.touches[0].clientX;
+      _swipeStartY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener("touchend", e => {
+      const dx = e.changedTouches[0].clientX - _swipeStartX;
+      const dy = Math.abs(e.changedTouches[0].clientY - _swipeStartY);
+      if (_swipeStartX < 30 && dx > 60 && dy < 80) history.back();
+    }, { passive: true });
+
     /* ================= BOOT ================= */
+    history.pushState({}, "");
     screenHome();
 
   </script>
