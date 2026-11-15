@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 978">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e4c56a"/>
+      <stop offset=".55" stop-color="#d5ad51"/>
+      <stop offset="1" stop-color="#c79a3e"/>
+    </linearGradient>
+    <pattern id="grain" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+      <path d="M0 0V12" stroke="#f6dfa0" stroke-opacity=".18" stroke-width="3"/>
+    </pattern>
+  </defs>
+  <image href="./20801.png" width="700" height="978"/>
+  <rect x="94" y="218" width="124" height="143" rx="4" fill="url(#gold)"/>
+  <rect x="94" y="218" width="124" height="143" rx="4" fill="url(#grain)"/>
+  <text x="156" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="84" font-weight="800" fill="#25190c">95</text>
+  <text x="156" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="39" font-weight="800" fill="#25190c">ST</text>
+</svg>
