@@ -2140,7 +2140,7 @@
       isIcon: player.isIcon,
       eaId: player.eaId
     }));
-    if (P.length !== 500 || P.some(player => !Number.isInteger(player.r) || player.r < 1 || player.r > 99 || !player.p || !player.role)) {
+    if (P.length === 0 || P.some(player => !Number.isInteger(player.r) || player.r < 1 || player.r > 99 || !player.p || !player.role)) {
       fatalStartup("بيانات اللاعبين غير مكتملة أو تقييماتهم غير صالحة.");
     }
     if (P.some(player => player.price === null &&
