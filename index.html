@@ -3039,6 +3039,7 @@
     function squadPitchHTML(club) {
       const formation = formationById(club.formation);
       const slots = formationSlots(formation.id);
+      const roles = formationRoleSlots(formation.id);
       const starters = alignTeamToFormation(club.starters.map(name => P.find(player => player.n === name)).filter(Boolean), formation.id);
       const coach = COACHES.find(item => item.n === club.coach);
       const baseRating = starters.length
@@ -3063,8 +3064,8 @@
           const selected = selectedSquadSlot && selectedSquadSlot.area === "starter" && selectedSquadSlot.index === index;
           return `<button class="pitch-player squad-slot ${player ? "has-player-card" : "empty"} ${selected ? "selected" : ""}"
             data-squad-slot="starter" data-index="${index}" data-position="${position}" aria-pressed="${!!selected}"
-            aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[position]}`}">
-            ${player ? cardHTML(player, "squad-player-card") : `<small>${POS_SHORT[position]}</small><b>＋ إضافة</b>`}
+            aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[roles[index]]}`}">
+            ${player ? cardHTML(player, "squad-player-card") : `<small>${POS_SHORT[roles[index]]}</small><b>＋ إضافة</b>`}
           </button>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
