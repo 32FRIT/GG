@@ -4743,8 +4743,8 @@
       const clampGoals = value => Math.min(3.2, Math.max(0.35, value));
       const edge = Math.min(Math.abs(gap), 12) * 0.1;
       const redGoalImpact = minutes => minutes.reduce((impact, minute) => impact + 0.72 * ((90 - minute) / 90), 0);
-      const goalsA = clampGoals(MATCH_BASE_EXPECTED_GOALS + (gap < 0 ? edge : -edge) - redGoalImpact(redMinutes.A) + redGoalImpact(redMinutes.B));
-      const goalsB = clampGoals(MATCH_BASE_EXPECTED_GOALS + (gap > 0 ? edge : -edge) - redGoalImpact(redMinutes.B) + redGoalImpact(redMinutes.A));
+      const goalsA = clampGoals(MATCH_BASE_EXPECTED_GOALS + (gap > 0 ? edge : -edge) - redGoalImpact(redMinutes.A) + redGoalImpact(redMinutes.B));
+      const goalsB = clampGoals(MATCH_BASE_EXPECTED_GOALS + (gap < 0 ? edge : -edge) - redGoalImpact(redMinutes.B) + redGoalImpact(redMinutes.A));
       let ga = pois(goalsA, r), gb = pois(goalsB, r);
       if (result === "draw") {
         gb = ga;
