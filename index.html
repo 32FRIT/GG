@@ -3036,7 +3036,7 @@
     function squadPitchHTML(club) {
       const formation = formationById(club.formation);
       const slots = formationSlots(formation.id);
-      const starters = club.starters.map(name => P.find(player => player.n === name)).filter(Boolean);
+      const starters = alignTeamToFormation(club.starters.map(name => P.find(player => player.n === name)).filter(Boolean), formation.id);
       const coach = COACHES.find(item => item.n === club.coach);
       const baseRating = starters.length
         ? Math.round(starters.reduce((sum, player) => sum + player.r, 0) / starters.length)
