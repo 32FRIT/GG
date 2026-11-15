@@ -4622,7 +4622,8 @@
       </div>`;
       }
       const r = simulate(mt, OPP);
-      const evs = r.ev.map(e => ({ m: e.m, who: e.who, me: (e.s === "A") === r.mine }));
+      const evs = r.ev.map(e => ({ ...e, me: (e.s === "A") === r.mine }));
+      const motm = { ...r.motm, me: (r.motm.s === "A") === r.mine };
       box.innerHTML = `
     <div class="sec-title">المباراة</div>
     <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center">
@@ -4642,7 +4643,7 @@
           const teamName = e.me ? "فريقك" : esc(OPP.name);
           const icon = e.type === "goal" ? "⚽" : e.type === "yellow" ? "🟨" : e.type === "red" ? "🟥" : "🔁";
           const detail = e.type === "goal"
-            ? esc(e.who)
+            ? `${esc(e.who)}${e.assist ? ` · أسيست ${esc(e.assist)}` : ""}`
             : e.type === "yellow" ? `إنذار · ${esc(e.who)}`
             : e.type === "red" ? `طرد · ${esc(e.who)}`
             : `تبديل تكتيكي · ${esc(e.who)}`;
@@ -4663,6 +4664,12 @@
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
           if (win) buzz([20, 60, 20]);
+          const manTeam = motm.me ? "فريقك" : esc(OPP.name);
+          $("lg").insertAdjacentHTML("beforeend",
+            `<div class="row" style="margin-top:10px;padding:10px;background:rgba(255,207,74,.08);border-color:rgba(255,207,74,.25)">
+          <span class="n" style="font-size:12.5px">⭐ رجل المباراة · ${esc(motm.who)} (${manTeam})</span>
+          <span class="r" style="font-size:11px">${esc(motm.reason)}</span>
+        </div>`);
           recordGuestMatch(mt, a, b);
         }
       }, 1000);
@@ -4764,10 +4771,51 @@
         while (k < w.length - 1 && t >= w[k]) { t -= w[k]; k++ }
         return x.names[k];
       };
-      for (let i = 0; i < ga; i++) ev.push({ m: 1 + Math.floor(r() * 90), s: "A", type: "goal", who: pickScorer(A) });
-      for (let i = 0; i < gb; i++) ev.push({ m: 1 + Math.floor(r() * 90), s: "B", type: "goal", who: pickScorer(B) });
+      const stats = new Map();
+      const statsFor = (side, name) => {
+        const id = `${side}|${name}`;
+        if (!stats.has(id)) stats.set(id, { s: side, who: name, goals: 0, assists: 0, saves: 0 });
+        return stats.get(id);
+      };
+      const pickAssister = (team, scorer) => {
+        const candidates = team.names.filter(name => name !== scorer);
+        return candidates.length ? candidates[Math.floor(r() * candidates.length)] : null;
+      };
+      const addGoals = (team, side, count) => {
+        for (let i = 0; i < count; i++) {
+          const scorer = pickScorer(team);
+          const assist = r() < 0.68 ? pickAssister(team, scorer) : null;
+          statsFor(side, scorer).goals++;
+          if (assist) statsFor(side, assist).assists++;
+          ev.push({ m: 1 + Math.floor(r() * 90), s: side, type: "goal", who: scorer, assist });
+        }
+      };
+      addGoals(A, "A", ga);
+      addGoals(B, "B", gb);
+
+      const goalkeeper = team => {
+        const slots = team.slots || formationSlots(team.formation);
+        const index = slots.findIndex(slot => slot === "G");
+        return team.names[index >= 0 ? index : 0] || "الحارس";
+      };
+      statsFor("A", goalkeeper(A)).saves = Math.max(1, 2 + Math.floor(r() * 6) - Math.max(0, gb - 2));
+      statsFor("B", goalkeeper(B)).saves = Math.max(1, 2 + Math.floor(r() * 6) - Math.max(0, ga - 2));
+
+      const candidates = [...stats.values()];
+      candidates.sort((x, y) => {
+        const score = player => player.goals * 4 + player.assists * 2.5 + player.saves * 0.85;
+        return score(y) - score(x) ||
+          (P.find(player => player.n === y.who)?.r || 0) - (P.find(player => player.n === x.who)?.r || 0);
+      });
+      const best = candidates[0];
+      const reason = best.saves >= 4 && best.saves * 0.85 >= best.goals * 4 + best.assists * 2.5
+        ? `${best.saves} تصديات حاسمة`
+        : [
+          best.goals ? (best.goals === 1 ? "سجل هدفًا" : best.goals === 2 ? "سجل هدفين" : `سجل ${best.goals} أهداف`) : "",
+          best.assists ? (best.assists === 1 ? "صنع أسيست" : `صنع ${best.assists} أسيست`) : ""
+        ].filter(Boolean).join(" و ") || (best.saves ? `${best.saves} تصديات حاسمة` : "أداء مميز طوال المباراة");
       ev.sort((x, y) => x.m - y.m);
-      return { mine: mineFirst, ev };
+      return { mine: mineFirst, ev, motm: { s: best.s, who: best.who, reason } };
     }
 
     /* ================= AI OPPONENT ================= */
