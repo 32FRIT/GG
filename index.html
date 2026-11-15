@@ -2216,17 +2216,9 @@
     const MATCH_REWARDS = { win: 20000, draw: 10000, loss: 5000 };
     /* Offline matches pay less than online matches, with a small loss reward. */
     const OFFLINE_MATCH_REWARDS = { win: 10000, draw: 5000, loss: 2500 };
-    /* Match engine: each side's goals are drawn from the rating gap, so the stronger
-       team is only a favourite — draws and upsets stay possible at every gap. */
+    /* Results use an explicit win/draw/loss distribution. Equal teams draw 75%;
+       rating differences steadily favor the stronger side while leaving upsets possible. */
     const MATCH_BASE_EXPECTED_GOALS = 1.35;
-    const MATCH_MIN_EXPECTED_GOALS = 0.35;
-    const MATCH_MAX_EXPECTED_GOALS = 3.2;
-    /* A rating gap above this counts as exactly this much, and at the cap the goal
-       expectancy swings by MATCH_EDGE_AT_MAX_GAP either way (≈1.95 vs 0.75 goals):
-       the better side stays a clear favourite without being guaranteed the result. */
-    const MATCH_MAX_EFFECTIVE_GAP = 3;
-    const MATCH_EDGE_AT_MAX_GAP = 0.6;
-    const MATCH_GOALS_PER_RATING_POINT = MATCH_EDGE_AT_MAX_GAP / MATCH_MAX_EFFECTIVE_GAP;
     const STARTING_COINS = 9000000;
     const FORMATION_PRICE = 100000;
     const SALE_PRICE_PERCENT = 70;
@@ -4579,7 +4571,7 @@
           <span class="r" style="font-size:11px">${e.me ? "فريقك" : esc(OPP.name)}</span>
         </div>`);
         });
-        $("sc").textContent = a + " - " + b;
+        $("sc").textContent = b + " - " + a;
         $("mn").textContent = Math.min(m, 90) + "'";
         if (m >= 90) {
           clearInterval(t);
@@ -4623,14 +4615,31 @@
         ? `${stableKey(A)}#${stableKey(B)}`
         : `${key(A)}#${key(B)}`;
       const r = rng32(hs(seedInput));
-      const d = A.avg - B.avg;
-      const effectiveGap = Math.max(-MATCH_MAX_EFFECTIVE_GAP,
-        Math.min(MATCH_MAX_EFFECTIVE_GAP, d));
-      const edge = effectiveGap * MATCH_GOALS_PER_RATING_POINT;
-      const clampGoals = value => Math.min(MATCH_MAX_EXPECTED_GOALS,
-        Math.max(MATCH_MIN_EXPECTED_GOALS, value));
-      const ga = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS + edge), r);
-      const gb = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS - edge), r);
+      const gap = A.avg - B.avg;
+      const absGap = Math.abs(gap);
+      const drawChance = 0.75 * Math.exp(-absGap / 4);
+      const favoriteShare = 0.5 + 0.25 * absGap / (absGap + 3);
+      const drawRoll = r();
+      let result;
+      if (drawRoll < drawChance) {
+        result = "draw";
+      } else {
+        const favoriteWon = (drawRoll - drawChance) / (1 - drawChance) < favoriteShare;
+        result = (gap >= 0) === favoriteWon ? "A" : "B";
+      }
+
+      const clampGoals = value => Math.min(3.2, Math.max(0.35, value));
+      const edge = Math.min(absGap, 12) * 0.1;
+      let ga = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS + edge), r);
+      let gb = pois(clampGoals(MATCH_BASE_EXPECTED_GOALS - edge), r);
+      if (result === "draw") {
+        gb = ga;
+      } else if (result === "A" && ga <= gb) {
+        ga = gb + 1;
+      } else if (result === "B" && gb <= ga) {
+        gb = ga + 1;
+      }
+
       const pickScorer = x => {
         const slots = x.slots || formationSlots(x.formation);
         const w = x.names.map((n, k) => slots[k] === "F" ? 5 : slots[k] === "M" ? 2 : slots[k] === "D" ? 1 : 0);
