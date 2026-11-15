@@ -2779,6 +2779,30 @@
     }
 
     /* ================= SCREENS ================= */
+    function resetGameData() {
+      if (!window.confirm("هل تريد مسح كل بياناتك في اللعبة؟ سيتم حذف السجل والتشكيلة والكوينز المحفوظة وإرجاع رصيد البداية إلى 9,000,000. صور اللاعبين ستظل محفوظة.")) return;
+      cancelGameTimers();
+      killNet();
+      resetOpponent();
+      try {
+        localStorage.removeItem(GUEST_PROGRESS_KEY);
+        localStorage.removeItem("gg_muted");
+      } catch (error) {
+        console.error("Could not clear saved game data.", error);
+        toast("تعذر مسح البيانات من هذا الجهاز");
+        return;
+      }
+      guestProgress = emptyGuestProgress();
+      muted = true;
+      selectedSquadSlot = null;
+      showBench = false;
+      selectedFormation = DEFAULT_FORMATION;
+      opponentFormation = DEFAULT_FORMATION;
+      if (!saveGuestProgress()) return;
+      screenHome();
+      toast("تم مسح بيانات اللعبة · رصيد البداية 9,000,000 🪙");
+    }
+
     function screenHome() {
       cancelGameTimers(); killNet();
       selectedSquadSlot = null;
@@ -2808,10 +2832,12 @@
     <div class="arw">‹</div>
   </button>
   <button class="btn g w mt" id="record">السجل</button>
+  <button class="btn g w mt" id="reset-game-data">مسح بيانات اللعبة</button>
   <div class="foot">GG </div>`;
       $("go").onclick = () => { buzz(8); screenModes() };
       $("how").onclick = screenHow;
       $("record").onclick = screenRecord;
+      $("reset-game-data").onclick = resetGameData;
       $("my-team").onclick = screenMyTeam;
     }
 
