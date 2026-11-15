@@ -3040,15 +3040,16 @@
       const formation = formationById(club.formation);
       const slots = formationSlots(formation.id);
       const roles = formationRoleSlots(formation.id);
-      const starters = alignTeamToFormation(club.starters.map(name => P.find(player => player.n === name)).filter(Boolean), formation.id);
+      const clubPlayers = club.starters.map(name => name && P.find(player => player.n === name)).filter(Boolean);
+      const starters = alignTeamToFormation(clubPlayers, formation.id);
       const coach = COACHES.find(item => item.n === club.coach);
-      const baseRating = starters.length
-        ? Math.round(starters.reduce((sum, player) => sum + player.r, 0) / starters.length)
+      const baseRating = clubPlayers.length
+        ? Math.round(clubPlayers.reduce((sum, player) => sum + player.r, 0) / clubPlayers.length)
         : null;
       const overall = baseRating === null
         ? null
         : coach ? coachAdjustedPower(baseRating, coach) : baseRating;
-      const ratingDetails = `${starters.length}/11 لاعبين · ${coach ? `مدرب ${coach.n}` : "بدون مدرب"}`;
+      const ratingDetails = `${clubPlayers.length}/11 لاعبين · ${coach ? `مدرب ${coach.n}` : "بدون مدرب"}`;
       const offsets = {
         G: 0,
         D: 1,
