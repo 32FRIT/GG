@@ -1097,6 +1097,8 @@
     .fc.has-card-art {
       padding: 0;
       background: transparent;
+      border: 0;
+      box-shadow: none;
     }
 
     .fc.has-card-art::after {
@@ -1639,6 +1641,10 @@
       position: relative;
       min-width: 0;
       filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .2))
+    }
+
+    .fcwrap:has(> .fc.has-card-art) {
+      filter: none
     }
 
     .pick-actions {
