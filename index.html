@@ -4738,7 +4738,7 @@
           ? inRange
           : available.slice().sort((a, b) =>
             Math.abs(a.r - difficulty.target) - Math.abs(b.r - difficulty.target)).slice(0, 10);
-        if (!candidates.length) throw new Error(`No computer players available for position ${position}.`);
+        if (!candidates.length) throw new Error(`No computer players available for position ${role}.`);
         const player = candidates[Math.floor(Math.random() * candidates.length)];
         used.add(player.n);
         return player.n;
