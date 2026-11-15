@@ -2272,8 +2272,6 @@
     const cardSalePrice = card => Number.isSafeInteger(card.price) && card.price > 0
       ? Math.floor(card.price * SALE_PRICE_PERCENT / 100)
       : null;
-    const MARKET_PRICE_SNAPSHOT = FUT_DATA.snapshot.split("-").reverse().join("/");
-    const MARKET_PRICE_PLATFORM = FUT_DATA.pricePlatform.toUpperCase();
     const coachPrice = coach => coach.price;
     const BENCH_SLOT_POSITIONS = ["G", "D", "M", "F", ...Array(8).fill(null)];
 
@@ -2817,7 +2815,7 @@
   <div class="hero">
     <h2>اختار 11 لاعب<br>وابني فريقك</h2>
     <div class="hero-meta">
-      <div class="pill">⚽ ${P.length} لاعب · 🧢 ${COACHES.length} مدرب في الداتا</div>
+      <div class="pill">⚽ ${P.length} لاعب · 🧢 ${COACHES.length} مدرب</div>
       <button class="help-icon" id="how" aria-label="إزاي تلعب" title="إزاي تلعب">؟</button>
     </div>
   </div>
@@ -3835,7 +3833,6 @@
   <div class="hdr"><div class="l"><span class="pos">السوق</span><span class="cnt">${isCoachMarket ? "المدربين" : isFormationMarket ? "التشكيلات" : "اللاعبين"}</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
-  <div class="market-meta">أسعار ${MARKET_PRICE_SNAPSHOT} · ${MARKET_PRICE_PLATFORM}</div>
   ${filters}
   <input class="market-search" id="market-search" type="search" dir="auto"
     placeholder="${isCoachMarket ? "ابحث باسم المدرب..." : isFormationMarket ? "ابحث باسم التشكيلة أو الخطة..." : "ابحث باسم اللاعب أو النادي..."}"
