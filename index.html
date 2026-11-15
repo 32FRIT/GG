@@ -2406,15 +2406,19 @@
         coach: coherenceName(club.coach)
       };
 
-      const used = new Set();
-      const keepPlayer = (name, requiredPosition) => {
-        if (name === null) return null;
-        const player = P.find(item => item.n === name);
-        if (!player || (requiredPosition && player.p !== requiredPosition) || used.has(name)) return null;
-        used.add(name);
-        return name;
-      };
       const positions = formationSlots(club.formation);
+      const candidates = [...new Set([...club.starters, ...club.bench]
+        .filter(name => typeof name === "string" && P.some(player => player.n === name)))];
+      const takePlayer = requiredPosition => {
+        const index = candidates.findIndex(name =>
+          !requiredPosition || P.find(player => player.n === name).p === requiredPosition);
+        return index < 0 ? null : candidates.splice(index, 1)[0];
+      };
+      const starters = positions.map(takePlayer);
+      const bench = BENCH_SLOT_POSITIONS.map(position => position ? takePlayer(position) : null);
+      BENCH_SLOT_POSITIONS.forEach((position, index) => {
+        if (position === null && candidates.length) bench[index] = candidates.shift();
+      });
       const ownedFormations = Array.isArray(club.ownedFormations)
         ? [...new Set(club.ownedFormations.filter(id => FORMATIONS.some(formation => formation.id === id)))]
         : [];
@@ -2424,8 +2428,6 @@
         ? [...new Set(club.coaches.filter(name => COACHES.some(coach => coach.n === name)))]
         : [];
       if (activeCoach && !coaches.includes(activeCoach)) coaches.unshift(activeCoach);
-      const starters = club.starters.map((name, index) => keepPlayer(name, positions[index]));
-      const bench = club.bench.map((name, index) => keepPlayer(name, BENCH_SLOT_POSITIONS[index]));
       const playerNames = [...starters, ...bench].filter(name => name !== null);
       const savedCosts = club.assetCosts || {};
       const costsFor = (table, keys, fallback) => Object.fromEntries(keys.map(key => {
