@@ -4617,7 +4617,7 @@
       const r = rng32(hs(seedInput));
       const gap = A.avg - B.avg;
       const absGap = Math.abs(gap);
-      const drawChance = 0.75 * Math.exp(-absGap / 4);
+      const drawChance = 0.75 * Math.exp(-absGap / 2.5);
       const favoriteShare = 0.5 + 0.25 * absGap / (absGap + 3);
       const drawRoll = r();
       let result;
