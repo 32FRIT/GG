@@ -637,7 +637,7 @@
       background: transparent;
     }
 
-    .pitch-player.has-player-card > .fc {
+    .pitch-player.has-player-card>.fc {
       width: 100%;
       margin-inline: auto
     }
@@ -980,7 +980,7 @@
       margin: 0
     }
 
-    .owned-formation-row > .btn {
+    .owned-formation-row>.btn {
       white-space: nowrap
     }
 
@@ -1118,7 +1118,7 @@
       user-select: none;
     }
 
-    .fc.has-card-art > :not(.fc-card-art) {
+    .fc.has-card-art> :not(.fc-card-art) {
       display: none;
     }
 
@@ -1494,6 +1494,7 @@
     }
 
     @container (max-width: 150px) {
+
       .fc-coach-tier,
       .fc-coach-deviation {
         display: none
@@ -2061,7 +2062,7 @@
         gap: 2px
       }
 
-      .pitch-player.has-player-card > .fc,
+      .pitch-player.has-player-card>.fc,
       .bench-slot .fc {
         width: 100%
       }
@@ -3024,27 +3025,27 @@
   <div class="hdr"><div class="l"><span class="pos">تغيير التشكيلة</span><span class="cnt">${club.ownedFormations.length} تشكيلات</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <p class="note">${draft
-    ? "اختار أي خطة مجانًا للتجهيز الأول. الخطط الإضافية تقدر تضيفها من السوق بسعرها الظاهر."
-    : "لاعبوك هيتوزعوا تلقائيًا حسب مراكزهم. تقدر ترجع أي خطة غير مستخدمة وتسترد سعرها المدفوع بالكامل."}</p>
+          ? "اختار أي خطة مجانًا للتجهيز الأول. الخطط الإضافية تقدر تضيفها من السوق بسعرها الظاهر."
+          : "لاعبوك هيتوزعوا تلقائيًا حسب مراكزهم. تقدر ترجع أي خطة غير مستخدمة وتسترد سعرها المدفوع بالكامل."}</p>
   <div class="formation-grid mt">
     ${visibleFormations.map(id => {
-        const formation = formationById(id);
-        const owned = club.ownedFormations.includes(id);
-        const active = owned && id === club.formation;
-        const refund = owned ? club.assetCosts.formations[id] : null;
-        if (!owned && draft && freeFormationId) {
-          return `<button class="formation-option" data-select-free-formation="${id}">
+            const formation = formationById(id);
+            const owned = club.ownedFormations.includes(id);
+            const active = owned && id === club.formation;
+            const refund = owned ? club.assetCosts.formations[id] : null;
+            if (!owned && draft && freeFormationId) {
+              return `<button class="formation-option" data-select-free-formation="${id}">
             <b dir="ltr">${formation.id}</b><small>${formation.name} · اختيار مجاني</small>
           </button>`;
-        }
-        if (!owned) return "";
-        return `<div class="owned-formation-row">
+            }
+            if (!owned) return "";
+            return `<div class="owned-formation-row">
           <button class="formation-option ${active ? "active" : ""}" data-switch-club-formation="${id}" ${active ? "disabled" : ""}>
             <b dir="ltr">${formation.id}</b><small>${formation.name} · ${active ? "الحالية" : "تبديل"}</small>
           </button>
           ${active || (!club.confirmed && refund === 0) ? "" : `<button class="btn g sm" data-return-formation="${id}">${club.confirmed ? `إرجاع · ${formatCoins(refund)} 🪙` : "إزالة"}</button>`}
         </div>`;
-      }).join("")}
+          }).join("")}
   </div>
   <button class="btn w" id="buy-formation">شراء تشكيلة من السوق · ${formatCoins(FORMATION_PRICE)} 🪙</button>`;
       $("bk").onclick = screenMyTeam;
@@ -3317,10 +3318,10 @@
   ${showBench ? `<p class="note mt">بديل لكل مركز رئيسي، و8 أماكن مرنة.</p><div class="bench-grid">
     ${BENCH_SLOT_POSITIONS.map((position, index) => {
         const name = club.bench[index];
-      const player = name && P.find(item => item.n === name);
+        const player = name && P.find(item => item.n === name);
         const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
         const selected = selectedSquadSlot && selectedSquadSlot.area === "bench" && selectedSquadSlot.index === index;
-      return `<button class="bench-slot ${player ? "owned-slot" : ""} ${selected ? "selected" : ""}"
+        return `<button class="bench-slot ${player ? "owned-slot" : ""} ${selected ? "selected" : ""}"
           data-squad-slot="bench" data-index="${index}" data-position="${position || "ANY"}" aria-pressed="${!!selected}">
         ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `<small>${label}</small><b>＋ إضافة</b>`}
         </button>`;
@@ -3794,41 +3795,41 @@
             </div>`;
           }).join("")
           : items.map(player => {
-          const owned = ownedPlayers.includes(player.n);
-          const slot = owned ? null : findPlayerSlot(player, target);
-          const hasPrice = Number.isSafeInteger(player.price) && player.price > 0;
-          const replacing = target && target.kind === "player" && target.replaceName;
-          const refund = replacing && guestProgress.club
-            ? guestProgress.club.assetCosts.players[target.replaceName] || 0
-            : 0;
-          const available = guestProgress.coins + refund;
-          const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
-            Number.isSafeInteger(available) && available >= player.price;
-          const difference = player.price - refund;
-          const salePrice = cardSalePrice(player);
-          const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
-            salePrice !== null && salePrice > 0;
-          /* The price already sits above the button, so the action label stays short
-             enough for the narrow grid column. */
-          const label = owned ? canSellOwned ? `بيع · ${formatCoins(salePrice)} 🪙` : "مملوك" :
-            !guestProgress.club ? "اختار تشكيلتك" :
-            !hasPrice ? "مقترح" : !slot ? "لا يوجد مكان" :
-              !canAfford ? "رصيد غير كافٍ" :
-                `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "اختيار"}`;
-          const actionAttribute = canSellOwned
-            ? `data-sell-market-player="${P.indexOf(player)}"`
-            : `data-buy-player="${P.indexOf(player)}"`;
-          const disabled = canSellOwned
-            ? ""
-            : owned || !slot || !hasPrice || !canAfford ? "disabled" : "";
-          return `<div class="market-item player-market-card" data-market-search-item>
+            const owned = ownedPlayers.includes(player.n);
+            const slot = owned ? null : findPlayerSlot(player, target);
+            const hasPrice = Number.isSafeInteger(player.price) && player.price > 0;
+            const replacing = target && target.kind === "player" && target.replaceName;
+            const refund = replacing && guestProgress.club
+              ? guestProgress.club.assetCosts.players[target.replaceName] || 0
+              : 0;
+            const available = guestProgress.coins + refund;
+            const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
+              Number.isSafeInteger(available) && available >= player.price;
+            const difference = player.price - refund;
+            const salePrice = cardSalePrice(player);
+            const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
+              salePrice !== null && salePrice > 0;
+            /* The price already sits above the button, so the action label stays short
+               enough for the narrow grid column. */
+            const label = owned ? canSellOwned ? `بيع · ${formatCoins(salePrice)} 🪙` : "مملوك" :
+              !guestProgress.club ? "اختار تشكيلتك" :
+                !hasPrice ? "مقترح" : !slot ? "لا يوجد مكان" :
+                  !canAfford ? "رصيد غير كافٍ" :
+                    `${replacing ? "تبديل" : guestProgress.club.confirmed ? "شراء" : "اختيار"}`;
+            const actionAttribute = canSellOwned
+              ? `data-sell-market-player="${P.indexOf(player)}"`
+              : `data-buy-player="${P.indexOf(player)}"`;
+            const disabled = canSellOwned
+              ? ""
+              : owned || !slot || !hasPrice || !canAfford ? "disabled" : "";
+            return `<div class="market-item player-market-card" data-market-search-item>
             ${cardHTML(player, "market-player-card")}
             <small class="market-item-price">${hasPrice
-              ? `السعر ${formatCoins(player.price)} 🪙${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `الفرق ${formatCoins(difference)}`}` : ""}`
-              : `السعر غير متاح · المقترح ${formatCoins(player.suggestedPrice)} 🪙`}</small>
+                ? `السعر ${formatCoins(player.price)} 🪙${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `الفرق ${formatCoins(difference)}`}` : ""}`
+                : `السعر غير متاح · المقترح ${formatCoins(player.suggestedPrice)} 🪙`}</small>
             <button class="btn g sm market-price ${owned && !canSellOwned ? "owned" : ""}" ${actionAttribute} ${disabled}>${label}</button>
           </div>`;
-        }).join("");
+          }).join("");
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">السوق</span><span class="cnt">${isCoachMarket ? "المدربين" : isFormationMarket ? "التشكيلات" : "اللاعبين"}</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -3839,8 +3840,8 @@
     aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}">
   <div class="market-list ${!isFormationMarket ? "player-grid" : ""}" id="market-list">
     ${marketItems
-      ? marketItems
-      : `<div class="rows" data-market-empty><div class="row"><span class="n">مفيش عناصر متاحة في القسم ده.</span></div></div>`}
+          ? marketItems
+          : `<div class="rows" data-market-empty><div class="row"><span class="n">مفيش عناصر متاحة في القسم ده.</span></div></div>`}
     <div class="rows market-search-empty" id="market-search-empty" hidden><div class="row"><span class="n">مفيش نتائج مطابقة للبحث.</span></div></div>
   </div>`;
       $("bk").onclick = returnTo === "coaches" ? screenClubCoaches :
@@ -4261,8 +4262,8 @@
       return `<div class="fc coach ${cls || ""}" data-tier="${tierKey}" style="--needle:${needle.toFixed(1)}%">
     <div class="fc-coach-pitch" aria-hidden="true"></div>
     ${art
-      ? `<img class="fc-coach-photo" src="${art}" alt="مدرب ${esc(coach.n)}" loading="lazy" decoding="async">`
-      : `<div class="fc-coach-mono" aria-hidden="true">م</div>`}
+          ? `<img class="fc-coach-photo" src="${art}" alt="مدرب ${esc(coach.n)}" loading="lazy" decoding="async">`
+          : `<div class="fc-coach-mono" aria-hidden="true">م</div>`}
     <div class="fc-coach-spine">
       <b class="fc-coach-rating">${coach.r}</b>
       <span class="fc-coach-rail" aria-hidden="true"></span>
@@ -4633,17 +4634,18 @@
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
       let m = 0, a = 0, b = 0;
+      const TICK_MS = Math.round(60000 / 90);
       const t = setInterval(() => {
         if (!$("sc") || S !== matchState) { clearInterval(t); return }
-        m += 6;
-        evs.filter(e => e.m <= m && e.m > m - 6).forEach(e => {
+        m = Math.min(m + 1, 90);
+        evs.filter(e => e.m === m).forEach(e => {
           const teamName = e.me ? "فريقك" : esc(OPP.name);
           const icon = e.type === "goal" ? "⚽" : e.type === "yellow" ? "🟨" : e.type === "red" ? "🟥" : "🔁";
           const detail = e.type === "goal"
             ? `${esc(e.who)}${e.assist ? ` · أسيست ${esc(e.assist)}` : ""}`
             : e.type === "yellow" ? `إنذار · ${esc(e.who)}`
-            : e.type === "red" ? `طرد · ${esc(e.who)}`
-            : `تبديل · ${esc(e.who)}`;
+              : e.type === "red" ? `طرد · ${esc(e.who)}`
+                : `تبديل · ${esc(e.who)}`;
           if (e.type === "goal") {
             if (e.me) a++; else b++;
             sfxGoal();
@@ -4655,20 +4657,21 @@
         </div>`);
         });
         $("sc").textContent = b + " - " + a;
-        $("mn").textContent = Math.min(m, 90) + "'";
+        $("mn").textContent = m + "'";
         if (m >= 90) {
           clearInterval(t);
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
           if (win) buzz([20, 60, 20]);
+          const mvpTeamLabel = motm.me ? "فريقك" : esc(OPP.name);
           $("lg").insertAdjacentHTML("beforeend",
             `<div class="row" style="margin-top:10px;padding:10px;background:rgba(255,207,74,.08);border-color:rgba(255,207,74,.25)">
-          <span class="n" style="font-size:12.5px">⭐ MVP: ${esc(motm.who.toLocaleUpperCase())}</span>
+          <span class="n" style="font-size:12.5px">⭐ MVP: ${esc(motm.who.toLocaleUpperCase())} · ${mvpTeamLabel}</span>
           <span class="r" style="font-size:11px">${esc(motm.reason)}</span>
         </div>`);
           recordGuestMatch(mt, a, b);
         }
-      }, 1000);
+      }, TICK_MS);
     }
 
     /* ================= SIMULATION ================= */
@@ -4723,8 +4726,13 @@
         }
         if (r() < 0.82) {
           const count = 1 + (r() < 0.42 ? 1 : 0) + (r() < 0.12 ? 1 : 0);
+          const subbedOut = new Set();
           for (let i = 0; i < count; i++) {
-            ev.push({ m: 55 + Math.floor(r() * 34), s: side, type: "sub", who: pickPlayer(team) });
+            const available = team.names.filter(n => !subbedOut.has(n));
+            if (!available.length) break;
+            const who = available[Math.floor(r() * available.length)];
+            subbedOut.add(who);
+            ev.push({ m: 55 + Math.floor(r() * 34), s: side, type: "sub", who });
           }
         }
       });
@@ -4799,17 +4807,19 @@
 
       const candidates = [...stats.values()];
       candidates.sort((x, y) => {
-        const score = player => player.goals * 4 + player.assists * 2.5 + player.saves * 0.85;
+        const goalsAgainst = s => s === "A" ? gb : ga;
+        const didNotLose = s => s === "A" ? ga >= gb : gb >= ga;
+        const score = player => player.goals * 4 + player.assists * 2.5 + (player.saves >= 5 && goalsAgainst(player.s) <= 2 && didNotLose(player.s) ? player.saves * 0.6 : 0);
         return score(y) - score(x) ||
           (P.find(player => player.n === y.who)?.r || 0) - (P.find(player => player.n === x.who)?.r || 0);
       });
       const best = candidates[0];
-      const reason = best.saves >= 4 && best.saves * 0.85 >= best.goals * 4 + best.assists * 2.5
+      const reason = best.saves >= 5 && best.goals === 0 && best.assists === 0 && (best.s === "A" ? gb : ga) <= 2 && (best.s === "A" ? ga >= gb : gb >= ga)
         ? `${best.saves} SAVES`
         : [
-          best.assists ? `${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}` : "",
-          best.goals ? `${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}` : ""
-        ].filter(Boolean).join(" · ") || (best.saves ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
+          best.goals ? `${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}` : "",
+          best.assists ? `${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}` : ""
+        ].filter(Boolean).join(" · ") || (best.saves >= 3 ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
       ev.sort((x, y) => x.m - y.m);
       return { mine: mineFirst, ev, motm: { s: best.s, who: best.who, reason } };
     }
@@ -5047,9 +5057,7 @@
 
     /* ================= BOOT ================= */
     screenHome();
-    // expose card renderers for QA/testing
-    window.coachCardHTML = coachCardHTML;
-    window.cardHTML = cardHTML;
+
   </script>
 </body>
 
