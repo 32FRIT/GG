@@ -2128,6 +2128,7 @@
     const P = FUT_DATA.players.map(player => ({
       n: player.n,
       p: player.p,
+      role: player.role || player.p,
       nat: player.nat,
       club: player.club,
       era: player.era,
@@ -2138,8 +2139,8 @@
       isIcon: player.isIcon,
       eaId: player.eaId
     }));
-    if (P.length !== 500 || P.some(player => player.r < 80 || !player.p)) {
-      fatalStartup("بيانات اللاعبين غير مكتملة: محتاجين 500 لاعب بتقييم 80 أو أعلى.");
+    if (P.length !== 500 || P.some(player => !Number.isInteger(player.r) || player.r < 1 || player.r > 99 || !player.p || !player.role)) {
+      fatalStartup("بيانات اللاعبين غير مكتملة أو تقييماتهم غير صالحة.");
     }
     if (P.some(player => player.price === null &&
       (!Number.isSafeInteger(player.suggestedPrice) || player.suggestedPrice <= 0))) {
@@ -2211,8 +2212,47 @@
       formationById(id).lines.forEach(([pos, count]) => { counts[pos] += count });
       return ["G", ...Array(counts.D).fill("D"), ...Array(counts.M).fill("M"), ...Array(counts.F).fill("F")];
     };
-    const POS_NAME = { G: "حارس مرمى", D: "مدافع", M: "لاعب وسط", F: "مهاجم" };
-    const POS_SHORT = { G: "GK", D: "DF", M: "MF", F: "FW" };
+    const FORMATION_ROLE_LINES = {
+      "4-3-3": { D: ["LB", "CB", "CB", "RB"], M: ["CM", "CM", "CM"], F: ["LW", "ST", "RW"] },
+      "4-4-2": { D: ["LB", "CB", "CB", "RB"], M: ["LM", "CM", "CM", "RM"], F: ["ST", "ST"] },
+      "4-2-3-1": { D: ["LB", "CB", "CB", "RB"], M: ["CDM", "CDM", "CAM", "CAM", "CAM"], F: ["ST"] },
+      "3-5-2": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CDM", "CM", "RM"], F: ["ST", "ST"] },
+      "3-4-3": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CM", "RM"], F: ["LW", "ST", "RW"] },
+      "4-1-4-1": { D: ["LB", "CB", "CB", "RB"], M: ["CDM", "LM", "CM", "CM", "RM"], F: ["ST"] },
+      "4-5-1": { D: ["LB", "CB", "CB", "RB"], M: ["LM", "CM", "CDM", "CM", "RM"], F: ["ST"] },
+      "5-3-2": { D: ["LB", "CB", "CB", "CB", "RB"], M: ["CM", "CDM", "CM"], F: ["ST", "ST"] },
+      "5-4-1": { D: ["LB", "CB", "CB", "CB", "RB"], M: ["LM", "CM", "CM", "RM"], F: ["ST"] },
+      "3-4-2-1": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CM", "RM", "CAM", "CAM"], F: ["ST"] }
+    };
+    const POSITION_GROUP = {
+      GK: "G", CB: "D", LB: "D", RB: "D",
+      CDM: "M", CM: "M", CAM: "M", LM: "M", RM: "M",
+      LW: "F", RW: "F", ST: "F"
+    };
+    const formationRoleSlots = id => {
+      const roles = FORMATION_ROLE_LINES[formationById(id).id];
+      return ["GK", ...roles.D, ...roles.M, ...roles.F];
+    };
+    const alignTeamToFormation = (team, id) => {
+      const roles = formationRoleSlots(id), groups = formationSlots(id), remaining = team.filter(Boolean);
+      return roles.map((role, index) => {
+        let playerIndex = remaining.findIndex(player => player.role === role);
+        if (playerIndex < 0) playerIndex = remaining.findIndex(player => player.p === groups[index]);
+        return playerIndex < 0 ? null : remaining.splice(playerIndex, 1)[0];
+      });
+    };
+    const POS_NAME = {
+      G: "حارس مرمى", D: "مدافع", M: "لاعب وسط", F: "مهاجم",
+      GK: "حارس مرمى", CB: "قلب دفاع", LB: "ظهير أيسر", RB: "ظهير أيمن",
+      CDM: "وسط دفاعي", CM: "وسط", CAM: "وسط هجومي", LM: "وسط أيسر", RM: "وسط أيمن",
+      LW: "جناح أيسر", RW: "جناح أيمن", ST: "مهاجم"
+    };
+    const POS_SHORT = {
+      G: "GK", D: "DF", M: "MF", F: "FW",
+      GK: "GK", CB: "CB", LB: "LB", RB: "RB",
+      CDM: "CDM", CM: "CM", CAM: "CAM", LM: "LM", RM: "RM",
+      LW: "LW", RW: "RW", ST: "ST"
+    };
     const MATCH_REWARDS = { win: 20000, draw: 10000, loss: 5000 };
     /* Offline matches pay less than online matches, with a small loss reward. */
     const OFFLINE_MATCH_REWARDS = { win: 10000, draw: 5000, loss: 2500 };
