@@ -4664,10 +4664,9 @@
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
           if (win) buzz([20, 60, 20]);
-          const manTeam = motm.me ? "فريقك" : esc(OPP.name);
           $("lg").insertAdjacentHTML("beforeend",
             `<div class="row" style="margin-top:10px;padding:10px;background:rgba(255,207,74,.08);border-color:rgba(255,207,74,.25)">
-          <span class="n" style="font-size:12.5px">⭐ رجل المباراة · ${esc(motm.who)} (${manTeam})</span>
+          <span class="n" style="font-size:12.5px">⭐ MVP: ${esc(motm.who.toLocaleUpperCase())}</span>
           <span class="r" style="font-size:11px">${esc(motm.reason)}</span>
         </div>`);
           recordGuestMatch(mt, a, b);
@@ -4809,11 +4808,11 @@
       });
       const best = candidates[0];
       const reason = best.saves >= 4 && best.saves * 0.85 >= best.goals * 4 + best.assists * 2.5
-        ? `${best.saves} تصديات حاسمة`
+        ? `${best.saves} SAVES`
         : [
-          best.goals ? (best.goals === 1 ? "سجل هدفًا" : best.goals === 2 ? "سجل هدفين" : `سجل ${best.goals} أهداف`) : "",
-          best.assists ? (best.assists === 1 ? "صنع أسيست" : `صنع ${best.assists} أسيست`) : ""
-        ].filter(Boolean).join(" و ") || (best.saves ? `${best.saves} تصديات حاسمة` : "أداء مميز طوال المباراة");
+          best.assists ? `${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}` : "",
+          best.goals ? `${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}` : ""
+        ].filter(Boolean).join(" · ") || (best.saves ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
       ev.sort((x, y) => x.m - y.m);
       return { mine: mineFirst, ev, motm: { s: best.s, who: best.who, reason } };
     }
