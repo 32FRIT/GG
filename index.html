@@ -2759,7 +2759,7 @@
       const cardContent = cardArt
         ? `<img class="fc-card-art" src="${cardArt}" alt="كارت ${esc(x.n)}"><span class="sr">${esc(x.n)}</span>`
         : `
-    <div class="fc-top"><b>${x.r}</b><i>${POS_SHORT[x.p] || ""}</i></div>
+    <div class="fc-top"><b>${x.r}</b><i>${POS_SHORT[x.role] || POS_SHORT[x.p] || ""}</i></div>
     <div class="fc-era">${x.era === "L" ? "ICON" : esc(x.era)}</div>
     <div class="fc-mono">${esc(x.n.charAt(0))}</div>
     <div class="fc-player-silhouette" aria-hidden="true"></div>
@@ -3716,7 +3716,8 @@
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
         : isFormationMarket ? FORMATIONS :
-          P.filter(player => position === "ALL" || player.p === position);
+          P.filter(player => position === "ALL" || player.p === position)
+            .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
       const filters = target && (target.kind === "coach" || target.position)
         ? `<div class="sec-title">${target.kind === "coach" ? "المدربين فقط" : `${POS_SHORT[target.position]} فقط`}</div>`
         : `<div class="formation-grid market-filters">
@@ -4032,6 +4033,7 @@
         sel: null,
         formation: setup.club.formation,
         slots: formationSlots(setup.club.formation),
+        roles: formationRoleSlots(setup.club.formation),
         coach: setup.coach,
         coachPool: [],
         coachShown: new Set(),
@@ -4126,7 +4128,7 @@
     /* ================= GAME FLOW ================= */
     function startGame() {
       cancelGameTimers();
-      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai" };
+      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), roles: formationRoleSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai" };
       round();
     }
 
@@ -4136,7 +4138,7 @@
       clearTimeout(phaseTimeout);
       phaseTimeout = null;
       if (S.i >= 11) return startCoachDraft();
-      S.pool = mkPool(S.slots[S.i], S.used);
+      S.pool = mkPool(S.roles[S.i], S.used);
       S.shown = new Set();
       S.sw = 1;
       S.phase = "pick";
@@ -4155,8 +4157,9 @@
       });
     }
 
-    function mkPool(pos, used) {
-      const av = P.filter(x => x.p === pos && !used.has(x.n));
+    function mkPool(role, used) {
+      const exact = P.filter(player => player.role === role && !used.has(player.n));
+      const av = exact.length ? exact : P.filter(player => player.p === POSITION_GROUP[role] && !used.has(player.n));
       const st = shuffle(av.filter(x => x.r >= 88));
       const md = shuffle(av.filter(x => x.r >= 75 && x.r < 88));
       const wk = shuffle(av.filter(x => x.r < 75));
@@ -4169,7 +4172,7 @@
       const live = S.phase === "pick";
       const left = live ? Math.max(0, Math.ceil((tEnd - Date.now()) / 1000)) : 0;
       return `<div class="hdr">
-    <div class="l"><span class="pos">${POS_NAME[S.slots[S.i]]}</span><span class="cnt">الاختيار ${S.i + 1} من 11 · ${formationById(S.formation).id}</span></div>
+    <div class="l"><span class="pos">${POS_SHORT[S.roles[S.i]]} · ${POS_NAME[S.roles[S.i]]}</span><span class="cnt">الاختيار ${S.i + 1} من 11 · ${formationById(S.formation).id}</span></div>
     <div class="timer ${live && left <= 10 ? "warn" : ""}" id="tm">${live ? left : "—"}</div>
     <button class="btn g sm" id="quit">انسحاب</button>
   </div>
@@ -4190,11 +4193,11 @@
       return `<div class="squad">
     <div class="lbl"><span>فريقك</span><span dir="ltr">${S.team.length} / 11</span></div>
     <div class="slots">
-      ${S.slots.map((p, k) => {
+      ${(S.roles || formationRoleSlots(S.formation)).map((role, k) => {
         const t = S.team[k];
         if (t) return `<div class="slot on">${esc(t.n)}</div>`;
-        if (k === S.i) return `<div class="slot now">${POS_SHORT[p]}</div>`;
-        return `<div class="slot">${POS_SHORT[p]}</div>`;
+        if (k === S.i) return `<div class="slot now">${POS_SHORT[role]}</div>`;
+        return `<div class="slot">${POS_SHORT[role]}</div>`;
       }).join("")}
     </div>
   </div>`;
@@ -4202,7 +4205,9 @@
 
     function formationHTML(team, formationId, title) {
       const formation = formationById(formationId);
+      team = alignTeamToFormation(team, formation.id);
       const slots = formationSlots(formation.id);
+      const roles = formationRoleSlots(formation.id);
       const offsets = { G: 0, D: 1, M: 1 + slots.filter(p => p === "D").length, F: 1 + slots.filter(p => p === "D").length + slots.filter(p => p === "M").length };
       const used = { G: 0, D: 0, M: 0, F: 0 };
       const rows = formation.lines.map(([pos, count]) => {
@@ -4211,7 +4216,7 @@
           const player = team[index];
           return player
             ? `<div class="pitch-player has-player-card" aria-label="${esc(player.n)}">${cardHTML(player, "formation-player-card")}</div>`
-            : `<div class="pitch-player"><small>${POS_SHORT[pos]}</small><b>—</b></div>`;
+            : `<div class="pitch-player"><small>${POS_SHORT[roles[index]]}</small><b>—</b></div>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
       }).join("");
@@ -4700,8 +4705,9 @@
     function aiTeam(formationId) {
       let sum = 0; const names = [], sws = [], pools = [], used = new Set();
       const slots = formationSlots(formationId);
-      slots.forEach(p => {
-        const c = mkPool(p, used);
+      const roles = formationRoleSlots(formationId);
+      roles.forEach(role => {
+        const c = mkPool(role, used);
         let i = 0;
         if (c[0] && c[0].r < 80 && c[1]) i = 1;
         const x = c[i] || c[0];
@@ -4719,9 +4725,11 @@
     function aiClubTeam(difficulty) {
       const formation = FORMATIONS[Math.floor(Math.random() * FORMATIONS.length)];
       const slots = formationSlots(formation.id);
+      const roles = formationRoleSlots(formation.id);
       const used = new Set();
-      const names = slots.map(position => {
-        const available = P.filter(player => player.p === position && !used.has(player.n));
+      const names = roles.map(role => {
+        const exact = P.filter(player => player.role === role && !used.has(player.n));
+        const available = exact.length ? exact : P.filter(player => player.p === POSITION_GROUP[role] && !used.has(player.n));
         const inRange = available.filter(player => player.r >= difficulty.min && player.r <= difficulty.max);
         const candidates = inRange.length
           ? inRange
