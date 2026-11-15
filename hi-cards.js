@@ -69,7 +69,7 @@ var HI_CARD_ART = {
   167134: "./assets/167134.png",
   247635: "./assets/247635.png",
   1615: "./assets/1615.png",
-  158023: "./assets/158023.png",
+  158023: "./assets/158023-96.svg",
   266690: "./assets/266690.png",
   1116: "./assets/1116.png",
   176676: "./assets/176676.png",
