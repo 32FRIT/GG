@@ -2198,7 +2198,10 @@
     }
     const FORMATIONS = [
       { id: "4-3-3", name: "هجوم متوازن", lines: [["F", 3], ["M", 3], ["D", 4], ["G", 1]] },
+      { id: "4-3-3 DM", name: "ارتكاز دفاعي", lines: [["F", 3], ["M", 3], ["D", 4], ["G", 1]] },
+      { id: "4-3-3 AM", name: "صانع لعب", lines: [["F", 3], ["M", 3], ["D", 4], ["G", 1]] },
       { id: "4-4-2", name: "توازن كلاسيكي", lines: [["F", 2], ["M", 4], ["D", 4], ["G", 1]] },
+      { id: "4-2-4", name: "هجوم مفتوح", lines: [["F", 4], ["M", 2], ["D", 4], ["G", 1]] },
       { id: "4-2-3-1", name: "وسط وصانع لعب", lines: [["F", 1], ["M", 3], ["M", 2], ["D", 4], ["G", 1]] },
       { id: "3-5-2", name: "سيطرة وسط", lines: [["F", 2], ["M", 5], ["D", 3], ["G", 1]] },
       { id: "3-4-3", name: "ضغط هجومي", lines: [["F", 3], ["M", 4], ["D", 3], ["G", 1]] },
@@ -2221,15 +2224,18 @@
     };
     const FORMATION_ROLE_LINES = {
       "4-3-3": { D: ["LB", "CB", "CB", "RB"], M: ["CM", "CM", "CM"], F: ["LW", "ST", "RW"] },
+      "4-3-3 DM": { D: ["LB", "CB", "CB", "RB"], M: ["CM", "CDM", "CM"], F: ["LW", "ST", "RW"] },
+      "4-3-3 AM": { D: ["LB", "CB", "CB", "RB"], M: ["CM", "CAM", "CM"], F: ["LW", "ST", "RW"] },
+      "4-2-4": { D: ["LB", "CB", "CB", "RB"], M: ["CM", "CM"], F: ["LW", "ST", "ST", "RW"] },
       "4-4-2": { D: ["LB", "CB", "CB", "RB"], M: ["LM", "CM", "CM", "RM"], F: ["ST", "ST"] },
-      "4-2-3-1": { D: ["LB", "CB", "CB", "RB"], M: ["CDM", "CDM", "CAM", "CAM", "CAM"], F: ["ST"] },
+      "4-2-3-1": { D: ["LB", "CB", "CB", "RB"], M: ["CAM", "CAM", "CAM", "CDM", "CDM"], F: ["ST"] },
       "3-5-2": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CDM", "CM", "RM"], F: ["ST", "ST"] },
       "3-4-3": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CM", "RM"], F: ["LW", "ST", "RW"] },
-      "4-1-4-1": { D: ["LB", "CB", "CB", "RB"], M: ["CDM", "LM", "CM", "CM", "RM"], F: ["ST"] },
+      "4-1-4-1": { D: ["LB", "CB", "CB", "RB"], M: ["LM", "CM", "CM", "RM", "CDM"], F: ["ST"] },
       "4-5-1": { D: ["LB", "CB", "CB", "RB"], M: ["LM", "CM", "CDM", "CM", "RM"], F: ["ST"] },
       "5-3-2": { D: ["LB", "CB", "CB", "CB", "RB"], M: ["CM", "CDM", "CM"], F: ["ST", "ST"] },
       "5-4-1": { D: ["LB", "CB", "CB", "CB", "RB"], M: ["LM", "CM", "CM", "RM"], F: ["ST"] },
-      "3-4-2-1": { D: ["CB", "CB", "CB"], M: ["LM", "CM", "CM", "RM", "CAM", "CAM"], F: ["ST"] }
+      "3-4-2-1": { D: ["CB", "CB", "CB"], M: ["CAM", "CAM", "LM", "CM", "CM", "RM"], F: ["ST"] }
     };
     const POSITION_GROUP = {
       GK: "G", CB: "D", LB: "D", RB: "D",
