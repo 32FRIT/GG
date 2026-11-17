@@ -2134,6 +2134,8 @@
       n: player.n,
       p: player.p,
       role: player.role || player.p,
+      alt: (Array.isArray(player.alt) ? player.alt : player.alt ? [player.alt] : [])
+        .map(role => String(role).toUpperCase()).filter(role => role !== (player.role || player.p)),
       nat: player.nat,
       club: player.club,
       era: player.era,
@@ -2238,11 +2240,17 @@
       const roles = FORMATION_ROLE_LINES[formationById(id).id];
       return ["GK", ...roles.D, ...roles.M, ...roles.F];
     };
+    /* Main role + optional extra roles ("alt" in fut-data.js). */
+    const playerRoles = player => [player.role, ...(player.alt || [])];
+    const playsRole = (player, role) => playerRoles(player).includes(role);
+    const playerGroups = player => [...new Set(playerRoles(player).map(role => POSITION_GROUP[role]).filter(Boolean))];
+    const playsGroup = (player, group) => !!group && playerGroups(player).includes(group);
     const alignTeamToFormation = (team, id) => {
       const roles = formationRoleSlots(id), groups = formationSlots(id), remaining = team.filter(Boolean);
       return roles.map((role, index) => {
         let playerIndex = remaining.findIndex(player => player.role === role);
-        if (playerIndex < 0) playerIndex = remaining.findIndex(player => player.p === groups[index]);
+        if (playerIndex < 0) playerIndex = remaining.findIndex(player => playsRole(player, role));
+        if (playerIndex < 0) playerIndex = remaining.findIndex(player => playsGroup(player, groups[index]));
         return playerIndex < 0 ? null : remaining.splice(playerIndex, 1)[0];
       });
     };
@@ -2365,9 +2373,9 @@
         !validCostTable(costs.coaches, club.coaches) ||
         !validCostTable(costs.formations, club.ownedFormations)) return false;
       if (club.starters.some((name, index) => name !== null &&
-        P.find(player => player.n === name).p !== starters[index])) return false;
+        !playsGroup(P.find(player => player.n === name), starters[index]))) return false;
       return club.bench.every((name, index) => name === null || BENCH_SLOT_POSITIONS[index] === null ||
-        P.find(player => player.n === name).p === BENCH_SLOT_POSITIONS[index]);
+        playsGroup(P.find(player => player.n === name), BENCH_SLOT_POSITIONS[index]));
     }
 
     /* Saves written before the catalog encoding fix hold names like "PelÃ©".
@@ -2414,7 +2422,7 @@
         .filter(name => typeof name === "string" && P.some(player => player.n === name)))];
       const takePlayer = requiredPosition => {
         const index = candidates.findIndex(name =>
-          !requiredPosition || P.find(player => player.n === name).p === requiredPosition);
+          !requiredPosition || playsGroup(P.find(player => player.n === name), requiredPosition));
         return index < 0 ? null : candidates.splice(index, 1)[0];
       };
       const starters = positions.map(takePlayer);
@@ -2932,12 +2940,24 @@
         .filter(Boolean);
       const remaining = new Set(inventory.map(player => player.n));
       const takePlayer = position => {
-        const player = inventory.find(item => remaining.has(item.n) && item.p === position);
+        const player = inventory.find(item => remaining.has(item.n) && item.p === position)
+          || inventory.find(item => remaining.has(item.n) && playsGroup(item, position));
         if (!player) return null;
         remaining.delete(player.n);
         return player.n;
       };
-      const starters = formationSlots(formationId).map(takePlayer);
+      const starterRoles = formationRoleSlots(formationId);
+      const starterGroups = formationSlots(formationId);
+      const starters = starterGroups.map(() => null);
+      /* 1) main role  2) extra role  3) same group */
+      [(item, role) => item.role === role, (item, role) => playsRole(item, role)].forEach(match => {
+        starterRoles.forEach((role, i) => {
+          if (starters[i] !== null) return;
+          const found = inventory.find(item => remaining.has(item.n) && match(item, role));
+          if (found) { remaining.delete(found.n); starters[i] = found.n; }
+        });
+      });
+      starterGroups.forEach((group, i) => { if (starters[i] === null) starters[i] = takePlayer(group); });
       const bench = Array(BENCH_SLOT_POSITIONS.length).fill(null);
 
       BENCH_SLOT_POSITIONS.forEach((position, index) => {
@@ -3129,7 +3149,7 @@
     function canPlayerUseSlot(playerName, slot) {
       const requiredPosition = squadSlotPosition(slot);
       const player = P.find(item => item.n === playerName);
-      return !!player && (!requiredPosition || player.p === requiredPosition);
+      return !!player && (!requiredPosition || playsGroup(player, requiredPosition));
     }
 
     function firstEmptySquadSlot(area, playerName) {
@@ -3139,8 +3159,9 @@
       const occupied = guestProgress.club[area === "starter" ? "starters" : "bench"];
       const player = P.find(item => item.n === playerName);
       if (!player) return null;
-      let index = slots.findIndex((position, i) =>
-        position === player.p && occupied[i] === null);
+      let index = area === "starter"
+        ? bestStarterIndex(player, guestProgress.club.formation, occupied)
+        : emptyGroupIndex(player, slots, occupied);
       if (index === -1 && area === "bench") {
         index = slots.findIndex((position, i) => position === null && occupied[i] === null);
       }
@@ -3260,11 +3281,12 @@
       const playerName = squadSlotPlayer(slot);
       const player = P.find(item => item.n === playerName);
       if (!player) return toast("اللاعب المحدد غير موجود");
-      openMarket(player.p, {
+      const slotGroup = squadSlotPosition(slot) || player.p;
+      openMarket(slotGroup, {
         kind: "player",
         area: slot.area,
         index: slot.index,
-        position: player.p,
+        position: slotGroup,
         replaceName: player.n
       }, "team");
     }
@@ -3430,6 +3452,22 @@
       };
     }
 
+    /* أول خانة فاضية لمجموعة اللاعب: الأساسية الأول وبعدين الإضافية */
+    function emptyGroupIndex(player, positions, occupied) {
+      let index = positions.findIndex((position, i) => position === player.p && occupied[i] === null);
+      if (index === -1) index = positions.findIndex((position, i) => position && playsGroup(player, position) && occupied[i] === null);
+      return index;
+    }
+
+    /* أحسن خانة أساسية: المركز الأساسي ← مركز إضافي ← نفس المجموعة */
+    function bestStarterIndex(player, formationId, occupied) {
+      const roles = formationRoleSlots(formationId);
+      let index = roles.findIndex((role, i) => role === player.role && occupied[i] === null);
+      if (index === -1) index = roles.findIndex((role, i) => playsRole(player, role) && occupied[i] === null);
+      if (index === -1) index = emptyGroupIndex(player, formationSlots(formationId), occupied);
+      return index;
+    }
+
     function findPlayerSlot(player, target) {
       const club = guestProgress.club;
       if (!club) return null;
@@ -3442,15 +3480,13 @@
         if (!Number.isInteger(index) || index < 0 || index >= slots.length ||
           (slots[index] !== null && !replacing)) return null;
         const required = key === "starters" ? positions[index] : BENCH_SLOT_POSITIONS[index];
-        if (required && required !== player.p) return null;
+        if (required && !playsGroup(player, required)) return null;
         return { key, index };
       }
 
-      const starterIndex = positions.findIndex((position, index) =>
-        position === player.p && club.starters[index] === null);
+      const starterIndex = bestStarterIndex(player, club.formation, club.starters);
       if (starterIndex !== -1) return { key: "starters", index: starterIndex };
-      const reserveIndex = BENCH_SLOT_POSITIONS.findIndex((position, index) =>
-        position === player.p && club.bench[index] === null);
+      const reserveIndex = emptyGroupIndex(player, BENCH_SLOT_POSITIONS, club.bench);
       if (reserveIndex !== -1) return { key: "bench", index: reserveIndex };
       const flexibleIndex = BENCH_SLOT_POSITIONS.findIndex((position, index) =>
         position === null && club.bench[index] === null);
@@ -3756,7 +3792,7 @@
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
         : isFormationMarket ? FORMATIONS :
-          P.filter(player => position === "ALL" || player.p === position)
+          P.filter(player => position === "ALL" || playsGroup(player, position))
             .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
       const filters = target && (target.kind === "coach" || target.position)
         ? `<div class="sec-title">${target.kind === "coach" ? "المدربين فقط" : `${POS_SHORT[target.position]} فقط`}</div>`
@@ -4183,7 +4219,9 @@
       clearTimeout(phaseTimeout);
       phaseTimeout = null;
       if (S.i >= 11) return startCoachDraft();
-      S.pool = mkPool(S.roles[S.i], S.used);
+      S.multiSeen = S.multiSeen || new Set();
+      S.pool = mkPool(S.roles[S.i], new Set([...S.used, ...S.multiSeen]));
+      S.pool.forEach(x => { if (x.alt.length) S.multiSeen.add(x.n); });
       S.shown = new Set();
       S.sw = 1;
       S.phase = "pick";
@@ -4203,8 +4241,8 @@
     }
 
     function mkPool(role, used) {
-      const exact = P.filter(player => player.role === role && !used.has(player.n));
-      const av = exact.length ? exact : P.filter(player => player.p === POSITION_GROUP[role] && !used.has(player.n));
+      const exact = P.filter(player => playsRole(player, role) && !used.has(player.n));
+      const av = exact.length ? exact : P.filter(player => playsGroup(player, POSITION_GROUP[role]) && !used.has(player.n));
       const st = shuffle(av.filter(x => x.r >= 88));
       const md = shuffle(av.filter(x => x.r >= 75 && x.r < 88));
       const wk = shuffle(av.filter(x => x.r < 75));
@@ -4752,11 +4790,12 @@
           redMinutes[side].push(minute);
           ev.push({ m: minute, s: side, type: "red", who: pickPlayer(team) });
         }
-        if (r() < 0.82) {
+        if (me.entry === "club" && r() < 0.82) {
           const count = 1 + (r() < 0.42 ? 1 : 0) + (r() < 0.12 ? 1 : 0);
           const subbedOut = new Set();
+          const teamSlots = team.slots || formationSlots(team.formation);
           for (let i = 0; i < count; i++) {
-            const available = team.names.filter(n => !subbedOut.has(n));
+            const available = team.names.filter((n, k) => teamSlots[k] !== "G" && !subbedOut.has(n));
             if (!available.length) break;
             const who = available[Math.floor(r() * available.length)];
             subbedOut.add(who);
@@ -4811,7 +4850,8 @@
         return stats.get(id);
       };
       const pickAssister = (team, scorer) => {
-        const candidates = team.names.filter(name => name !== scorer);
+        const teamSlots = team.slots || formationSlots(team.formation);
+        const candidates = team.names.filter((name, k) => name !== scorer && teamSlots[k] !== "G");
         return candidates.length ? candidates[Math.floor(r() * candidates.length)] : null;
       };
       const addGoals = (team, side, count) => {
@@ -4880,8 +4920,8 @@
       const roles = formationRoleSlots(formation.id);
       const used = new Set();
       const names = roles.map(role => {
-        const exact = P.filter(player => player.role === role && !used.has(player.n));
-        const available = exact.length ? exact : P.filter(player => player.p === POSITION_GROUP[role] && !used.has(player.n));
+        const exact = P.filter(player => playsRole(player, role) && !used.has(player.n));
+        const available = exact.length ? exact : P.filter(player => playsGroup(player, POSITION_GROUP[role]) && !used.has(player.n));
         const inRange = available.filter(player => player.r >= difficulty.min && player.r <= difficulty.max);
         const candidates = inRange.length
           ? inRange
@@ -5039,7 +5079,7 @@
           const validSeed = gameType !== "club" ||
             Number.isSafeInteger(d.seed) && d.seed >= 0 && d.seed < 0x100000000;
           const validTeam = !!coach && !!formation && team.length === 11 &&
-            team.every((player, index) => player && player.p === slots[index]) &&
+            team.every((player, index) => player && playsGroup(player, slots[index])) &&
             new Set(d.names).size === 11 &&
             Number.isSafeInteger(d.avg) && d.avg >= 1 && d.avg <= 99 &&
             Number.isSafeInteger(d.baseAvg) && d.baseAvg >= 1 && d.baseAvg <= 99 &&
