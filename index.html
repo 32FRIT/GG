@@ -3058,9 +3058,11 @@
       ["CAM", "CAM", "وسط هجومي"], ["RM", "RM", "وسط أيمن"], ["LM", "LM", "وسط أيسر"],
       ["RW", "RW", "جناح أيمن"], ["LW", "LW", "جناح أيسر"], ["ST", "ST", "مهاجم"]
     ];
-    const marketPositionMatches = (player, position, roles) => {
+    const marketPositionMatches = (player, position, roles, target) => {
+      const targetRole = target && target.kind === "player" && POSITION_GROUP[target.position] ? target.position : null;
       const inBaseGroup = position === "ALL" || playsGroup(player, position);
-      return inBaseGroup && (!roles.length || roles.includes(player.role));
+      return inBaseGroup && (!targetRole || playsRole(player, targetRole)) &&
+        (!roles.length || roles.some(role => playsRole(player, role)));
     };
     let showBench = false;
     let selectedSquadSlot = null;
@@ -3338,10 +3340,17 @@
         : BENCH_SLOT_POSITIONS[slot.index];
     }
 
+    function squadSlotRole(slot) {
+      return slot.area === "starter"
+        ? formationRoleSlots(guestProgress.club.formation)[slot.index]
+        : null;
+    }
+
     function canPlayerUseSlot(playerName, slot) {
       const requiredPosition = squadSlotPosition(slot);
+      const requiredRole = squadSlotRole(slot);
       const player = P.find(item => item.n === playerName);
-      return !!player && (!requiredPosition || playsGroup(player, requiredPosition));
+      return !!player && (requiredRole ? playsRole(player, requiredRole) : !requiredPosition || playsGroup(player, requiredPosition));
     }
 
     function firstEmptySquadSlot(area, playerName) {
@@ -3400,7 +3409,7 @@
           kind: "player",
           area: target.area,
           index: target.index,
-          position: squadSlotPosition(target)
+          position: squadSlotRole(target) || squadSlotPosition(target)
         }, "team");
       }
 
@@ -3421,7 +3430,7 @@
         kind: "player",
         area: target.area,
         index: target.index,
-        position
+        position: squadSlotRole(target) || position
       }, "team");
       app.querySelectorAll("[data-use-reserve]").forEach(button => {
         button.onclick = () => {
@@ -3478,7 +3487,7 @@
         kind: "player",
         area: slot.area,
         index: slot.index,
-        position: slotGroup,
+        position: squadSlotRole(slot) || slotGroup,
         replaceName: player.n
       }, "team");
     }
@@ -3999,11 +4008,9 @@
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
         : isFormationMarket ? FORMATIONS :
-          P.filter(player => marketPositionMatches(player, marketContext.position, marketContext.roles))
+          P.filter(player => marketPositionMatches(player, marketContext.position, marketContext.roles, target))
             .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
-      const roleFilters = target && target.position
-        ? MARKET_ROLE_FILTERS.filter(([role]) => POSITION_GROUP[role] === target.position)
-        : MARKET_ROLE_FILTERS;
+      const roleFilters = MARKET_ROLE_FILTERS;
       const filterCount = marketContext.roles.length +
         (marketContext.query ? 1 : 0) +
         (marketContext.ratingMin || marketContext.ratingMax ? 1 : 0) +
@@ -4015,7 +4022,7 @@
           <span>تصفية السوق</span>${filterCount ? `<span class="market-filter-count">${filterCount}</span>` : ""}
         </button>
         <div class="market-filter-panel" ${marketContext.filtersOpen ? "" : "hidden"}>
-          ${target && target.kind ? "" : `<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`}
+          `<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`
           <div class="market-filter-fields">
             <label>اسم اللاعب<input type="search" id="market-search" dir="auto" placeholder="ابحث بالاسم..." value="${esc(marketContext.query)}"></label>
             ${isCoachMarket || isFormationMarket ? "" : `
@@ -4159,6 +4166,7 @@
       app.querySelectorAll("[data-market-category]").forEach(button => {
         button.onclick = () => {
           marketContext.position = button.dataset.marketCategory;
+          marketContext.target = null;
           marketContext.roles = [];
           marketContext.filtersOpen = true;
           screenMarket();
