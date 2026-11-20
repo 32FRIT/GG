@@ -881,42 +881,41 @@
       font-weight: 900
     }
 
-    .market-criteria {
+    .market-sort-controls {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
       margin-bottom: 12px;
-      padding: 10px;
+      padding: 9px;
       border: 1px solid var(--line);
       border-radius: 12px;
       background: var(--card)
     }
 
-    .market-criteria-title {
+    .market-sort-title {
       grid-column: 1 / -1;
       color: var(--mu);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800
     }
 
-    .market-criteria label {
-      display: grid;
-      gap: 4px;
-      color: var(--mu);
-      font-size: 10px;
-      font-weight: 700
-    }
-
-    .market-criteria input {
-      width: 100%;
+    .market-sort-option {
       min-width: 0;
-      padding: 8px;
+      padding: 8px 4px;
       border: 1px solid var(--line);
       border-radius: 9px;
-      background: var(--bg);
-      color: var(--tx);
+      background: transparent;
+      color: var(--mu);
       font: inherit;
-      font-size: 12px
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .market-sort-option.active {
+      border-color: rgba(46,224,138,.45);
+      background: rgba(46,224,138,.1);
+      color: var(--ac)
     }
 
     .market-search {
@@ -2966,7 +2965,7 @@
       $("play").onclick = screenModes;
     }
 
-    let marketContext = { position: "ALL", target: null, returnTo: "home", query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "" };
+    let marketContext = { position: "ALL", target: null, returnTo: "home", query: "", sort: "rating" };
     const MARKET_ROLE_FILTERS = [
       ["LB", "LB", "ظهير أيسر"], ["RB", "RB", "ظهير أيمن"], ["GK", "GK", "حارس مرمى"],
       ["CB", "CB", "قلب دفاع"], ["CDM", "CDM", "وسط دفاعي"], ["CM", "CM", "وسط"],
@@ -3000,7 +2999,7 @@
 
     function openMarket(position, target, returnTo) {
       selectedSquadSlot = null;
-      marketContext = { position: position === "ANY" ? "ALL" : position, target, returnTo, query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "" };
+      marketContext = { position: position === "ANY" ? "ALL" : position, target, returnTo, query: "", sort: "rating" };
       screenMarket();
     }
 
@@ -3912,11 +3911,18 @@
         ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean)
         : [];
       /* Managers are listed best first so the elite names lead the market. */
+      const marketValueForSort = player => Number.isSafeInteger(player.price) && player.price > 0
+        ? player.price
+        : Number.isSafeInteger(player.suggestedPrice) && player.suggestedPrice > 0 ? player.suggestedPrice : -1;
+      const sortPlayers = players => players.sort((a, b) => {
+        if (marketContext.sort === "price") return marketValueForSort(b) - marketValueForSort(a) || b.r - a.r;
+        if (marketContext.sort === "name") return a.n.localeCompare(b.n, "en");
+        return b.r - a.r || a.n.localeCompare(b.n, "en");
+      });
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
         : isFormationMarket ? FORMATIONS :
-          P.filter(player => marketPositionMatches(player, position))
-            .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
+          sortPlayers(P.filter(player => marketPositionMatches(player, position)));
       const roleFilters = target && target.position
         ? MARKET_ROLE_FILTERS.filter(([role]) => POSITION_GROUP[role] === target.position)
         : MARKET_ROLE_FILTERS;
@@ -3928,13 +3934,11 @@
         : `<div class="formation-grid market-filters">
             ${filterOptions.map(([value, label, title]) => `<button class="formation-option ${position === value ? "active" : ""}" data-market-filter="${value}" aria-label="${title}" title="${title}"><small>${label}</small></button>`).join("")}
           </div>`;
-      const marketCriteriaControls = isCoachMarket || isFormationMarket ? "" :
-        `<div class="market-criteria" aria-label="تصفية اللاعبين">
-          <div class="market-criteria-title">تصفية حسب التقييم والسعر</div>
-          <label>أقل تقييم<input type="number" id="market-rating-min" min="1" max="99" inputmode="numeric" placeholder="من" value="${esc(marketContext.ratingMin)}"></label>
-          <label>أعلى تقييم<input type="number" id="market-rating-max" min="1" max="99" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.ratingMax)}"></label>
-          <label>أقل سعر 🪙<input type="number" id="market-price-min" min="0" inputmode="numeric" placeholder="من" value="${esc(marketContext.priceMin)}"></label>
-          <label>أعلى سعر 🪙<input type="number" id="market-price-max" min="0" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.priceMax)}"></label>
+      const marketSortControls = isCoachMarket || isFormationMarket ? "" :
+        `<div class="market-sort-controls" aria-label="ترتيب اللاعبين">
+          <div class="market-sort-title">ترتيب النتائج</div>
+          ${[["rating", "التقييم ↓", "الأعلى تقييمًا"], ["price", "السعر ↓", "من الأغلى للأرخص"], ["name", "الاسم A–Z", "ترتيب أبجدي من A إلى Z"]]
+            .map(([value, label, title]) => `<button type="button" class="market-sort-option ${marketContext.sort === value ? "active" : ""}" data-market-sort="${value}" title="${title}" aria-pressed="${marketContext.sort === value}">${label}</button>`).join("")}
         </div>`;
       const marketItems = isCoachMarket
         ? items.map(coach => {
@@ -4017,7 +4021,7 @@
   <button class="btn g sm" id="bk">رجوع</button></div>
   <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
   ${filters}
-  ${marketCriteriaControls}
+  ${marketSortControls}
   <input class="market-search" id="market-search" type="search" dir="auto"
     placeholder="${isCoachMarket ? "ابحث باسم المدرب..." : isFormationMarket ? "ابحث باسم التشكيلة أو الخطة..." : "ابحث باسم اللاعب أو النادي..."}"
     aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}">
@@ -4032,41 +4036,29 @@
       const marketSearch = $("market-search");
       const applyMarketSearch = () => {
         marketContext.query = marketSearch.value;
-        const ratingMinInput = $("market-rating-min"), ratingMaxInput = $("market-rating-max");
-        const priceMinInput = $("market-price-min"), priceMaxInput = $("market-price-max");
-        const readBound = input => input && input.value.trim() !== "" ? Number(input.value) : null;
-        const ratingMin = readBound(ratingMinInput), ratingMax = readBound(ratingMaxInput);
-        const priceMin = readBound(priceMinInput), priceMax = readBound(priceMaxInput);
-        if (ratingMinInput) marketContext.ratingMin = ratingMinInput.value;
-        if (ratingMaxInput) marketContext.ratingMax = ratingMaxInput.value;
-        if (priceMinInput) marketContext.priceMin = priceMinInput.value;
-        if (priceMaxInput) marketContext.priceMax = priceMaxInput.value;
         const query = marketSearch.value.trim().toLocaleLowerCase();
         const items = [...app.querySelectorAll("[data-market-search-item]")];
         let hasMatch = false;
         items.forEach(item => {
-          let matches = !query || item.textContent.toLocaleLowerCase().includes(query);
-          if (matches && item.hasAttribute("data-market-player")) {
-            const rating = Number(item.dataset.marketRating);
-            const price = item.dataset.marketPrice === "" ? null : Number(item.dataset.marketPrice);
-            if (ratingMin !== null && rating < ratingMin) matches = false;
-            if (ratingMax !== null && rating > ratingMax) matches = false;
-            if (priceMin !== null && (price === null || price < priceMin)) matches = false;
-            if (priceMax !== null && (price === null || price > priceMax)) matches = false;
-          }
+          const matches = !query || item.textContent.toLocaleLowerCase().includes(query);
           item.hidden = !matches;
           if (matches) hasMatch = true;
         });
         const emptyMarket = app.querySelector("[data-market-empty]");
-        if (emptyMarket) emptyMarket.hidden = !!query || ratingMin !== null || ratingMax !== null || priceMin !== null || priceMax !== null;
-        $("market-search-empty").hidden = !query && ratingMin === null && ratingMax === null && priceMin === null && priceMax === null || hasMatch;
+        if (emptyMarket) emptyMarket.hidden = !!query;
+        $("market-search-empty").hidden = !query || hasMatch;
       };
       marketSearch.oninput = applyMarketSearch;
-      app.querySelectorAll(".market-criteria input").forEach(input => { input.oninput = applyMarketSearch });
       applyMarketSearch();
       app.querySelectorAll("[data-market-filter]").forEach(button => {
         button.onclick = () => {
           marketContext.position = button.dataset.marketFilter;
+          screenMarket();
+        };
+      });
+      app.querySelectorAll("[data-market-sort]").forEach(button => {
+        button.onclick = () => {
+          marketContext.sort = button.dataset.marketSort;
           screenMarket();
         };
       });
