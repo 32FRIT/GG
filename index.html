@@ -329,6 +329,55 @@
       font-size: 12px
     }
 
+    /* ---------- start screen ---------- */
+    .start-screen { flex:1;display:flex;flex-direction:column;gap:14px;min-height:calc(100dvh - 42px) }
+    .start-head { display:flex;align-items:center;justify-content:space-between;gap:12px }
+    .start-brand { display:flex;align-items:center;gap:10px;direction:ltr }
+    .start-brand .logo { width:46px;height:46px;font-size:19px }
+    .start-wordmark { font-weight:900;letter-spacing:1.5px;font-size:17px }
+    .start-wordmark small { display:block;direction:rtl;letter-spacing:0;color:var(--mu);font-size:11px;font-weight:600;margin-top:2px }
+    .start-hero { flex:1;min-height:330px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:24px 16px 32px;border:1px solid rgba(46,224,138,.36);border-radius:24px;background-image:linear-gradient(180deg,rgba(4,18,11,.34) 0%,rgba(4,18,11,.12) 42%,rgba(4,18,11,.35) 100%),url("./Background.jpg");background-size:cover;background-position:center 25%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06) }
+    .start-pitch { position:absolute;z-index:1;inset:12px;border:1.5px solid rgba(255,255,255,.54);border-radius:16px;pointer-events:none }
+    .start-pitch::before { content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid rgba(255,255,255,.55) }
+    .start-pitch::after { content:"";position:absolute;left:50%;top:50%;width:30%;aspect-ratio:1;border:1px solid rgba(255,255,255,.52);border-radius:50%;transform:translate(-50%,-50%) }
+    .start-goal { position:absolute;left:50%;width:27%;height:14%;transform:translateX(-50%);border:1px solid rgba(255,255,255,.5) }
+    .start-goal.top { top:0;border-top:0 }
+    .start-goal.bottom { bottom:0;border-bottom:0 }
+    .start-ball { display:none }
+    .start-title { position:relative;z-index:2;margin:0 0 7px;font-size:clamp(26px,8vw,34px);font-weight:900;letter-spacing:1px;text-shadow:0 2px 12px rgba(0,0,0,.65) }
+    .start-caption { position:relative;z-index:2;color:#e6f2eb;font-size:14px;text-shadow:0 1px 8px rgba(0,0,0,.8) }
+    .start-play { width:100%;min-height:60px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(126,240,184,.38);border-radius:15px;background:linear-gradient(100deg,#2ee08a,#19a966);color:#04150d;font-size:18px;font-weight:900;box-shadow:0 8px 24px rgba(46,224,138,.16);cursor:pointer }
+    .start-play span { font-size:22px;line-height:1 }
+    .start-shortcuts { display:grid;grid-template-columns:1fr 1fr;gap:10px }
+    .start-shortcut { min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:13px;background:var(--card);font-weight:800;cursor:pointer }
+    .start-shortcut:first-child { background:linear-gradient(150deg,#123a26,#0d2418);border-color:rgba(46,224,138,.25) }
+    .start-bottom { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 3px 0;color:var(--mu);font-size:12px }
+    .start-bottom button { border:0;background:transparent;color:inherit;padding:8px 2px;cursor:pointer }
+    @media(max-height:720px) { .start-hero { min-height:260px } .start-screen { min-height:0 } }
+    .play-menu { flex:1;display:flex;flex-direction:column;gap:14px }
+    .play-menu-head { display:flex;align-items:center;gap:12px;margin-bottom:3px }
+    .play-menu-head .logo { width:40px;height:40px;font-size:16px }
+    .play-menu-title { font-size:21px;font-weight:900 }
+    .play-menu-subtitle { margin-top:3px;color:var(--mu);font-size:12px }
+    .play-club-card { width:100%;min-height:92px;display:flex;align-items:center;gap:12px;padding:15px;border:1px solid rgba(46,224,138,.35);border-radius:16px;background:linear-gradient(145deg,#123a26,#0d2418);text-align:right;cursor:pointer }
+    .play-club-card.secondary { border-color:var(--line);background:var(--card) }
+    .play-mode-icon { width:46px;height:46px;flex:0 0 auto;display:grid;place-items:center;border-radius:13px;background:rgba(46,224,138,.16);font-size:23px }
+    .play-mode-copy { flex:1;min-width:0 }
+    .play-mode-copy b { display:block;font-size:15px;font-weight:900 }
+    .play-mode-copy small { display:block;margin-top:4px;color:var(--mu);font-size:12px;line-height:1.45 }
+    .play-mode-arrow { color:var(--ac);font-size:22px }
+    .draft-menu { padding:15px;border:1px solid var(--line);border-radius:17px;background:var(--card) }
+    .draft-menu-head { display:flex;align-items:center;gap:10px;margin-bottom:12px }
+    .draft-menu-head b { display:block;font-size:16px }
+    .draft-menu-head small { display:block;color:var(--mu);font-size:12px;margin-top:3px }
+    .draft-menu .field-label { margin:0 0 7px }
+    .draft-menu .timer-options { margin-bottom:12px }
+    .draft-submodes { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px }
+    .draft-submode { min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px;border:1px solid var(--line);border-radius:12px;background:var(--card2);font-size:12px;font-weight:800;cursor:pointer }
+    .draft-submode span:first-child { font-size:20px }
+    .play-back { margin-top:auto }
+    @media(max-width:360px) { .draft-menu { padding:12px } .draft-submodes { gap:6px } .draft-submode { font-size:11px } }
+
     .squad-topbar {
       display: flex;
       align-items: center;
@@ -611,6 +660,23 @@
       letter-spacing: .04em
     }
 
+    .match-pitch { display:grid;grid-template-rows:repeat(2,minmax(0,1fr));height:var(--match-pitch-height);position:relative;overflow:hidden;border:1px solid rgba(46,224,138,.3);border-radius:10px;background:repeating-linear-gradient(0deg,#123a26 0 30px,#103321 30px 60px) }
+    .match-pitch::before { content:"";position:absolute;z-index:1;left:0;right:0;top:50%;border-top:1px solid rgba(255,255,255,.32);pointer-events:none }
+    .match-pitch::after { content:"";position:absolute;z-index:1;left:50%;top:50%;width:24%;aspect-ratio:1;border:1px solid rgba(255,255,255,.25);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none }
+    .match-pitch-half { display:grid;grid-template-rows:repeat(var(--match-row-count),minmax(0,1fr));position:relative;gap:0;padding:3px;min-width:0;min-height:0 }
+    .match-formation-label { margin:3px 0;color:var(--mu);font-size:9px;font-weight:800;text-align:center }
+    .match-player-art { position:relative;width:100%;min-width:0 }
+    .match-rating-badge { position:absolute;z-index:3;top:1px;right:1px;min-width:0;padding:0 3px;border:1px solid rgba(255,255,255,.48);border-radius:999px;background:#20b976;color:#fff;font-size:7px;font-weight:900;line-height:1.35;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.4) }
+    .match-rating-badge.average { background:#e7a52b;color:#171006 }
+    .match-rating-badge.low { background:#df5b4d;color:#fff }
+    .match-rating-badge.mvp { outline:2px solid #58a7ff;outline-offset:1px }
+    .match-rating-badge .star { margin-inline-start:2px;color:#fff }
+    .match-pitch .pitch-row { position:relative;z-index:2 }
+    .match-score-card { padding:8px !important }
+    .match-pitch .pitch-player { flex:0 0 clamp(42px,11.5vw,48px);max-width:48px;padding:0 }
+    .match-pitch .pitch-row { gap:3px;align-items:center }
+    .match-pitch .pitch-player.has-player-card>.fc { width:100%;margin:0 }
+    .match-pitch .match-rating-badge { font-size:8px;padding-inline:4px }
     .pitch-row {
       display: flex;
       justify-content: center;
@@ -881,85 +947,25 @@
       font-weight: 900
     }
 
-    .market-filter-wrap {
-      margin-top: 10px
-    }
-
-    .market-actions { display:flex; gap:8px; align-items:center }
-    .market-filter-toggle { flex:1; width:auto }
-    .market-search-toggle { display:grid; place-items:center; flex:0 0 44px; width:44px; height:42px; padding:0; border:1px solid var(--line); border-radius:11px; background:var(--card); color:var(--tx); cursor:pointer }
-    .market-search-toggle svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round }
-    .market-search-box { margin-top:8px }
-    .market-search-box[hidden] { display:none }
-    .market-search-box .market-search { margin-top:0 }
-
-    .market-filter-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      min-height: 42px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 11px;
-      background: var(--card);
-      color: var(--tx);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer
-    }
-
-    .market-filter-toggle svg {
-      width: 17px;
-      height: 17px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round
-    }
-
-    .market-filter-count {
-      display: inline-grid;
-      place-items: center;
-      min-width: 19px;
-      height: 19px;
-      padding: 0 5px;
-      border-radius: 999px;
-      background: var(--ac);
-      color: #082015;
-      font-size: 10px
-    }
-
-    .market-filter-panel {
+    .market-criteria {
       display: grid;
-      gap: 10px;
-      margin-top: 8px;
-      padding: 11px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 10px;
       border: 1px solid var(--line);
       border-radius: 12px;
       background: var(--card)
     }
 
-    .market-filter-panel[hidden] {
-      display: none
+    .market-criteria-title {
+      grid-column: 1 / -1;
+      color: var(--mu);
+      font-size: 11px;
+      font-weight: 800
     }
 
-    .market-filter-categories {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px
-    }
-
-    .market-filter-fields {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px
-    }
-
-    .market-filter-panel label {
+    .market-criteria label {
       display: grid;
       gap: 4px;
       color: var(--mu);
@@ -967,7 +973,7 @@
       font-weight: 700
     }
 
-    .market-filter-panel input {
+    .market-criteria input {
       width: 100%;
       min-width: 0;
       padding: 8px;
@@ -979,39 +985,27 @@
       font-size: 12px
     }
 
-    .market-position-choices {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px
-    }
-
-    .market-position-choice,
-    .market-category-choice,
-    .market-filter-clear {
-      min-width: 0;
-      padding: 7px 4px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: transparent;
-      color: var(--mu);
-      font: inherit;
-      font-size: 10px;
-      font-weight: 800;
-      cursor: pointer
-    }
-
-    .market-position-choice.active,
-    .market-category-choice.active {
-      border-color: rgba(46,224,138,.45);
-      background: rgba(46,224,138,.1);
-      color: var(--ac)
-    }
-
-    .market-filter-clear {
-      width: 100%;
-      color: var(--bad)
-    }
-
+    .market-filter-wrap { margin:10px 0 12px }
+    .market-actions { display:flex;gap:8px;align-items:center }
+    .market-actions .market-filter-toggle { flex:1;width:auto }
+    .market-search-toggle { display:grid;place-items:center;flex:0 0 44px;width:44px;height:42px;padding:0;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--tx);cursor:pointer }
+    .market-search-toggle svg { width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round }
+    .market-search-box { margin-top:8px }
+    .market-search-box[hidden] { display:none }
+    .market-search-box .market-search { margin-top:0 }
+    .market-filter-toggle { display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--tx);font:inherit;font-size:12px;font-weight:800;cursor:pointer }
+    .market-filter-toggle svg { width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round }
+    .market-filter-count { display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--ac);color:#082015;font-size:10px }
+    .market-filter-panel { display:grid;gap:10px;margin-top:8px;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--card) }
+    .market-filter-panel[hidden] { display:none }
+    .market-filter-categories { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px }
+    .market-filter-fields { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px }
+    .market-filter-panel label { display:grid;gap:4px;color:var(--mu);font-size:10px;font-weight:700 }
+    .market-filter-panel input { width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit;font-size:12px }
+    .market-position-choices { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px }
+    .market-position-choice,.market-category-choice,.market-filter-clear { min-width:0;padding:7px 4px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--mu);font:inherit;font-size:10px;font-weight:800;cursor:pointer }
+    .market-position-choice.active,.market-category-choice.active { border-color:rgba(46,224,138,.45);background:rgba(46,224,138,.1);color:var(--ac) }
+    .market-filter-clear { width:100%;color:var(--bad) }
     .market-search {
       width: 100%;
       margin-top: 12px;
@@ -1051,6 +1045,7 @@
     .market-search-empty {
       grid-column: 1 / -1
     }
+
 
     .field-label {
       margin-bottom: 8px;
@@ -1108,6 +1103,8 @@
       font-weight: 800;
       text-align: center
     }
+
+
 
     .market-item {
       display: flex;
@@ -2449,14 +2446,14 @@
     const OFFLINE_MATCH_REWARDS = { win: 10000, draw: 5000, loss: 2500 };
     /* Results use an explicit win/draw/loss distribution. Equal teams draw 75%;
        rating differences steadily favor the stronger side while leaving upsets possible. */
-    const MATCH_BASE_EXPECTED_GOALS = 1.35;
+    const MATCH_BASE_EXPECTED_GOALS = 6.35;
     const STARTING_COINS = 9000000;
     const FORMATION_PRICE = 100000;
     const SALE_PRICE_PERCENT = 70;
     const COMPUTER_DIFFICULTIES = [
       { id: "easy", name: "سهل", min: 80, max: 84, target: 82, coachTarget: 72 },
-      { id: "normal", name: "متوسط", min: 85, max: 88, target: 86, coachTarget: 80 },
-      { id: "hard", name: "صعب", min: 89, max: 94, target: 91, coachTarget: 89 }
+      { id: "normal", name: "متوسط", min: 85, max: 91, target: 88, coachTarget: 85 },
+      { id: "hard", name: "صعب", min: 92, max: 98, target: 94, coachTarget: 92 }
     ];
     const formatCoins = amount => amount.toLocaleString("en-US");
     const cardSalePrice = card => Number.isSafeInteger(card.price) && card.price > 0
@@ -2801,6 +2798,7 @@
     let peer = null, conn = null, activeRoomType = "draft";
     let OPP = null;              // {avg,names,name}
     let OPPK = [], OPPS = [], OPPP = [];
+    let rematchContext = null, rematchPending = null, rematchRemote = null, rematchLaunching = false;
 
     function stopTeamResultRetry() {
       clearInterval(teamRetryTimer);
@@ -2978,6 +2976,7 @@
       try {
         localStorage.removeItem(GUEST_PROGRESS_KEY);
         localStorage.removeItem("gg_muted");
+
       } catch (error) {
         console.error("Could not clear saved game data.", error);
         toast("تعذر مسح البيانات من هذا الجهاز");
@@ -3000,38 +2999,28 @@
       _navStack = [screenHome];
       history.pushState({}, "");
       app.innerHTML = `
-  <div class="brand">
-    <div class="logo">GG</div>
-    <div class="brand-heading">
-      <h1>ابني فريق أحلامك</h1>
-      <div class="wallet-badge brand-wallet" aria-label="الكوينز"><span>🪙</span><b>${formatCoins(guestProgress.coins)}</b></div>
-    </div>
-  </div>
-  <div class="hero">
-    <h2>اختار 11 لاعب</h2>
-    <div class="hero-meta">
-      
-      <button class="help-icon" id="how" aria-label="إزاي تلعب" title="إزاي تلعب">؟</button>
-    </div>
-  </div>
-  <button class="mode primary" id="my-team">
-    <div class="ic">👥</div>
-    <div class="tx"><b>تشكيلتي</b><small> إدارة فريقك </small></div>
-    <div class="arw">‹</div>
-  </button>
-  <button class="mode primary" id="go">
-    <div class="ic">🎯</div>
-    <div class="tx"><b>ابدأ اللعب</b></div>
-    <div class="arw">‹</div>
-  </button>
-  <button class="btn g w mt" id="record">السجل</button>
-  <button class="btn g w mt" id="reset-game-data">مسح بيانات اللعبة</button>
-  <div class="foot">GG </div>`;
+  <main class="start-screen" aria-label="شاشة بداية GG">
+    <header class="start-head">
+      <div class="start-brand"><div class="logo">GG</div><div class="start-wordmark">GG FOOTBALL<small>كوّن فريقك وابدأ التحدي</small></div></div>
+      <div class="wallet-badge brand-wallet" aria-label="رصيد الكوينز"><span>🪙</span><b>${formatCoins(guestProgress.coins)}</b></div>
+    </header>
+    <section class="start-hero" aria-label="ابدأ رحلتك الكروية">
+      <div class="start-pitch" aria-hidden="true"><span class="start-goal top"></span><span class="start-goal bottom"></span></div>
+      <h1 class="start-title">ابني فريق أحلامك</h1><p class="start-caption">اختار 11 لاعب ونافس صحابك</p>
+    </section>
+    <button class="start-play" id="go"><span>ابدأ اللعب</span><span aria-hidden="true">‹</span></button>
+    <nav class="start-shortcuts" aria-label="اختصارات اللعبة">
+      <button class="start-shortcut" id="my-team">👥 <span>تشكيلتي</span></button>
+      <button class="start-shortcut" id="home-market">🛒 <span>السوق</span></button>
+    </nav>
+    <footer class="start-bottom"><button id="record">سجل المباريات</button><button id="how">طريقة اللعب</button><button id="reset-game-data">مسح البيانات</button></footer>
+  </main>`;
       $("go").onclick = () => { buzz(8); screenModes() };
       $("how").onclick = screenHow;
       $("record").onclick = screenRecord;
       $("reset-game-data").onclick = resetGameData;
       $("my-team").onclick = screenMyTeam;
+      $("home-market").onclick = () => openMarket("ALL", null, "home");
     }
 
     function screenRecord() {
@@ -3565,6 +3554,7 @@
     <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
     <button class="btn g sm" id="team-market">السوق</button>
   </div>
+  ${rematchContext ? `<button class="btn w mt" id="start-rematch-edit">${rematchContext.online ? "جاهز بعد التعديل · ابدأ مع صاحبك" : "ابدأ المباراة بالتشكيلة دي"}</button>` : ""}
   ${squadPitchHTML(club)}
   ${squadSelectionHTML()}
   <button class="btn g w mt" id="bench-toggle" aria-expanded="${showBench}">${showBench ? "إخفاء الاحتياطي" : "عرض الاحتياطي · 12"}</button>
@@ -3594,6 +3584,17 @@
   </div>` : ""}
   `;
       $("bk").onclick = screenHome;
+      if ($("start-rematch-edit")) $("start-rematch-edit").onclick = () => {
+        if (rematchContext.online) {
+          rematchPending = "ready";
+          try { conn.send({ t: "rematch-choice", action: "ready" }) } catch (e) { return netFail("الاتصال بالخصم غير جاهز", screenMyTeam) }
+          toast("مستني صاحبك يخلص التعديل");
+          checkRematchAgreement();
+        } else {
+          const context = rematchContext; rematchContext = null;
+          startClubMatch("ai", context.difficulty);
+        }
+      };
       $("bench-toggle").onclick = () => { showBench = !showBench; screenMyTeam() };
       if ($("cancel-squad-selection")) {
         $("cancel-squad-selection").onclick = () => { selectedSquadSlot = null; screenMyTeam() };
@@ -4023,32 +4024,17 @@
             .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
       const roleFilters = MARKET_ROLE_FILTERS;
       const filterCount = marketContext.roles.length +
-        (marketContext.ratingMin || marketContext.ratingMax ? 1 : 0) +
-        (marketContext.priceMin || marketContext.priceMax ? 1 : 0);
+        (marketContext.ratingMin || marketContext.ratingMax ? 1 : 0) + (marketContext.priceMin || marketContext.priceMax ? 1 : 0);
       const categoryOptions = [["ALL", "لاعبون"], ["COACH", "مدربون"], ["FORMATION", "تشكيلات"]];
-      const marketFilterControls = `<div class="market-filter-wrap">
-        <div class="market-actions">
-        <button type="button" class="market-filter-toggle" id="market-filter-toggle" aria-expanded="${marketContext.filtersOpen}">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16l-6.5 7.2V19l-3 1v-7.8L4 5z"/></svg>
-          <span>تصفية السوق</span>${filterCount ? `<span class="market-filter-count">${filterCount}</span>` : ""}
-        </button>
-        <button type="button" class="market-search-toggle" id="market-search-toggle" aria-label="بحث" title="بحث" aria-expanded="${marketContext.searchOpen}"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 5 5"></path></svg></button>
-        </div>
-        <div class="market-search-box" ${marketContext.searchOpen ? "" : "hidden"}><input class="market-search" id="market-search" type="search" dir="auto" placeholder="ابحث بالاسم..." aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}"></div>
-        <div class="market-filter-panel" ${marketContext.filtersOpen ? "" : "hidden"}>
-          ${`<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`}
+      const marketFilterControls = `<div class="market-filter-wrap"><div class="market-actions">
+        <button type="button" class="market-filter-toggle" id="market-filter-toggle" aria-expanded="${marketContext.filtersOpen}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16l-6.5 7.2V19l-3 1v-7.8L4 5z"/></svg><span>تصفية السوق</span>${filterCount ? `<span class="market-filter-count">${filterCount}</span>` : ""}</button><button type="button" class="market-search-toggle" id="market-search-toggle" aria-label="بحث" title="بحث" aria-expanded="${marketContext.searchOpen}"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 5 5"></path></svg></button></div><div class="market-search-box" ${marketContext.searchOpen ? "" : "hidden"}><input class="market-search" id="market-search" type="search" dir="auto" placeholder="ابحث بالاسم..." aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}"></div><div class="market-filter-panel" ${marketContext.filtersOpen ? "" : "hidden"}>
+          ${`<div class="market-filter-categories">${categoryOptions.map(([value,label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`}
           <div class="market-filter-fields">
-            ${isCoachMarket || isFormationMarket ? "" : `
-            <label>أقل تقييم<input type="number" id="market-rating-min" min="1" max="99" inputmode="numeric" placeholder="من" value="${esc(marketContext.ratingMin)}"></label>
-            <label>أعلى تقييم<input type="number" id="market-rating-max" min="1" max="99" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.ratingMax)}"></label>
-            <label>أقل سعر 🪙<input type="number" id="market-price-min" min="0" inputmode="numeric" placeholder="من" value="${esc(marketContext.priceMin)}"></label>
-            <label>أعلى سعر 🪙<input type="number" id="market-price-max" min="0" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.priceMax)}"></label>`}
+            ${isCoachMarket || isFormationMarket ? "" : `<label>أقل تقييم<input type="number" id="market-rating-min" min="1" max="99" inputmode="numeric" placeholder="من" value="${esc(marketContext.ratingMin)}"></label><label>أعلى تقييم<input type="number" id="market-rating-max" min="1" max="99" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.ratingMax)}"></label><label>أقل سعر 🪙<input type="number" id="market-price-min" min="0" inputmode="numeric" placeholder="من" value="${esc(marketContext.priceMin)}"></label><label>أعلى سعر 🪙<input type="number" id="market-price-max" min="0" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.priceMax)}"></label>`}
           </div>
-          ${!isCoachMarket && !isFormationMarket ? `<div class="market-position-choices" aria-label="اختيار المراكز">${roleFilters.map(([role, label, title]) => `<button type="button" class="market-position-choice ${marketContext.roles.includes(role) ? "active" : ""}" data-market-role="${role}" title="${title}" aria-pressed="${marketContext.roles.includes(role)}">${label}</button>`).join("")}</div>` : ""}
+          ${!isCoachMarket && !isFormationMarket ? `<div class="market-position-choices" aria-label="اختيار المراكز">${roleFilters.map(([role,label,title]) => `<button type="button" class="market-position-choice ${marketContext.roles.includes(role) ? "active" : ""}" data-market-role="${role}" title="${title}" aria-pressed="${marketContext.roles.includes(role)}">${label}</button>`).join("")}</div>` : ""}
           ${filterCount ? `<button type="button" class="market-filter-clear" id="clear-market-filters">مسح التحديدات</button>` : ""}
-        </div>
-      </div>`;
-      const marketItems = isCoachMarket
+        </div></div>`;      const marketItems = isCoachMarket
         ? items.map(coach => {
           const price = coachPrice(coach);
           const owned = guestProgress.club && guestProgress.club.coaches.includes(coach.n);
@@ -4101,6 +4087,7 @@
               Number.isSafeInteger(available) && available >= player.price;
             const difference = player.price - refund;
             const salePrice = cardSalePrice(player);
+
             const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
               salePrice !== null && salePrice > 0;
             /* The price already sits above the button, so the action label stays short
@@ -4139,7 +4126,6 @@
         returnTo === "team" ? screenMyTeam : screenHome;
       const marketSearch = $("market-search");
       const applyMarketSearch = () => {
-        if (marketSearch) marketContext.query = marketSearch.value;
         const ratingMinInput = $("market-rating-min"), ratingMaxInput = $("market-rating-max");
         const priceMinInput = $("market-price-min"), priceMaxInput = $("market-price-max");
         const readBound = input => input && input.value.trim() !== "" ? Number(input.value) : null;
@@ -4149,64 +4135,33 @@
         if (ratingMaxInput) marketContext.ratingMax = ratingMaxInput.value;
         if (priceMinInput) marketContext.priceMin = priceMinInput.value;
         if (priceMaxInput) marketContext.priceMax = priceMaxInput.value;
-        const query = (marketSearch ? marketSearch.value : marketContext.query).trim().toLocaleLowerCase();
-        const items = [...app.querySelectorAll("[data-market-search-item]")];
+        const query = marketSearch ? marketSearch.value.trim().toLocaleLowerCase() : "";
+        if (marketSearch) marketContext.query = marketSearch.value;
         let hasMatch = false;
-        items.forEach(item => {
+        app.querySelectorAll("[data-market-search-item]").forEach(item => {
           let matches = !query || item.textContent.toLocaleLowerCase().includes(query);
           if (matches && item.hasAttribute("data-market-player")) {
-            const rating = Number(item.dataset.marketRating);
-            const price = item.dataset.marketPrice === "" ? null : Number(item.dataset.marketPrice);
-            if (ratingMin !== null && rating < ratingMin) matches = false;
-            if (ratingMax !== null && rating > ratingMax) matches = false;
-            if (priceMin !== null && (price === null || price < priceMin)) matches = false;
-            if (priceMax !== null && (price === null || price > priceMax)) matches = false;
+            const rating = Number(item.dataset.marketRating), price = item.dataset.marketPrice === "" ? null : Number(item.dataset.marketPrice);
+            if (ratingMin !== null && rating < ratingMin || ratingMax !== null && rating > ratingMax || priceMin !== null && (price === null || price < priceMin) || priceMax !== null && (price === null || price > priceMax)) matches = false;
           }
-          item.hidden = !matches;
-          if (matches) hasMatch = true;
+          item.hidden = !matches; if (matches) hasMatch = true;
         });
         const emptyMarket = app.querySelector("[data-market-empty]");
         if (emptyMarket) emptyMarket.hidden = !!query || ratingMin !== null || ratingMax !== null || priceMin !== null || priceMax !== null;
-        const anyFilter = !!query || ratingMin !== null || ratingMax !== null || priceMin !== null || priceMax !== null || marketContext.roles.length > 0;
-        $("market-search-empty").hidden = !anyFilter || hasMatch;
+        const emptySearch = $("market-search-empty"); if (emptySearch) emptySearch.hidden = !query && ratingMin === null && ratingMax === null && priceMin === null && priceMax === null || hasMatch;
       };
       if (marketSearch) marketSearch.oninput = applyMarketSearch;
-      app.querySelectorAll(".market-filter-fields input").forEach(input => { input.oninput = applyMarketSearch });
-      $("market-filter-toggle").onclick = () => {
-        marketContext.filtersOpen = !marketContext.filtersOpen;
+      app.querySelectorAll(".market-filter-panel input").forEach(input => { input.oninput = applyMarketSearch });
+      applyMarketSearch();
+      const toggle = $("market-filter-toggle"); if (toggle) toggle.onclick = () => { marketContext.filtersOpen = !marketContext.filtersOpen; screenMarket(); };
+      $("market-search-toggle").onclick = () => { marketContext.searchOpen = !marketContext.searchOpen; screenMarket(); if (marketContext.searchOpen) $("market-search").focus(); };
+      app.querySelectorAll("[data-market-category]").forEach(button => button.onclick = () => { marketContext.position = button.dataset.marketCategory; marketContext.target = null; marketContext.roles = []; screenMarket(); });
+      app.querySelectorAll("[data-market-role]").forEach(button => button.onclick = () => {
+        const role = button.dataset.marketRole;
+        marketContext.roles = marketContext.roles.includes(role) ? marketContext.roles.filter(value => value !== role) : [...marketContext.roles, role];
         screenMarket();
-      };
-      $("market-search-toggle").onclick = () => {
-        marketContext.searchOpen = !marketContext.searchOpen;
-        screenMarket();
-        if (marketContext.searchOpen) $("market-search").focus();
-      };
-      app.querySelectorAll("[data-market-category]").forEach(button => {
-        button.onclick = () => {
-          marketContext.position = button.dataset.marketCategory;
-          marketContext.target = null;
-          marketContext.roles = [];
-          marketContext.filtersOpen = true;
-          screenMarket();
-        };
       });
-      app.querySelectorAll("[data-market-role]").forEach(button => {
-        button.onclick = () => {
-          const role = button.dataset.marketRole;
-          marketContext.roles = marketContext.roles.includes(role)
-            ? marketContext.roles.filter(item => item !== role)
-            : [...marketContext.roles, role];
-          marketContext.filtersOpen = true;
-          screenMarket();
-        };
-      });
-      if ($("clear-market-filters")) $("clear-market-filters").onclick = () => {
-        marketContext.roles = [];
-        marketContext.ratingMin = marketContext.ratingMax = "";
-        marketContext.priceMin = marketContext.priceMax = "";
-        marketContext.filtersOpen = true;
-        screenMarket();
-      };
+      const clearFilters = $("clear-market-filters"); if (clearFilters) clearFilters.onclick = () => { Object.assign(marketContext,{roles:[],ratingMin:"",ratingMax:"",priceMin:"",priceMax:""}); screenMarket(); };
       app.querySelectorAll("[data-buy-player]").forEach(button => {
         button.onclick = () => buyMarketPlayer(P[Number(button.dataset.buyPlayer)]);
       });
@@ -4247,37 +4202,31 @@
       cancelGameTimers(); killNet();
       _origPush(screenModes);
       app.innerHTML = `
-  <div class="hdr"><div class="l"><span class="pos">طريقة اللعب</span><span class="cnt">اختار المود</span></div>
-  <button class="btn g sm" id="bk">رجوع</button></div>
-  <div class="sec-title">العب بالتشكيلة اللي بنيتها</div>
-  <button class="mode primary" id="mClub">
-    <div class="ic">🏟️</div>
-    <div class="tx"><b>مباريات تشكيلتي</b><small>استخدم لاعبيك ومدربك والبدلاء</small></div>
-    <div class="arw">‹</div>
-  </button>
-  <div class="sec-title">الدرفت السريع بالكروت</div>
-  <div class="field-label">وقت كل اختيار</div>
-  <div class="timer-options">
-    ${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}">${s} ثانية</button>`).join("")}
-  </div>
-  <button class="mode primary" id="mAi">
-    <div class="ic">🤖</div>
-    <div class="tx"><b>ضد الكمبيوتر</b><small>بيبني فريقه بنفس القواعد والتغيير</small></div>
-    <div class="arw">‹</div>
-  </button>
-  <button class="mode" id="mRoom">
-    <div class="ic">👥</div>
-    <div class="tx"><b>غرفة مع صاحبك</b><small>اعمل غرفة وابعتله الكود</small></div>
-    <div class="arw">‹</div>
-  </button>
-  <button class="mode" id="mOn">
-    <div class="ic">🌐</div>
-    <div class="tx"><b>أونلاين</b><small>تقابل لاعب عشوائي</small></div>
-    <div class="arw">‹</div>
-  </button>`;
+  <main class="play-menu">
+    <header class="play-menu-head"><div class="logo">GG</div><div><h1 class="play-menu-title">اختار طريقة اللعب</h1><p class="play-menu-subtitle">ابدأ مباراة بتشكيلتك أو كوّن فريق بالدريفت</p></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <button class="play-club-card" id="mClub"><span class="play-mode-icon">🏟️</span><span class="play-mode-copy"><b>مباريات تشكيلتي</b><small>العب بفريقك ومدربك والبدلاء</small></span><span class="play-mode-arrow">‹</span></button>
+    <button class="play-club-card secondary" id="mDraft"><span class="play-mode-icon">🃏</span><span class="play-mode-copy"><b>دريفت الكروت</b><small>اكشف الكروت وكوّن فريقك جولة بجولة</small></span><span class="play-mode-arrow">‹</span></button>
+  </main>`;
       $("bk").onclick = screenHome;
-      app.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { TM = +b.dataset.t; screenModes() });
       $("mClub").onclick = screenClubModes;
+      $("mDraft").onclick = screenDraftModes;
+    }
+
+    function screenDraftModes() {
+      _origPush(screenDraftModes);
+      app.innerHTML = `
+  <main class="play-menu">
+    <header class="play-menu-head"><div class="logo">GG</div><div><h1 class="play-menu-title">دريفت الكروت</h1><p class="play-menu-subtitle">اختار الوقت وطريقة المنافسة</p></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <section class="draft-menu" aria-label="إعدادات الدريفت">
+      <header class="draft-menu-head"><span class="play-mode-icon">⏱️</span><span><b>وقت كل اختيار</b><small>تقدر تغيّره قبل كل جولة</small></span></header>
+      <div class="timer-options">${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}" aria-pressed="${s === TM}">${s} ثانية</button>`).join("")}</div>
+    </section>
+    <button class="play-club-card" id="mAi"><span class="play-mode-icon">🤖</span><span class="play-mode-copy"><b>ضد الكمبيوتر</b><small>ابدأ دريفت فردي</small></span><span class="play-mode-arrow">‹</span></button>
+    <button class="play-club-card secondary" id="mRoom"><span class="play-mode-icon">👥</span><span class="play-mode-copy"><b>العب مع صاحبك</b><small>اعمل غرفة وابعتله الكود</small></span><span class="play-mode-arrow">‹</span></button>
+    <button class="play-club-card secondary" id="mOn"><span class="play-mode-icon">🌐</span><span class="play-mode-copy"><b>أونلاين</b><small>قابل لاعب عشوائي</small></span><span class="play-mode-arrow">‹</span></button>
+  </main>`;
+      $("bk").onclick = screenModes;
+      app.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { TM = +b.dataset.t; screenDraftModes() });
       $("mAi").onclick = () => screenFormations(startAIGame);
       $("mRoom").onclick = () => screenFormations(screenRoom);
       $("mOn").onclick = () => screenFormations(() => hostRoom("lobby", true));
@@ -4444,6 +4393,7 @@
         ? selectedFormation
         : opponentFormations[Math.floor(Math.random() * opponentFormations.length)].id;
       OPP = aiTeam(opponentFormation);
+      OPP.seed = Math.floor(Math.random() * 0x100000000);
       OPPK = OPP.names.slice(); OPPS = OPP.sws.slice(); OPPP = OPP.pools.slice();
       startGame();
     }
@@ -4501,7 +4451,7 @@
     /* ================= GAME FLOW ================= */
     function startGame() {
       cancelGameTimers();
-      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), roles: formationRoleSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai" };
+      S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), roles: formationRoleSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai", matchSeed: Math.floor(Math.random() * 0x100000000) };
       round();
     }
 
@@ -4598,6 +4548,43 @@
       return `<div class="sec-title">${esc(title)} · <b dir="ltr">${formation.id}</b></div><div class="pitch">${rows}</div>`;
     }
 
+    function matchFormationRows(team, formationId, ratings, mvpName, reverseRows) {
+      const formation = formationById(formationId);
+      team = alignTeamToFormation(team, formation.id);
+      const slots = formationSlots(formation.id);
+      const roles = formationRoleSlots(formation.id);
+      const offsets = { G: 0, D: 1, M: 1 + slots.filter(pos => pos === "D").length, F: 1 + slots.filter(pos => pos === "D").length + slots.filter(pos => pos === "M").length };
+      const used = { G: 0, D: 0, M: 0, F: 0 };
+      const lines = formation.lines.map(([position, count]) => {
+        const start = offsets[position] + used[position];
+        used[position] += count;
+        return { position, count, start };
+      });
+      const displayLines = reverseRows ? lines.slice().reverse() : lines;
+      return displayLines.map(({ position, count, start }) => {
+        const players = Array.from({ length: count }, (_, rowIndex) => {
+          const index = start + rowIndex;
+          const player = team[index];
+          if (!player) return `<div class="pitch-player"><small>${POS_SHORT[roles[index]] || ""}</small><b>—</b></div>`;
+          const rating = Number.isFinite(ratings[player.n]) ? ratings[player.n] : 6;
+          const tone = rating < 6 ? "low" : rating < 7 ? "average" : "";
+          const isMvp = player.n === mvpName;
+          return `<div class="pitch-player has-player-card"><div class="match-player-art"><span class="match-rating-badge ${tone} ${isMvp ? "mvp" : ""}" aria-label="تقييم المباراة ${rating.toFixed(1)}">${rating.toFixed(1)}${isMvp ? `<span class="star">★</span>` : ""}</span>${cardHTML(player, "formation-player-card")}</div></div>`;
+        }).join("");
+        return `<div class="pitch-row">${players}</div>`;
+      }).join("");
+    }
+
+    function matchFormationHTML(myTeam, myFormation, myRatings, myMvp, opponentTeam, opponentFormation, opponentRatings, opponentMvp) {
+      const mine = formationById(myFormation), theirs = formationById(opponentFormation);
+      const ownLines = mine.lines, opponentLines = theirs.lines;
+      const pitchHeight = Math.max(ownLines.length, opponentLines.length) * 66 * 2;
+      return `<div class="sec-title">تقييمات اللاعبين في المباراة</div>
+        <div class="match-formation-label">تشكيلتك · <b dir="ltr">${mine.id}</b></div>
+        <div class="match-pitch" style="--match-pitch-height:${pitchHeight}px"><div class="match-pitch-half" style="--match-row-count:${ownLines.length}">${matchFormationRows(myTeam, mine.id, myRatings, myMvp, true)}</div>
+        <div class="match-pitch-half" style="--match-row-count:${opponentLines.length}">${matchFormationRows(opponentTeam, theirs.id, opponentRatings, opponentMvp, false)}</div></div>
+        <div class="match-formation-label">تشكيلة الخصم · <b dir="ltr">${theirs.id}</b></div>`;
+    }
     function coachCardHTML(coach, cls) {
       const tierKey = COACH_TIER[coach.tier] ? coach.tier : "regular";
       const tier = COACH_TIER[tierKey];
@@ -4878,18 +4865,71 @@
       </div>
     </div>
     <p class="note">قوة اللاعبين ${baseAvg}، وتأثير المدرب ${coachMultiplier(S.coach).toFixed(3)}، فيصبح تقييم الفريق <b>${avg}</b>.</p>
-    ${formationHTML(S.team, S.formation, "خطة فريقك")}
-    <div id="opp-formation">
-      <div class="sec-title">خطة الخصم</div>
-      <p class="note">مستني بيانات خطة الخصم...</p>
-    </div>
     <div class="mt" style="display:flex;gap:10px">
-      <button class="btn" id="again" style="flex:1">العب تاني</button>
+      <button class="btn" id="again" style="flex:1">إعادة المباراة</button>
       <button class="btn g" id="hm" style="flex:1">الرئيسية</button>
     </div>`;
-      $("again").onclick = () => { killNet(); returnToModeMenu() };
+      $("again").onclick = showRematchChoices;
       $("hm").onclick = () => { killNet(); screenHome() };
       runMatch(avg);
+    }
+
+    function showRematchChoices() {
+      rematchLaunching = false;
+      const isClub = S && S.entry === "club";
+      const online = !!(conn && conn.open);
+      const overlay = document.createElement("div");
+      overlay.className = "pick-overlay sale-overlay";
+      overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true" aria-labelledby="rematch-title">
+        <div class="pick-dialog-title" id="rematch-title">إعادة المباراة</div>
+        <p>${online ? "اختاروا نفس الاختيار عشان تبدأ المباراة الجديدة عندكم" : "اختار طريقة اللعب من جديد"}</p>
+        <div class="pick-actions">
+          <button class="btn" type="button" data-rematch="same">بنفس التشكيلة</button>
+          <button class="btn g" type="button" data-rematch="${isClub ? "edit" : "new"}">${isClub ? "تعديل التشكيلة" : "تشكيلة جديدة"}</button>
+          <button class="btn g" type="button" data-rematch-cancel>إلغاء</button>
+        </div></div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector("[data-rematch-cancel]").onclick = () => overlay.remove();
+      overlay.querySelectorAll("[data-rematch]").forEach(button => button.onclick = () => {
+        const action = button.dataset.rematch; overlay.remove();
+        if (online) {
+          rematchPending = action; rematchRemote = null; rematchLaunching = false;
+          try { conn.send({ t: "rematch-choice", action }) }
+          catch (e) { return netFail("الاتصال بالخصم غير جاهز", isClub ? screenClubModes : screenModes) }
+          toast("مستني اختيار صاحبك"); checkRematchAgreement();
+        } else if (action === "same") launchSameLineupRematch();
+        else if (isClub) { rematchContext = { online: false, difficulty: S.difficulty }; screenMyTeam() }
+        else screenModes();
+      });
+    }
+
+    function launchSameLineupRematch() {
+      if (!S) return;
+      const previous = S, club = previous.entry === "club";
+      if (club) return startClubMatch(previous.mode === "online" && conn && conn.open ? "online" : "ai", previous.difficulty);
+      cancelGameTimers(); resetOpponent();
+      S = { i: 11, team: previous.team.slice(), used: new Set(previous.team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
+        phase: "match", sel: null, formation: previous.formation, slots: formationSlots(previous.formation), roles: formationRoleSlots(previous.formation),
+        coach: previous.coach, coachPool: [], coachShown: new Set(), coachSwap: 0, mode: conn && conn.open ? "online" : "ai", entry: "draft",
+        matchSeed: Math.floor(Math.random() * 0x100000000) };
+      if (!(conn && conn.open)) {
+        opponentFormation = FORMATIONS[Math.floor(Math.random() * FORMATIONS.length)].id;
+        OPP = aiTeam(opponentFormation);
+        OPP.seed = Math.floor(Math.random() * 0x100000000);
+      }
+      endGame();
+    }
+
+    function checkRematchAgreement() {
+      if (rematchLaunching || !rematchPending || !rematchRemote || rematchPending !== rematchRemote) return;
+      rematchLaunching = true;
+      const action = rematchPending;
+      rematchPending = rematchRemote = null;
+      const club = S && S.entry === "club";
+      if (action === "ready" && club) { rematchContext = null; return startClubMatch("online"); }
+      if (action === "same") return launchSameLineupRematch();
+      if (action === "edit" && club) { rematchLaunching = false; rematchContext = { online: true }; return screenMyTeam(); }
+      if (action === "new" && !club) return startGame();
     }
 
     function runMatch(me) {
@@ -4904,7 +4944,7 @@
         coach: S.coach,
         mode: S.mode,
         entry: S.entry,
-        seed: S.entry === "club" ? S.matchSeed : undefined
+        seed: S.matchSeed
       };
       if (conn && conn.open) {
         publishTeamResult(conn, {
@@ -4917,12 +4957,7 @@
           seed: mt.seed
         });
       }
-      const oppFormation = $("opp-formation");
-      if (oppFormation) {
-        oppFormation.innerHTML = OPP
-          ? formationHTML(OPP.names.map(n => P.find(p => p.n === n)).filter(Boolean), OPP.formation, "خطة الخصم")
-          : `<div class="sec-title">خطة الخصم</div><p class="note">مستني بيانات خطة الخصم...</p>`;
-      }
+
       const coaches = $("coach-compare");
       if (coaches) {
         coaches.innerHTML = `<div class="coach-compare-item">
@@ -4970,9 +5005,11 @@
       const motm = { ...r.motm, me: (r.motm.s === "A") === r.mine };
       box.innerHTML = `
     <div class="sec-title">المباراة</div>
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center">
+    <div class="match-score-card" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center">
+
       <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
       <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
+      <div id="match-pitch"></div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
       sfxWhistle();
@@ -5016,9 +5053,15 @@
           $("lg").insertAdjacentHTML("beforeend",
             `<div class="row" style="margin-top:10px;padding:10px;background:rgba(255,207,74,.08);border-color:rgba(255,207,74,.25)">
           <span class="n" style="font-size:12.5px">⭐ MVP: ${esc(motm.who.toLocaleUpperCase())} · ${mvpTeamLabel}</span>
-          <span class="r" style="font-size:11px">${esc(motm.reason)}</span>
+          <span class="r" dir="ltr" style="font-size:11px;direction:ltr;unicode-bidi:isolate;text-align:left">${esc(motm.reason)}</span>
         </div>`);
-          recordGuestMatch(mt, a, b);
+          const mySide = r.mine ? "A" : "B", opponentSide = r.mine ? "B" : "A";
+          const opponentTeam = OPP.names.map(name => P.find(player => player.n === name)).filter(Boolean);
+          const matchPitch = $("match-pitch");
+          if (matchPitch) matchPitch.innerHTML = matchFormationHTML(
+            S.team, S.formation, r.ratings[mySide], motm.me ? motm.who : null,
+            opponentTeam, OPP.formation, r.ratings[opponentSide], motm.me ? null : motm.who
+          );          recordGuestMatch(mt, a, b);
         }
       }, TICK_MS);
     }
@@ -5057,6 +5100,21 @@
       const r = rng32(hs(seedInput));
       const pickPlayer = x => x.names[Math.floor(r() * x.names.length)] || "لاعب";
       const ev = [];
+      const occupiedEventMinutes = new Set();
+      const pushEvent = event => {
+        const preferred = Math.max(1, Math.min(90, Math.round(event.m)));
+        let chosen = 0;
+        for (let offset = 0; offset <= 90; offset++) {
+          const later = preferred + offset, earlier = preferred - offset;
+          if (later <= 90 && !occupiedEventMinutes.has(later)) { chosen = later; break; }
+          if (earlier >= 1 && !occupiedEventMinutes.has(earlier)) { chosen = earlier; break; }
+        }
+        if (!chosen) for (let minute = 1; minute <= 90; minute++) if (!occupiedEventMinutes.has(minute)) { chosen = minute; break; }
+        event.m = chosen || preferred;
+        occupiedEventMinutes.add(event.m);
+        ev.push(event);
+        return event;
+      };
 
       /* Match incidents are generated before the result so dismissals affect team strength. */
       const redMinutes = { A: [], B: [] };
@@ -5072,21 +5130,21 @@
             const who = available[Math.floor(r() * available.length)];
             const minute = 12 + Math.floor(r() * 76);
             yellowedPlayers.add(who);
-            yellowCards.push({ who, minute });
-            ev.push({ m: minute, s: side, type: "yellow", who });
+            const yellow = pushEvent({ m: minute, s: side, type: "yellow", who });
+            yellowCards.push({ who, minute: yellow.m });
           }
           yellowCards.forEach(card => {
             if (r() < 0.04) {
               const minute = Math.min(90, card.minute + 5 + Math.floor(r() * 36));
-              redMinutes[side].push(minute);
-              ev.push({ m: minute, s: side, type: "red", who: card.who, secondYellow: true });
+              const red = pushEvent({ m: minute, s: side, type: "red", who: card.who, secondYellow: true });
+              redMinutes[side].push(red.m);
             }
           });
         }
         if (r() < 0.075) {
           const minute = 8 + Math.floor(r() * 78);
-          redMinutes[side].push(minute);
-          ev.push({ m: minute, s: side, type: "red", who: pickPlayer(team) });
+          const red = pushEvent({ m: minute, s: side, type: "red", who: pickPlayer(team) });
+          redMinutes[side].push(red.m);
         }
         if (me.entry === "club" && r() < 0.82) {
           const count = 1 + (r() < 0.42 ? 1 : 0) + (r() < 0.12 ? 1 : 0);
@@ -5097,7 +5155,7 @@
             if (!available.length) break;
             const who = available[Math.floor(r() * available.length)];
             subbedOut.add(who);
-            ev.push({ m: 55 + Math.floor(r() * 34), s: side, type: "sub", who });
+            pushEvent({ m: 55 + Math.floor(r() * 34), s: side, type: "sub", who });
           }
         }
       });
@@ -5170,7 +5228,7 @@
           const assist = r() < 0.68 ? pickAssister(team, scorer) : null;
           statsFor(side, scorer).goals++;
           if (assist) statsFor(side, assist).assists++;
-          ev.push({ m: 1 + Math.floor(r() * 90), s: side, type: "goal", who: scorer, assist });
+          pushEvent({ m: 1 + Math.floor(r() * 90), s: side, type: "goal", who: scorer, assist });
         }
       };
       addGoals(A, "A", ga);
@@ -5195,14 +5253,32 @@
           (P.find(player => player.n === y.who)?.r || 0) - (P.find(player => player.n === x.who)?.r || 0);
       });
       const best = candidates[0];
+      const reasonParts = [];
+      if (best.assists) reasonParts.push(`${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}`);
+      if (best.goals) reasonParts.push(`${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}`);
       const reason = best.saves >= 5 && best.goals === 0 && best.assists === 0 && (best.s === "A" ? gb : ga) <= 2 && (best.s === "A" ? ga >= gb : gb >= ga)
         ? `${best.saves} SAVES`
-        : [
-          best.goals ? `${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}` : "",
-          best.assists ? `${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}` : ""
-        ].filter(Boolean).join(" · ") || (best.saves >= 3 ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
+        : reasonParts.join(" · ") || (best.saves >= 3 ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
+      const ratings = { A: {}, B: {} };
+      ["A", "B"].forEach(side => {
+        const team = side === "A" ? A : B;
+        const conceded = side === "A" ? gb : ga;
+        const won = result === side, drew = result === "draw";
+        team.names.forEach((name, index) => {
+          const playerStats = stats.get(`${side}|${name}`) || { goals: 0, assists: 0, saves: 0 };
+          const yellowCount = ev.filter(event => event.s === side && event.type === "yellow" && event.who === name).length;
+          const redCount = ev.filter(event => event.s === side && event.type === "red" && event.who === name).length;
+          const slot = (team.slots || formationSlots(team.formation))[index];
+          let rating = 6 + playerStats.goals * 1.15 + playerStats.assists * 0.7 - yellowCount * 0.25 - redCount * 1.1;
+          if (slot === "G") rating += playerStats.saves * 0.12 - conceded * 0.3;
+          else if (slot === "D") rating += conceded === 0 ? 0.35 : -conceded * 0.08;
+          if (won) rating += 0.25;
+          else if (drew) rating += 0.1;
+          ratings[side][name] = Math.round(Math.max(4, Math.min(10, rating)) * 10) / 10;
+        });
+      });
       ev.sort((x, y) => x.m - y.m);
-      return { mine: mineFirst, ev, motm: { s: best.s, who: best.who, reason } };
+      return { mine: mineFirst, ev, ratings, motm: { s: best.s, who: best.who, reason } };
     }
 
     /* ================= AI OPPONENT ================= */
@@ -5343,6 +5419,14 @@
           resetOpponent();
           toast("الخصم انسحب من المباراة");
           returnScreen();
+          return;
+        }
+        if (d.t === "rematch-choice") {
+          const allowed = gameType === "club" ? ["same", "edit", "ready"] : ["same", "new"];
+          if (!allowed.includes(d.action)) return;
+          rematchRemote = d.action;
+          checkRematchAgreement();
+          if (rematchPending && rematchRemote !== rematchPending) toast("اختاروا نفس طريقة إعادة المباراة");
           return;
         }
         if (d.t === "hello" && isHost) {
