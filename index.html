@@ -885,6 +885,14 @@
       margin-top: 10px
     }
 
+    .market-actions { display:flex; gap:8px; align-items:center }
+    .market-filter-toggle { flex:1; width:auto }
+    .market-search-toggle { display:grid; place-items:center; flex:0 0 44px; width:44px; height:42px; padding:0; border:1px solid var(--line); border-radius:11px; background:var(--card); color:var(--tx); cursor:pointer }
+    .market-search-toggle svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round }
+    .market-search-box { margin-top:8px }
+    .market-search-box[hidden] { display:none }
+    .market-search-box .market-search { margin-top:0 }
+
     .market-filter-toggle {
       display: flex;
       align-items: center;
@@ -3051,7 +3059,7 @@
       $("play").onclick = screenModes;
     }
 
-    let marketContext = { position: "ALL", roles: [], target: null, returnTo: "home", query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "", filtersOpen: false };
+    let marketContext = { position: "ALL", roles: [], target: null, returnTo: "home", query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "", filtersOpen: false, searchOpen: false };
     const MARKET_ROLE_FILTERS = [
       ["LB", "LB", "ظهير أيسر"], ["RB", "RB", "ظهير أيمن"], ["GK", "GK", "حارس مرمى"],
       ["CB", "CB", "قلب دفاع"], ["CDM", "CDM", "وسط دفاعي"], ["CM", "CM", "وسط"],
@@ -3086,7 +3094,7 @@
 
     function openMarket(position, target, returnTo) {
       selectedSquadSlot = null;
-      marketContext = { position: position === "ANY" ? "ALL" : position, roles: [], target, returnTo, query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "", filtersOpen: false };
+      marketContext = { position: position === "ANY" ? "ALL" : position, roles: [], target, returnTo, query: "", ratingMin: "", ratingMax: "", priceMin: "", priceMax: "", filtersOpen: false, searchOpen: false };
       screenMarket();
     }
 
@@ -4015,19 +4023,21 @@
             .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
       const roleFilters = MARKET_ROLE_FILTERS;
       const filterCount = marketContext.roles.length +
-        (marketContext.query ? 1 : 0) +
         (marketContext.ratingMin || marketContext.ratingMax ? 1 : 0) +
         (marketContext.priceMin || marketContext.priceMax ? 1 : 0);
       const categoryOptions = [["ALL", "لاعبون"], ["COACH", "مدربون"], ["FORMATION", "تشكيلات"]];
       const marketFilterControls = `<div class="market-filter-wrap">
+        <div class="market-actions">
         <button type="button" class="market-filter-toggle" id="market-filter-toggle" aria-expanded="${marketContext.filtersOpen}">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16l-6.5 7.2V19l-3 1v-7.8L4 5z"/></svg>
           <span>تصفية السوق</span>${filterCount ? `<span class="market-filter-count">${filterCount}</span>` : ""}
         </button>
+        <button type="button" class="market-search-toggle" id="market-search-toggle" aria-label="بحث" title="بحث" aria-expanded="${marketContext.searchOpen}"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 5 5"></path></svg></button>
+        </div>
+        <div class="market-search-box" ${marketContext.searchOpen ? "" : "hidden"}><input class="market-search" id="market-search" type="search" dir="auto" placeholder="ابحث بالاسم..." aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}"></div>
         <div class="market-filter-panel" ${marketContext.filtersOpen ? "" : "hidden"}>
           ${`<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`}
           <div class="market-filter-fields">
-            <label>اسم اللاعب<input type="search" id="market-search" dir="auto" placeholder="ابحث بالاسم..." value="${esc(marketContext.query)}"></label>
             ${isCoachMarket || isFormationMarket ? "" : `
             <label>أقل تقييم<input type="number" id="market-rating-min" min="1" max="99" inputmode="numeric" placeholder="من" value="${esc(marketContext.ratingMin)}"></label>
             <label>أعلى تقييم<input type="number" id="market-rating-max" min="1" max="99" inputmode="numeric" placeholder="إلى" value="${esc(marketContext.ratingMax)}"></label>
@@ -4166,6 +4176,11 @@
         marketContext.filtersOpen = !marketContext.filtersOpen;
         screenMarket();
       };
+      $("market-search-toggle").onclick = () => {
+        marketContext.searchOpen = !marketContext.searchOpen;
+        screenMarket();
+        if (marketContext.searchOpen) $("market-search").focus();
+      };
       app.querySelectorAll("[data-market-category]").forEach(button => {
         button.onclick = () => {
           marketContext.position = button.dataset.marketCategory;
@@ -4187,7 +4202,6 @@
       });
       if ($("clear-market-filters")) $("clear-market-filters").onclick = () => {
         marketContext.roles = [];
-        marketContext.query = "";
         marketContext.ratingMin = marketContext.ratingMax = "";
         marketContext.priceMin = marketContext.priceMax = "";
         marketContext.filtersOpen = true;
