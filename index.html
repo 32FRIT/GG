@@ -4022,7 +4022,7 @@
           <span>تصفية السوق</span>${filterCount ? `<span class="market-filter-count">${filterCount}</span>` : ""}
         </button>
         <div class="market-filter-panel" ${marketContext.filtersOpen ? "" : "hidden"}>
-          `<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`
+          ${`<div class="market-filter-categories">${categoryOptions.map(([value, label]) => `<button type="button" class="market-category-choice ${position === value ? "active" : ""}" data-market-category="${value}">${label}</button>`).join("")}</div>`}
           <div class="market-filter-fields">
             <label>اسم اللاعب<input type="search" id="market-search" dir="auto" placeholder="ابحث بالاسم..." value="${esc(marketContext.query)}"></label>
             ${isCoachMarket || isFormationMarket ? "" : `
