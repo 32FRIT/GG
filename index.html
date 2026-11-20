@@ -3456,11 +3456,12 @@
         if (area === "starter" && reservePlayersForSlot(target).length) {
           return screenReserveChoices(target);
         }
+        const requiredRole = area === "starter" ? squadSlotRole(target) : null;
         openMarket(position || "ANY", {
           kind: "player",
           area,
           index,
-          position: position || null
+          position: requiredRole || position || null
         }, "team");
         return;
       }
