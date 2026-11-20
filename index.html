@@ -678,18 +678,66 @@
     }
 
     .squad-action-panel {
+      display: grid;
+      gap: 10px;
       margin-top: 12px;
       padding: 12px;
-      border: 1px solid rgba(245, 196, 81, .3);
+      border: 1px solid var(--line);
       border-radius: 14px;
-      background: rgba(245, 196, 81, .08);
+      background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+      box-shadow: 0 10px 28px rgba(0,0,0,.18);
       animation: overlay-in .18s ease both
     }
 
-    .squad-action-panel p {
-      margin-bottom: 10px;
-      font-size: 13px;
+    .squad-player-summary {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0
+    }
+
+    .squad-selected-art {
+      flex: 0 0 54px;
+      width: 54px
+    }
+
+    .squad-selected-art .fc {
+      width: 100%;
+      border-radius: 8px;
+      pointer-events: none
+    }
+
+    .squad-selection-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+      flex: 1
+    }
+
+    .squad-selection-copy small {
+      color: var(--mu);
+      font-size: 10px;
       font-weight: 700
+    }
+
+    .squad-selection-copy strong {
+      overflow: hidden;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .squad-selection-copy span {
+      color: var(--ac);
+      font-size: 11px;
+      font-weight: 800
+    }
+
+    .squad-selection-hint {
+      margin: 0;
+      color: var(--mu);
+      font-size: 11px;
+      line-height: 1.5
     }
 
     .sale-breakdown {
@@ -3314,20 +3362,31 @@
         return "";
       }
       const player = P.find(item => item.n === playerName);
-      const destination = selectedSquadSlot.area === "starter" ? "الاحتياطي" : "التشكيلة الأساسية";
-      const hasTarget = !!firstEmptySquadSlot(
-        selectedSquadSlot.area === "starter" ? "bench" : "starter",
-        playerName
-      );
-      return `<div class="squad-action-panel">
-        <p>${esc(playerName)}${guestProgress.club.confirmed ? "" : " · تعديل مجاني قبل التأكيد"}</p>
+      if (!player) return "";
+      const slot = selectedSquadSlot;
+      const destination = slot.area === "starter" ? "الاحتياطي" : "التشكيلة الأساسية";
+      const hasTarget = !!firstEmptySquadSlot(slot.area === "starter" ? "bench" : "starter", playerName);
+      const selectedGroup = squadSlotPosition(slot) || player.p;
+      const selectedPlace = slot.area === "starter" ? "أساسي" : "احتياطي";
+      const saleValue = guestProgress.club.confirmed ? cardSalePrice(player) : null;
+      return `<section class="squad-action-panel" aria-label="إجراءات اللاعب المحدد">
+        <div class="squad-player-summary">
+          <div class="squad-selected-art">${cardHTML(player, "squad-selected-card")}</div>
+          <div class="squad-selection-copy">
+            <small>${selectedPlace} · ${POS_NAME[selectedGroup] || selectedGroup}</small>
+            <strong>${esc(playerName)}</strong>
+            <span>OVR ${player.r}${saleValue ? ` · بيع ${formatCoins(saleValue)} 🪙` : ""}</span>
+          </div>
+        </div>
+        <p class="squad-selection-hint">اضغط على لاعب آخر في الملعب أو الاحتياطي لتبديل المكان.</p>
         <div class="squad-action-buttons">
-          <button class="btn" id="auto-squad-move" ${hasTarget ? "" : "disabled"}>نقله إلى ${destination}</button>
-          <button class="btn g" id="swap-selected-player">تبديل اللاعب</button>
-          ${guestProgress.club.confirmed ? "" : `<button class="btn g" id="remove-draft-player">إزالة قبل التأكيد</button>`}
+          <button class="btn" id="auto-squad-move" ${hasTarget ? "" : "disabled"}>نقل إلى ${destination}</button>
+          <button class="btn g" id="swap-selected-player">استبدال من السوق</button>
+          ${saleValue ? `<button class="btn sell" id="sell-selected-player">بيع · ${formatCoins(saleValue)} 🪙</button>` : ""}
+          ${guestProgress.club.confirmed ? "" : `<button class="btn g" id="remove-draft-player">إزالة</button>`}
           <button class="btn g" id="cancel-squad-selection">إلغاء</button>
         </div>
-      </div>`;
+      </section>`;
     }
 
     function screenMyTeam() {
@@ -3377,6 +3436,10 @@
         $("cancel-squad-selection").onclick = () => { selectedSquadSlot = null; screenMyTeam() };
         $("auto-squad-move").onclick = moveSelectedPlayerBetweenSquadAreas;
         $("swap-selected-player").onclick = openSquadPlayerSwap;
+        if ($("sell-selected-player")) {
+          const selectedPlayer = P.find(item => item.n === squadSlotPlayer(selectedSquadSlot));
+          $("sell-selected-player").onclick = () => sellOwnedSquadPlayer(selectedPlayer);
+        }
         if ($("remove-draft-player")) $("remove-draft-player").onclick = removeDraftSquadPlayer;
       }
       $("club-coach").onclick = () => openMarket("COACH", { kind: "coach" }, "team");
