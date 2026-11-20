@@ -4108,7 +4108,6 @@
   <div class="hdr"><div class="l"><span class="pos">السوق</span><span class="cnt">${isCoachMarket ? "المدربين" : isFormationMarket ? "التشكيلات" : "اللاعبين"}</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
-  ${filters}
   ${marketFilterControls}
   <div class="market-list ${!isFormationMarket ? "player-grid" : ""}" id="market-list">
     ${marketItems
