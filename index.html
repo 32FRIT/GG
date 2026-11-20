@@ -3061,8 +3061,8 @@
     const marketPositionMatches = (player, position, roles, target) => {
       const targetRole = target && target.kind === "player" && POSITION_GROUP[target.position] ? target.position : null;
       const inBaseGroup = position === "ALL" || playsGroup(player, position);
-      return inBaseGroup && (!targetRole || playsRole(player, targetRole)) &&
-        (!roles.length || roles.some(role => playsRole(player, role)));
+      return inBaseGroup && (!targetRole || player.role === targetRole) &&
+        (!roles.length || roles.includes(player.role));
     };
     let showBench = false;
     let selectedSquadSlot = null;
@@ -3350,7 +3350,7 @@
       const requiredPosition = squadSlotPosition(slot);
       const requiredRole = squadSlotRole(slot);
       const player = P.find(item => item.n === playerName);
-      return !!player && (requiredRole ? playsRole(player, requiredRole) : !requiredPosition || playsGroup(player, requiredPosition));
+      return !!player && (requiredRole ? player.role === requiredRole : !requiredPosition || playsGroup(player, requiredPosition));
     }
 
     function firstEmptySquadSlot(area, playerName) {
@@ -3698,7 +3698,7 @@
         const required = key === "starters" ? positions[index] : BENCH_SLOT_POSITIONS[index];
         const requiredRole = key === "starters" ? formationRoleSlots(club.formation)[index] : null;
         if (required && !playsGroup(player, required)) return null;
-        if (requiredRole && !playsRole(player, requiredRole)) return null;
+        if (requiredRole && player.role !== requiredRole) return null;
         return { key, index };
       }
 
