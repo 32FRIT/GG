@@ -866,19 +866,56 @@
     }
 
     .market-filters {
-      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px;
       margin-bottom: 12px
     }
 
     .market-filters .formation-option {
-      min-height: 42px;
+      min-height: 40px;
       padding: 4px 2px
     }
 
     .market-filters small {
       font-size: 10px;
       font-weight: 900
+    }
+
+    .market-info-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 12px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card)
+    }
+
+    .market-info-controls>span {
+      width: 100%;
+      color: var(--mu);
+      font-size: 10px;
+      font-weight: 800
+    }
+
+    .market-info-toggle {
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--mu);
+      font: inherit;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    .market-info-toggle[aria-pressed="true"] {
+      border-color: rgba(46,224,138,.45);
+      background: rgba(46,224,138,.1);
+      color: var(--ac)
     }
 
     .market-search {
@@ -976,6 +1013,24 @@
       font-size: 10px;
       font-weight: 800;
       text-align: center
+    }
+
+    .market-item-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      color: var(--mu);
+      font-size: 10px;
+      font-weight: 700
+    }
+
+    .market-item-details span {
+      padding: 3px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.025)
     }
 
     .market-item {
@@ -2847,6 +2902,8 @@
       try {
         localStorage.removeItem(GUEST_PROGRESS_KEY);
         localStorage.removeItem("gg_muted");
+        localStorage.removeItem(MARKET_DISPLAY_STORAGE_KEY);
+        marketDisplaySettings = Object.fromEntries(MARKET_DISPLAY_FIELDS.map(([key]) => [key, true]));
       } catch (error) {
         console.error("Could not clear saved game data.", error);
         toast("تعذر مسح البيانات من هذا الجهاز");
@@ -2929,16 +2986,53 @@
     }
 
     let marketContext = { position: "ALL", target: null, returnTo: "home", query: "" };
+    const MARKET_ROLE_FILTERS = [
+      ["LB", "LB", "ظهير أيسر"], ["RB", "RB", "ظهير أيمن"], ["GK", "GK", "حارس مرمى"],
+      ["CB", "CB", "قلب دفاع"], ["CDM", "CDM", "وسط دفاعي"], ["CM", "CM", "وسط"],
+      ["CAM", "CAM", "وسط هجومي"], ["RM", "RM", "وسط أيمن"], ["LM", "LM", "وسط أيسر"],
+      ["RW", "RW", "جناح أيمن"], ["LW", "LW", "جناح أيسر"], ["ST", "ST", "مهاجم"]
+    ];
+    const MARKET_DISPLAY_FIELDS = [["name", "الاسم"], ["value", "القيمة"], ["rating", "التقييم"], ["position", "المركز"]];
+    const MARKET_DISPLAY_STORAGE_KEY = "gg_market_display_v1";
+    const readMarketDisplaySettings = () => {
+      const defaults = Object.fromEntries(MARKET_DISPLAY_FIELDS.map(([key]) => [key, true]));
+      try {
+        const saved = JSON.parse(localStorage.getItem(MARKET_DISPLAY_STORAGE_KEY) || "{}");
+        return Object.fromEntries(MARKET_DISPLAY_FIELDS.map(([key]) => [key, saved[key] !== false]));
+      } catch { return defaults }
+    };
+    let marketDisplaySettings = readMarketDisplaySettings();
+    const saveMarketDisplaySettings = () => {
+      try { localStorage.setItem(MARKET_DISPLAY_STORAGE_KEY, JSON.stringify(marketDisplaySettings)) }
+      catch { toast("تعذر حفظ تفضيلات عرض السوق") }
+    };
+    const marketPositionMatches = (player, position) => position === "ALL"
+      ? true
+      : position.startsWith("ROLE:")
+        ? playsRole(player, position.slice(5))
+        : playsGroup(player, position);
     let showBench = false;
     let selectedSquadSlot = null;
     document.addEventListener("click", event => {
-      if (!showBench || !(event.target instanceof Element)) return;
-      if (event.target.closest(".bench-grid") || event.target.closest("#bench-toggle")) return;
-      showBench = false;
-      if ($("bench-toggle")) screenMyTeam();
+      if (!(event.target instanceof Element)) return;
+      const target = event.target;
+      const clickedPlayerArea = target.closest("[data-squad-slot], .squad-action-panel");
+      const currentSquadScreen = !!app.querySelector(".pitch") && !!$("bench-toggle");
+      const clickedSquadControl = target.closest(".pitch, .squad-topbar, .squad-action-panel, #bench-toggle, .setup-confirmation, .coach-management-row");
+      let rerenderSquad = false;
+      if (selectedSquadSlot && !clickedPlayerArea && (currentSquadScreen || clickedSquadControl)) {
+        selectedSquadSlot = null;
+        rerenderSquad = true;
+      }
+      if (showBench && !target.closest(".bench-grid") && !target.closest("#bench-toggle")) {
+        showBench = false;
+        rerenderSquad = true;
+      }
+      if (rerenderSquad && $("bench-toggle") && app.querySelector(".pitch")) screenMyTeam();
     });
 
     function openMarket(position, target, returnTo) {
+      selectedSquadSlot = null;
       marketContext = { position: position === "ANY" ? "ALL" : position, target, returnTo, query: "" };
       screenMarket();
     }
@@ -3854,14 +3948,24 @@
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
         : isFormationMarket ? FORMATIONS :
-          P.filter(player => position === "ALL" || playsGroup(player, position))
+          P.filter(player => marketPositionMatches(player, position))
             .sort((a, b) => b.r - a.r || a.n.localeCompare(b.n));
-      const filters = target && (target.kind === "coach" || target.position)
-        ? `<div class="sec-title">${target.kind === "coach" ? "المدربين فقط" : `${POS_SHORT[target.position]} فقط`}</div>`
+      const roleFilters = target && target.position
+        ? MARKET_ROLE_FILTERS.filter(([role]) => POSITION_GROUP[role] === target.position)
+        : MARKET_ROLE_FILTERS;
+      const filterOptions = target && target.position
+        ? [[target.position, "ALL", "كل المراكز المناسبة"], ...roleFilters.map(([role, label, title]) => [`ROLE:${role}`, label, title])]
+        : [["ALL", "ALL", "كل المراكز"], ...roleFilters.map(([role, label, title]) => [`ROLE:${role}`, label, title]), ["COACH", "CO", "مدربون"], ["FORMATION", "خطط", "التشكيلات"]];
+      const filters = target && target.kind === "coach"
+        ? `<div class="sec-title">المدربين فقط</div>`
         : `<div class="formation-grid market-filters">
-            ${[["ALL", "ALL", "كل المراكز"], ["G", "GK", "حراس"], ["D", "DF", "دفاع"], ["M", "MF", "وسط"], ["F", "FW", "هجوم"], ["COACH", "CO", "مدربون"], ["FORMATION", "خطط", "التشكيلات"]]
-          .map(([value, label, title]) => `<button class="formation-option ${position === value ? "active" : ""}" data-market-filter="${value}" aria-label="${title}" title="${title}"><small>${label}</small></button>`).join("")}
+            ${filterOptions.map(([value, label, title]) => `<button class="formation-option ${position === value ? "active" : ""}" data-market-filter="${value}" aria-label="${title}" title="${title}"><small>${label}</small></button>`).join("")}
           </div>`;
+      const marketDisplayControls = isCoachMarket || isFormationMarket ? "" :
+        `<div class="market-info-controls" aria-label="تفاصيل إضافية في السوق">
+          <span>تفاصيل إضافية · صورة الكارت كما هي</span>
+          ${MARKET_DISPLAY_FIELDS.map(([key, label]) => `<button type="button" class="market-info-toggle" data-market-display="${key}" aria-pressed="${marketDisplaySettings[key]}">${label}</button>`).join("")}
+        </div>`;
       const marketItems = isCoachMarket
         ? items.map(coach => {
           const price = coachPrice(coach);
@@ -3915,6 +4019,11 @@
               Number.isSafeInteger(available) && available >= player.price;
             const difference = player.price - refund;
             const salePrice = cardSalePrice(player);
+            const marketDetails = [
+              marketDisplaySettings.name ? `<span>${esc(player.n)}</span>` : "",
+              marketDisplaySettings.rating ? `<span>OVR ${player.r}</span>` : "",
+              marketDisplaySettings.position ? `<span>${esc(POS_SHORT[player.role] || POS_SHORT[player.p] || player.role || player.p)}</span>` : ""
+            ].filter(Boolean).join("");
             const canSellOwned = owned && !target && guestProgress.club && guestProgress.club.confirmed &&
               salePrice !== null && salePrice > 0;
             /* The price already sits above the button, so the action label stays short
@@ -3932,9 +4041,10 @@
               : owned || !slot || !hasPrice || !canAfford ? "disabled" : "";
             return `<div class="market-item player-market-card" data-market-search-item>
             ${cardHTML(player, "market-player-card")}
-            <small class="market-item-price">${hasPrice
+            ${marketDetails ? `<div class="market-item-details">${marketDetails}</div>` : ""}
+            ${marketDisplaySettings.value ? `<small class="market-item-price">${hasPrice
                 ? `السعر ${formatCoins(player.price)} 🪙${replacing ? ` · ${difference < 0 ? `استرداد ${formatCoins(-difference)}` : `الفرق ${formatCoins(difference)}`}` : ""}`
-                : `السعر غير متاح · المقترح ${formatCoins(player.suggestedPrice)} 🪙`}</small>
+                : `السعر غير متاح · المقترح ${formatCoins(player.suggestedPrice)} 🪙`}</small>` : ""}
             <button class="btn g sm market-price ${owned && !canSellOwned ? "owned" : ""}" ${actionAttribute} ${disabled}>${label}</button>
           </div>`;
           }).join("");
@@ -3943,6 +4053,7 @@
   <button class="btn g sm" id="bk">رجوع</button></div>
   <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
   ${filters}
+  ${marketDisplayControls}
   <input class="market-search" id="market-search" type="search" dir="auto"
     placeholder="${isCoachMarket ? "ابحث باسم المدرب..." : isFormationMarket ? "ابحث باسم التشكيلة أو الخطة..." : "ابحث باسم اللاعب أو النادي..."}"
     aria-label="بحث في السوق" autocomplete="off" value="${esc(marketContext.query)}">
@@ -3974,6 +4085,15 @@
       app.querySelectorAll("[data-market-filter]").forEach(button => {
         button.onclick = () => {
           marketContext.position = button.dataset.marketFilter;
+          screenMarket();
+        };
+      });
+      app.querySelectorAll("[data-market-display]").forEach(button => {
+        button.onclick = () => {
+          const key = button.dataset.marketDisplay;
+          if (!(key in marketDisplaySettings)) return;
+          marketDisplaySettings[key] = !marketDisplaySettings[key];
+          saveMarketDisplaySettings();
           screenMarket();
         };
       });
@@ -4898,8 +5018,8 @@
 
       const pickScorer = x => {
         const slots = x.slots || formationSlots(x.formation);
-        const w = x.names.map((n, k) => slots[k] === "F" ? 5 : slots[k] === "M" ? 2 : slots[k] === "D" ? 1 : 0);
-        const total = w.reduce((s, v) => s + v, 0);
+        const w = x.names.map((n, k) => slots[k] === "F" ? 10 : slots[k] === "M" ? 3 : slots[k] === "D" ? 0.02 : 0);
+        const total = w.reduce((sum, value) => sum + value, 0);
         if (!total) return x.names[0];
         let t = total * r(), k = 0;
         while (k < w.length - 1 && t >= w[k]) { t -= w[k]; k++ }
@@ -4913,8 +5033,16 @@
       };
       const pickAssister = (team, scorer) => {
         const teamSlots = team.slots || formationSlots(team.formation);
-        const candidates = team.names.filter((name, k) => name !== scorer && teamSlots[k] !== "G");
-        return candidates.length ? candidates[Math.floor(r() * candidates.length)] : null;
+        const weights = team.names.map((name, k) =>
+          name === scorer ? 0 : teamSlots[k] === "F" ? 5 : teamSlots[k] === "M" ? 2 : teamSlots[k] === "D" ? 0.02 : 0
+        );
+        const total = weights.reduce((sum, value) => sum + value, 0);
+        if (!total) return null;
+        let roll = total * r(), index = 0;
+        while (index < weights.length - 1 && roll >= weights[index]) {
+          roll -= weights[index++];
+        }
+        return weights[index] > 0 ? team.names[index] : null;
       };
       const addGoals = (team, side, count) => {
         for (let i = 0; i < count; i++) {
