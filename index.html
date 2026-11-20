@@ -4987,7 +4987,7 @@
           const detail = e.type === "goal"
             ? `${esc(e.who)}${e.assist ? ` · أسيست ${esc(e.assist)}` : ""}`
             : e.type === "yellow" ? `إنذار · ${esc(e.who)}`
-              : e.type === "red" ? `طرد · ${esc(e.who)}`
+              : e.type === "red" ? `${e.secondYellow ? "طرد بعد الإنذار الثاني" : "طرد"} · ${esc(e.who)}`
                 : `تبديل · ${esc(e.who)}`;
           if (e.type === "goal") {
             if (e.me) a++; else b++;
