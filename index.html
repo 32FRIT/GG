@@ -3696,7 +3696,9 @@
         if (!Number.isInteger(index) || index < 0 || index >= slots.length ||
           (slots[index] !== null && !replacing)) return null;
         const required = key === "starters" ? positions[index] : BENCH_SLOT_POSITIONS[index];
+        const requiredRole = key === "starters" ? formationRoleSlots(club.formation)[index] : null;
         if (required && !playsGroup(player, required)) return null;
+        if (requiredRole && !playsRole(player, requiredRole)) return null;
         return { key, index };
       }
 
