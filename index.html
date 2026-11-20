@@ -346,19 +346,24 @@
     .start-ball { display:none }
     .start-title { position:relative;z-index:2;margin:0 0 7px;font-size:clamp(26px,8vw,34px);font-weight:900;letter-spacing:1px;text-shadow:0 2px 12px rgba(0,0,0,.65) }
     .start-caption { position:relative;z-index:2;color:#e6f2eb;font-size:14px;text-shadow:0 1px 8px rgba(0,0,0,.8) }
+    .start-team-summary { width:100%;min-height:68px;display:flex;align-items:center;gap:clamp(7px,2.5vw,13px);padding:10px 12px;border:1px solid rgba(46,224,138,.22);border-radius:14px;background:linear-gradient(110deg,rgba(18,58,38,.96),rgba(11,32,22,.96));text-align:right;cursor:pointer }
+    .start-summary-title { flex:1;min-width:0 }
+    .start-summary-title b { display:block;font-size:13px;font-weight:900 }
+    .start-summary-title small,.start-summary-value small { display:block;margin-top:3px;color:var(--mu);font-size:10px;white-space:nowrap }
+    .start-summary-value { flex:0 0 auto;text-align:center;min-width:34px }
+    .start-summary-value b { display:block;font-size:15px;font-weight:900;line-height:1.1 }
+    .start-summary-rating { color:var(--gold) }
+    .start-summary-arrow { color:var(--ac);font-size:20px }
     .start-play { width:100%;min-height:60px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(126,240,184,.38);border-radius:15px;background:linear-gradient(100deg,#2ee08a,#19a966);color:#04150d;font-size:18px;font-weight:900;box-shadow:0 8px 24px rgba(46,224,138,.16);cursor:pointer }
     .start-play span { font-size:22px;line-height:1 }
     .start-shortcuts { display:grid;grid-template-columns:1fr 1fr;gap:10px }
     .start-shortcut { min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:13px;background:var(--card);font-weight:800;cursor:pointer }
     .start-shortcut:first-child { background:linear-gradient(150deg,#123a26,#0d2418);border-color:rgba(46,224,138,.25) }
+    .start-shortcut:last-child { border-color:rgba(245,196,81,.25);background:rgba(245,196,81,.06) }
     .start-bottom { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 3px 0;color:var(--mu);font-size:12px }
     .start-bottom button { border:0;background:transparent;color:inherit;padding:8px 2px;cursor:pointer }
     @media(max-height:720px) { .start-hero { min-height:260px } .start-screen { min-height:0 } }
     .play-menu { flex:1;display:flex;flex-direction:column;gap:14px }
-    .play-menu-head { display:flex;align-items:center;gap:12px;margin-bottom:3px }
-    .play-menu-head .logo { width:40px;height:40px;font-size:16px }
-    .play-menu-title { font-size:21px;font-weight:900 }
-    .play-menu-subtitle { margin-top:3px;color:var(--mu);font-size:12px }
     .play-club-card { width:100%;min-height:92px;display:flex;align-items:center;gap:12px;padding:15px;border:1px solid rgba(46,224,138,.35);border-radius:16px;background:linear-gradient(145deg,#123a26,#0d2418);text-align:right;cursor:pointer }
     .play-club-card.secondary { border-color:var(--line);background:var(--card) }
     .play-mode-icon { width:46px;height:46px;flex:0 0 auto;display:grid;place-items:center;border-radius:13px;background:rgba(46,224,138,.16);font-size:23px }
@@ -1135,22 +1140,6 @@
       margin-top: 2px;
       color: var(--mu);
       font-size: 11px
-    }
-
-    .owned-formation-row {
-      display: grid;
-      grid-column: 1 / -1;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 6px;
-      align-items: stretch
-    }
-
-    .owned-formation-row .formation-option {
-      margin: 0
-    }
-
-    .owned-formation-row>.btn {
-      white-space: nowrap
     }
 
     .market-price {
@@ -2092,6 +2081,33 @@
       font-variant-numeric: tabular-nums
     }
 
+    .star-keeper-cover { display:flex;align-items:center;justify-content:center;min-height:126px;direction:ltr;overflow:hidden }
+    .star-keeper-cover-card { position:relative;flex:0 1 46px;width:46px;max-width:34%;box-shadow:0 6px 15px rgba(0,0,0,.45) }
+    .star-keeper-cover-card:first-child { transform:translateX(5px) rotate(-5deg) scale(.88) }
+    .star-keeper-cover-card:nth-child(2) { z-index:1;transform:translateY(-5px) }
+    .star-keeper-cover-card:last-child { transform:translateX(-5px) rotate(5deg) scale(.88) }
+    .star-keeper-cover-card.is-owned,.keeper-pack-row.is-owned { filter:grayscale(1);opacity:.42 }
+    .star-keeper-pack-tile { width:100%;min-height:148px;display:grid;grid-template-columns:minmax(0,1fr) 145px;align-items:center;gap:8px;margin-top:14px;padding:12px;border:1px solid rgba(46,224,138,.4);border-radius:18px;background:linear-gradient(145deg,#123a26,#0d2418);text-align:right;cursor:pointer }
+    .star-keeper-pack-tile-copy { display:grid;gap:6px }
+    .star-keeper-pack-tile-copy b { font-size:17px }
+    .star-keeper-pack-tile-copy small { color:var(--mu);font-size:11px;line-height:1.5 }
+    .star-keeper-cover-card .fc { width:100% }
+    .keeper-pack-list { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:10px 0 14px }
+    .keeper-pack-row { position:relative;min-width:0;border-radius:14px;transition:transform .18s ease,box-shadow .18s ease }
+    .keeper-pack-row .fc { width:100% }
+    .keeper-pack-row::after { content:"";position:absolute;inset:-3px;border:3px solid transparent;border-radius:16px;pointer-events:none;opacity:0 }
+    .keeper-pack-row.opening-highlight { z-index:2 }
+    .keeper-pack-row.opening-highlight::after { border-color:#37f596;opacity:1;box-shadow:0 0 10px #20e780,0 0 24px rgba(32,231,128,.8);animation:keeper-pack-loop .42s linear infinite alternate }
+    .keeper-pack-row.is-winner { z-index:1;transform:scale(1.035);box-shadow:0 0 0 3px #37f596,0 0 26px rgba(32,231,128,.75) }
+    .keeper-pack-owned-tag { position:absolute;z-index:3;inset-inline:3px;bottom:12%;padding:4px 2px;border-radius:999px;background:rgba(20,24,22,.9);color:#d4d8d5;font-size:10px;font-weight:900;text-align:center;pointer-events:none }
+    .star-keeper-winner { margin:10px 0;padding:10px 12px;border:1px solid #37f596;border-radius:12px;background:rgba(32,231,128,.12);color:#8dffbd;font-weight:900;text-align:center }
+    @keyframes keeper-pack-loop { from { filter:brightness(1);outline-offset:0 } to { filter:brightness(1.6);outline-offset:4px } }
+
+    @media (max-width:390px) {
+      .star-keeper-pack-tile { grid-template-columns:minmax(0,1fr) 116px;padding:9px }
+      .keeper-pack-list { gap:6px }
+    }
+
     /* Rows that carry sentences instead of values must wrap instead of truncating. */
     .rows-text .row {
       align-items: flex-start
@@ -2480,6 +2496,72 @@
     function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms) } catch (e) { } }
 
     const GUEST_PROGRESS_KEY = "gg_guest_progress_v1";
+    const PACK_CHANCES_KEY = "gg_pack_chances_v1";
+    const STAR_KEEPER_CUP_WON_KEY = "gg_star_keeper_cup_won_v1";
+    const STAR_KEEPER_PACK_KEY = "gg_star_keeper_pack_v1";
+    const STAR_KEEPER_PACK_OPENED_KEY = "gg_star_keeper_pack_opened_v1";
+    const STAR_KEEPER_PACK_WINNER_KEY = "gg_star_keeper_pack_winner_v1";
+    const STAR_KEEPER_FREE_OPENING_KEY = "gg_star_keeper_free_opening_granted_v1";
+    const STAR_KEEPER_CUP_OPENING_GRANTED_KEY = "gg_star_keeper_cup_opening_granted_v1";
+    const STAR_KEEPER_WON_PLAYERS_KEY = "gg_star_keeper_won_players_v1";
+    const STAR_KEEPER_PENDING_PLAYERS_KEY = "gg_star_keeper_pending_players_v1";
+    const STAR_KEEPER_COMPUTER_LEVEL = { id: "star-keeper-89", name: "89", min: 86, max: 92, target: 89, coachTarget: 80 };
+    let activeTournament = null, tournamentTeam = null, tournamentResult = null;
+    let starKeeperCupWon = false, starKeeperCupOpeningGranted = false;
+    let starKeeperPack = null, starKeeperPackOpened = false, starKeeperPackWinner = null;
+    let starKeeperWonPlayers = [], starKeeperPendingPlayers = [];
+    try {
+      starKeeperCupWon = localStorage.getItem(STAR_KEEPER_CUP_WON_KEY) === "true";
+      starKeeperCupOpeningGranted = localStorage.getItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY) === "true";
+      starKeeperPack = JSON.parse(localStorage.getItem(STAR_KEEPER_PACK_KEY) || "null");
+      starKeeperPackOpened = localStorage.getItem(STAR_KEEPER_PACK_OPENED_KEY) === "true";
+      starKeeperPackWinner = localStorage.getItem(STAR_KEEPER_PACK_WINNER_KEY) || null;
+      const savedWinners = JSON.parse(localStorage.getItem(STAR_KEEPER_WON_PLAYERS_KEY) || "[]");
+      const savedPending = JSON.parse(localStorage.getItem(STAR_KEEPER_PENDING_PLAYERS_KEY) || "[]");
+      starKeeperWonPlayers = Array.isArray(savedWinners) ? [...new Set(savedWinners.filter(name => P.some(player => player.n === name)))] : [];
+      starKeeperPendingPlayers = Array.isArray(savedPending) ? [...new Set(savedPending.filter(name => starKeeperWonPlayers.includes(name)))] : [];
+    } catch (_) {
+      starKeeperCupWon = false; starKeeperCupOpeningGranted = false; starKeeperPack = null;
+      starKeeperPackOpened = false; starKeeperPackWinner = null; starKeeperWonPlayers = []; starKeeperPendingPlayers = [];
+    }
+    let freePackChances = 0;
+    try {
+      const savedPackChances = Number(localStorage.getItem(PACK_CHANCES_KEY));
+      if (Number.isSafeInteger(savedPackChances) && savedPackChances > 0) freePackChances = savedPackChances;
+    } catch (error) { console.warn("Could not read pack chances.", error) }
+    function savePackChances() {
+      try { localStorage.setItem(PACK_CHANCES_KEY, String(freePackChances)); return true }
+      catch (error) { console.warn("Could not save pack chances.", error); return false }
+    }
+    function saveStarKeeperPlayerClaims() {
+      try {
+        localStorage.setItem(STAR_KEEPER_WON_PLAYERS_KEY, JSON.stringify(starKeeperWonPlayers));
+        localStorage.setItem(STAR_KEEPER_PENDING_PLAYERS_KEY, JSON.stringify(starKeeperPendingPlayers));
+        return true;
+      } catch (error) { console.warn("Could not save Star Keeper players.", error); return false }
+    }
+    if (starKeeperPackWinner && P.some(player => player.n === starKeeperPackWinner) && !starKeeperWonPlayers.includes(starKeeperPackWinner)) {
+      starKeeperWonPlayers.push(starKeeperPackWinner);
+      starKeeperPendingPlayers.push(starKeeperPackWinner);
+      saveStarKeeperPlayerClaims();
+    }
+    if (starKeeperPackOpened && !starKeeperPackWinner) {
+      starKeeperPackOpened = false;
+      try { localStorage.removeItem(STAR_KEEPER_PACK_OPENED_KEY) } catch (_) { }
+    }
+    let starterOpeningGranted = false;
+    try { starterOpeningGranted = localStorage.getItem(STAR_KEEPER_FREE_OPENING_KEY) === "true" } catch (_) { }
+    if (!starterOpeningGranted) {
+      if (!starKeeperPackOpened && !starKeeperPackWinner) freePackChances = Math.max(1, freePackChances);
+      try { localStorage.setItem(STAR_KEEPER_FREE_OPENING_KEY, "true") } catch (_) { }
+      savePackChances();
+    }
+    if (starKeeperCupWon && !starKeeperCupOpeningGranted) {
+      freePackChances++;
+      starKeeperCupOpeningGranted = true;
+      try { localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "true") } catch (_) { }
+      savePackChances();
+    }
     function emptyGuestProgress() {
       return {
         version: 7,
@@ -2975,6 +3057,15 @@
       resetOpponent();
       try {
         localStorage.removeItem(GUEST_PROGRESS_KEY);
+        localStorage.removeItem(PACK_CHANCES_KEY);
+        localStorage.removeItem(STAR_KEEPER_CUP_WON_KEY);
+        localStorage.removeItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY);
+        localStorage.removeItem(STAR_KEEPER_PACK_KEY);
+        localStorage.removeItem(STAR_KEEPER_PACK_OPENED_KEY);
+        localStorage.removeItem(STAR_KEEPER_PACK_WINNER_KEY);
+        localStorage.removeItem(STAR_KEEPER_FREE_OPENING_KEY);
+        localStorage.removeItem(STAR_KEEPER_WON_PLAYERS_KEY);
+        localStorage.removeItem(STAR_KEEPER_PENDING_PLAYERS_KEY);
         localStorage.removeItem("gg_muted");
 
       } catch (error) {
@@ -2983,6 +3074,17 @@
         return;
       }
       guestProgress = emptyGuestProgress();
+      freePackChances = 1;
+      starKeeperCupWon = false;
+      starKeeperCupOpeningGranted = false;
+      starKeeperPack = null;
+      starKeeperPackOpened = false;
+      starKeeperPackWinner = null;
+      starKeeperWonPlayers = [];
+      starKeeperPendingPlayers = [];
+      try { localStorage.setItem(STAR_KEEPER_FREE_OPENING_KEY, "true"); localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "false") } catch (_) { }
+      savePackChances();
+      activeTournament = tournamentTeam = tournamentResult = null;
       muted = true;
       selectedSquadSlot = null;
       showBench = false;
@@ -2998,6 +3100,15 @@
       selectedSquadSlot = null;
       _navStack = [screenHome];
       history.pushState({}, "");
+      const homeClub = guestProgress.club;
+      const homeStarters = homeClub && Array.isArray(homeClub.starters)
+        ? homeClub.starters.map(name => name && P.find(player => player.n === name)).filter(Boolean)
+        : [];
+      const homeCoach = homeClub && COACHES.find(coach => coach.n === homeClub.coach);
+      const homeBaseRating = homeStarters.length === 11
+        ? Math.round(homeStarters.reduce((sum, player) => sum + player.r, 0) / homeStarters.length)
+        : null;
+      const homeRating = homeBaseRating === null ? "—" : homeCoach ? coachAdjustedPower(homeBaseRating, homeCoach) : homeBaseRating;
       app.innerHTML = `
   <main class="start-screen" aria-label="شاشة بداية GG">
     <header class="start-head">
@@ -3008,10 +3119,17 @@
       <div class="start-pitch" aria-hidden="true"><span class="start-goal top"></span><span class="start-goal bottom"></span></div>
       <h1 class="start-title">ابني فريق أحلامك</h1><p class="start-caption">اختار 11 لاعب ونافس صحابك</p>
     </section>
+    <button class="start-team-summary" id="home-team-summary" aria-label="عرض ملخص تشكيلتي">
+      <span class="start-summary-title"><b>${homeClub ? "تشكيلتي" : "كوّن تشكيلتك"}</b><small>${homeClub ? homeCoach ? `مدرب ${esc(homeCoach.n)}` : "كمّل اختيار المدرب" : "اختار خطتك ولاعبيك"}</small></span>
+      <span class="start-summary-value"><b>${homeStarters.length}/11</b><small>لاعب</small></span>
+      <span class="start-summary-value"><b dir="ltr">${homeClub ? esc(formationById(homeClub.formation).id) : "—"}</b><small>الخطة</small></span>
+      <span class="start-summary-value start-summary-rating"><b>${homeRating}</b><small>التقييم</small></span>
+      <span class="start-summary-arrow" aria-hidden="true">‹</span>
+    </button>
     <button class="start-play" id="go"><span>ابدأ اللعب</span><span aria-hidden="true">‹</span></button>
     <nav class="start-shortcuts" aria-label="اختصارات اللعبة">
-      <button class="start-shortcut" id="my-team">👥 <span>تشكيلتي</span></button>
       <button class="start-shortcut" id="home-market">🛒 <span>السوق</span></button>
+      <button class="start-shortcut" id="home-packs">🎁 <span>حزم· ${freePackChances}</span></button>
     </nav>
     <footer class="start-bottom"><button id="record">سجل المباريات</button><button id="how">طريقة اللعب</button><button id="reset-game-data">مسح البيانات</button></footer>
   </main>`;
@@ -3019,8 +3137,9 @@
       $("how").onclick = screenHow;
       $("record").onclick = screenRecord;
       $("reset-game-data").onclick = resetGameData;
-      $("my-team").onclick = screenMyTeam;
+      $("home-team-summary").onclick = screenMyTeam;
       $("home-market").onclick = () => openMarket("ALL", null, "home");
+      $("home-packs").onclick = () => screenPacks(false);
     }
 
     function screenRecord() {
@@ -3118,8 +3237,25 @@
               formations: { [button.dataset.clubFormation]: 0 }
             }
           };
-          if (!commitClubProgress(previous)) return screenClubFormations();
+          const pendingBeforeSetup = starKeeperPendingPlayers.slice();
+          let addedStarKeepers = 0;
+          starKeeperPendingPlayers.slice().forEach(name => {
+            const player = P.find(item => item.n === name);
+            const slot = player && findPlayerSlot(player, null);
+            if (!slot) return;
+            guestProgress.club[slot.key][slot.index] = name;
+            guestProgress.club.assetCosts.players[name] = 0;
+            starKeeperPendingPlayers = starKeeperPendingPlayers.filter(pendingName => pendingName !== name);
+            addedStarKeepers++;
+          });
+          if (addedStarKeepers) saveStarKeeperPlayerClaims();
+          if (!commitClubProgress(previous)) {
+            starKeeperPendingPlayers = pendingBeforeSetup;
+            saveStarKeeperPlayerClaims();
+            return screenClubFormations();
+          }
           screenMyTeam();
+          if (addedStarKeepers) toast(`تمت إضافة ${addedStarKeepers} حارس فزت به للتشكيلة مجانًا`);
         };
       });
     }
@@ -3187,29 +3323,6 @@
       screenMyTeam();
     }
 
-    function returnOwnedClubFormation(formationId) {
-      const club = guestProgress.club;
-      if (!club || !club.ownedFormations.includes(formationId)) return toast("التشكيلة غير موجودة");
-      if (club.formation === formationId) return toast("غيّر خطتك الحالية الأول قبل إرجاعها");
-      if (club.ownedFormations.length <= 1) return toast("لازم تفضل عندك تشكيلة واحدة على الأقل");
-      const refund = club.assetCosts.formations[formationId];
-      if (!Number.isSafeInteger(refund) || refund < 0) return toast("قيمة استرداد الخطة غير متاحة");
-      if (!club.confirmed && refund === 0) return toast("الخطة الأولى المجانية تفضل متاحة لحد التأكيد");
-      if (club.confirmed && guestProgress.coins > Number.MAX_SAFE_INTEGER - refund) {
-        return toast("رصيدك وصل للحد الأقصى للكوينز");
-      }
-
-      const previous = snapshotClubProgress();
-      club.ownedFormations = club.ownedFormations.filter(id => id !== formationId);
-      delete club.assetCosts.formations[formationId];
-      if (club.confirmed) guestProgress.coins += refund;
-      if (!commitClubProgress(previous)) return screenOwnedClubFormations();
-      toast(club.confirmed
-        ? `تم إرجاع الخطة · استرداد ${formatCoins(refund)} 🪙`
-        : "تمت إزالة الخطة قبل التأكيد بدون خصم");
-      screenOwnedClubFormations();
-    }
-
     function selectDraftFreeFormation(formationId) {
       const club = guestProgress.club;
       if (!club || club.confirmed) return toast("اختيار الخطة المجاني متاح قبل التأكيد فقط");
@@ -3246,25 +3359,21 @@
   <button class="btn g sm" id="bk">رجوع</button></div>
   <p class="note">${draft
           ? "اختار أي خطة مجانًا للتجهيز الأول. الخطط الإضافية تقدر تضيفها من السوق بسعرها الظاهر."
-          : "لاعبوك هيتوزعوا تلقائيًا حسب مراكزهم. تقدر ترجع أي خطة غير مستخدمة وتسترد سعرها المدفوع بالكامل."}</p>
+          : "اضغط على أي خطة اشتريتها لتفعيلها. التبديل بين خططك المملوكة مجاني."}</p>
   <div class="formation-grid mt">
     ${visibleFormations.map(id => {
             const formation = formationById(id);
             const owned = club.ownedFormations.includes(id);
             const active = owned && id === club.formation;
-            const refund = owned ? club.assetCosts.formations[id] : null;
             if (!owned && draft && freeFormationId) {
               return `<button class="formation-option" data-select-free-formation="${id}">
             <b dir="ltr">${formation.id}</b><small>${formation.name} · اختيار مجاني</small>
           </button>`;
             }
             if (!owned) return "";
-            return `<div class="owned-formation-row">
-          <button class="formation-option ${active ? "active" : ""}" data-switch-club-formation="${id}" ${active ? "disabled" : ""}>
+            return `<button class="formation-option ${active ? "active" : ""}" data-switch-club-formation="${id}">
             <b dir="ltr">${formation.id}</b><small>${formation.name} · ${active ? "الحالية" : "تبديل"}</small>
-          </button>
-          ${active || (!club.confirmed && refund === 0) ? "" : `<button class="btn g sm" data-return-formation="${id}">${club.confirmed ? `إرجاع · ${formatCoins(refund)} 🪙` : "إزالة"}</button>`}
-        </div>`;
+          </button>`;
           }).join("")}
   </div>
   <button class="btn w" id="buy-formation">شراء تشكيلة من السوق · ${formatCoins(FORMATION_PRICE)} 🪙</button>`;
@@ -3272,9 +3381,6 @@
       $("buy-formation").onclick = () => openMarket("FORMATION", null, "team");
       app.querySelectorAll("[data-switch-club-formation]").forEach(button => {
         button.onclick = () => switchClubFormation(button.dataset.switchClubFormation);
-      });
-      app.querySelectorAll("[data-return-formation]").forEach(button => {
-        button.onclick = () => returnOwnedClubFormation(button.dataset.returnFormation);
       });
       app.querySelectorAll("[data-select-free-formation]").forEach(button => {
         button.onclick = () => selectDraftFreeFormation(button.dataset.selectFreeFormation);
@@ -3543,6 +3649,7 @@
 
     function screenMyTeam() {
       if (!guestProgress.club) return screenClubFormations();
+      processPendingStarKeeperPlayers();
       if (selectedSquadSlot && selectedSquadSlot.area === "bench") showBench = true;
       _origPush(screenMyTeam);
       const club = guestProgress.club;
@@ -4203,20 +4310,326 @@
       _origPush(screenModes);
       app.innerHTML = `
   <main class="play-menu">
-    <header class="play-menu-head"><div class="logo">GG</div><div><h1 class="play-menu-title">اختار طريقة اللعب</h1><p class="play-menu-subtitle">ابدأ مباراة بتشكيلتك أو كوّن فريق بالدريفت</p></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <header class="hdr"><div class="l"><span class="pos">اختار طريقة اللعب</span><span class="cnt">ابدأ مباراة بتشكيلتك أو كوّن فريق بالدريفت</span></div><button class="btn g sm" id="bk">رجوع</button></header>
     <button class="play-club-card" id="mClub"><span class="play-mode-icon">🏟️</span><span class="play-mode-copy"><b>مباريات تشكيلتي</b><small>العب بفريقك ومدربك والبدلاء</small></span><span class="play-mode-arrow">‹</span></button>
     <button class="play-club-card secondary" id="mDraft"><span class="play-mode-icon">🃏</span><span class="play-mode-copy"><b>دريفت الكروت</b><small>اكشف الكروت وكوّن فريقك جولة بجولة</small></span><span class="play-mode-arrow">‹</span></button>
+    <button class="play-club-card secondary" id="mEvents"><span class="play-mode-icon">🏆</span><span class="play-mode-copy"><b>الأحداث والبطولات</b><small>نافس الكمبيوتر في بطولة إقصائية واربح فرصة حزمة</small></span><span class="play-mode-arrow">‹</span></button>
   </main>`;
       $("bk").onclick = screenHome;
       $("mClub").onclick = screenClubModes;
       $("mDraft").onclick = screenDraftModes;
+      $("mEvents").onclick = screenEvents;
+    }
+
+    function screenEvents() {
+      _origPush(screenEvents);
+      const stages = ["ربع النهائي", "نصف النهائي", "النهائي"];
+      const currentStage = activeTournament ? stages[Math.max(0, activeTournament.round - 1)] : null;
+      app.innerHTML = `
+  <main class="play-menu">
+    <header class="hdr"><div class="l"><span class="pos">حارس نجم</span><span class="cnt">بطولة حراس · مستوى الكمبيوتر 89</span></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <button class="play-club-card" id="event-start"><span class="play-mode-icon">${starKeeperCupWon ? "🏆" : activeTournament ? "▶️" : "⚽"}</span><span class="play-mode-copy"><b>${starKeeperCupWon ? "العب بطولة حارس نجم مرة أخرى" : activeTournament ? `استكمال البطولة · ${currentStage || "تجهيز الفريق"}` : "ابدأ بطولة حارس نجم"}</b><small>${starKeeperCupWon ? "المكافأة اتفتحت قبل كده · العب بدون مكافأة إضافية" : activeTournament ? "كمّل تحدي الكمبيوتر · التقييم 89" : "محاولة واحدة · العب بتشكيلتك"}</small></span><span class="play-mode-arrow">‹</span></button>
+  </main>`;
+      $("bk").onclick = screenModes;
+      $("event-start").onclick = () => {
+        try {
+        if (starKeeperCupWon) {
+          activeTournament = { round: 1, total: 3 };
+          tournamentTeam = tournamentResult = null;
+          const setup = getClubMatchSetup(true, true);
+          if (!setup) { activeTournament = null; return; }
+          tournamentTeam = { team: setup.team, formation: setup.club.formation, coach: setup.coach };
+          eventTournamentRoundLabel = "ربع النهائي";
+          return startTournamentMatch();
+        }
+        if (!activeTournament) {
+          const setup = getClubMatchSetup(true, true);
+          if (!setup) return;
+          activeTournament = { round: 1, total: 3 };
+          tournamentTeam = { team: setup.team, formation: setup.club.formation, coach: setup.coach };
+          tournamentResult = null;
+          eventTournamentRoundLabel = "ربع النهائي";
+          return startTournamentMatch();
+        }
+        if (tournamentResult) return continueTournament();
+        if (tournamentTeam) return startTournamentMatch();
+        const setup = getClubMatchSetup(true, true);
+        if (setup) {
+          tournamentTeam = { team: setup.team, formation: setup.club.formation, coach: setup.coach };
+          startTournamentMatch();
+        }
+        } catch (error) {
+          console.error("Could not start Star Keeper tournament.", error);
+          toast("حصل خطأ أثناء بدء البطولة · راجع التشكيلة وحاول مرة تانية");
+        }
+      };
+    }
+
+    function ensureStarKeeperPack() {
+      const guaranteed = ["Peter Schmeichel", "Jan Oblak", "David Raya"];
+      const valid = Array.isArray(starKeeperPack) && starKeeperPack.length === 11 && new Set(starKeeperPack).size === 11 &&
+        guaranteed.every(name => starKeeperPack.includes(name)) && starKeeperPack.every(name => P.some(player =>
+          player.n === name && (guaranteed.includes(name) ? player.p === "G" : player.p === "G" && player.r < 83)));
+      if (!valid) {
+        const others = shuffle(P.filter(player => player.p === "G" && player.r < 83 && !guaranteed.includes(player.n))).slice(0, 8);
+        starKeeperPack = [...guaranteed, ...others.map(player => player.n)];
+        try { localStorage.setItem(STAR_KEEPER_PACK_KEY, JSON.stringify(starKeeperPack)) } catch (_) { }
+      }
+      return starKeeperPack.map(name => P.find(player => player.n === name)).filter(Boolean);
+    }
+
+    function playerMarketValue(player) {
+      if (player && Number.isSafeInteger(player.price) && player.price > 0) return player.price;
+      if (player && Number.isSafeInteger(player.suggestedPrice) && player.suggestedPrice > 0) return player.suggestedPrice;
+      return 0;
+    }
+
+    function addWonKeeperToClub(player) {
+      const club = guestProgress.club;
+      if (!club) return "no-club";
+      const owned = [...club.starters, ...club.bench].filter(Boolean);
+      if (owned.includes(player.n)) {
+        starKeeperPendingPlayers = starKeeperPendingPlayers.filter(name => name !== player.n);
+        saveStarKeeperPlayerClaims();
+        return "already-owned";
+      }
+      const slot = findPlayerSlot(player, null);
+      if (!slot) return "full";
+      const previous = snapshotClubProgress();
+      club[slot.key][slot.index] = player.n;
+      club.assetCosts.players[player.n] = 0;
+      if (!commitClubProgress(previous)) return "save-failed";
+      starKeeperPendingPlayers = starKeeperPendingPlayers.filter(name => name !== player.n);
+      saveStarKeeperPlayerClaims();
+      return "added";
+    }
+
+    function processPendingStarKeeperPlayers() {
+      if (!guestProgress.club || !starKeeperPendingPlayers.length) return;
+      for (const name of starKeeperPendingPlayers.slice()) {
+        const player = P.find(item => item.n === name);
+        if (!player) {
+          starKeeperPendingPlayers = starKeeperPendingPlayers.filter(pending => pending !== name);
+          saveStarKeeperPlayerClaims();
+          continue;
+        }
+        if (addWonKeeperToClub(player) === "full") break;
+      }
+    }
+
+    function availableStarKeeperPlayers(players) {
+      const inClub = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      return players.filter(player => !starKeeperWonPlayers.includes(player.n) && !inClub.includes(player.n));
+    }
+
+    function finishWonKeeperAsSale(player) {
+      const value = playerMarketValue(player);
+      if (!value) return toast("سعر السوق للاعب ده غير متاح");
+      const previous = guestProgress.coins;
+      guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, guestProgress.coins + value);
+      if (!saveGuestProgress()) { guestProgress.coins = previous; return }
+      starKeeperPendingPlayers = starKeeperPendingPlayers.filter(name => name !== player.n);
+      saveStarKeeperPlayerClaims();
+      document.getElementById("star-keeper-choice")?.remove();
+      toast(`تم بيع ${player.n} بسعر السوق · ${formatCoins(value)} 🪙`);
+      screenStarKeeperPackDetails();
+    }
+
+    function replaceClubPlayerWithWonKeeper(player, area, index) {
+      const club = guestProgress.club;
+      const key = area === "starter" ? "starters" : "bench";
+      const oldName = club && club[key][index];
+      const oldPlayer = oldName && P.find(item => item.n === oldName);
+      if (!club || !oldPlayer || !canPlayerUseSlot(player.n, { area, index })) return toast("اختار مكان حارس مناسب");
+      const value = playerMarketValue(oldPlayer);
+      if (!value) return toast("سعر السوق للاعب المحدد غير متاح");
+      if (guestProgress.coins > Number.MAX_SAFE_INTEGER - value) return toast("رصيدك وصل للحد الأقصى للكوينز");
+      const previous = snapshotClubProgress();
+      guestProgress.coins += value;
+      delete club.assetCosts.players[oldName];
+      club[key][index] = player.n;
+      club.assetCosts.players[player.n] = 0;
+      if (!commitClubProgress(previous)) return;
+      starKeeperPendingPlayers = starKeeperPendingPlayers.filter(name => name !== player.n);
+      saveStarKeeperPlayerClaims();
+      document.getElementById("star-keeper-choice")?.remove();
+      toast(`تمت إضافة ${player.n} وبيع ${oldName} بسعر السوق · ${formatCoins(value)} 🪙`);
+      screenStarKeeperPackDetails();
+    }
+
+    function showWonKeeperChoice(player) {
+      const overlay = document.createElement("div");
+      overlay.id = "star-keeper-choice";
+      overlay.className = "pick-overlay sale-overlay";
+      overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
+        <div class="pick-dialog-title">كسبت ${esc(player.n)} · ${player.r}</div>
+        <p class="note">تشكيلتك ممتلئة. استبدل حارسًا أو مكانًا مرنًا وبِع اللاعب القديم بسعر السوق، أو بِع اللاعب الفائز.</p>
+        <button class="btn w" id="choose-keeper-replacement">استبدال لاعب من التشكيلة</button>
+        <button class="btn g w mt-s" id="sell-won-keeper">بيع اللاعب الفائز · ${formatCoins(playerMarketValue(player))} 🪙</button>
+        <button class="btn g w mt-s" id="close-keeper-choice">لاحقًا</button></div>`;
+      document.body.appendChild(overlay);
+      $("choose-keeper-replacement").onclick = () => showWonKeeperReplacementList(player);
+      $("sell-won-keeper").onclick = () => finishWonKeeperAsSale(player);
+      $("close-keeper-choice").onclick = () => overlay.remove();
+    }
+
+    function showWonKeeperReplacementList(player) {
+      const dialog = $("star-keeper-choice"), club = guestProgress.club;
+      if (!dialog || !club) return;
+      const players = [...club.starters.map((name, index) => ({ name, area: "starter", index })),
+        ...club.bench.map((name, index) => ({ name, area: "bench", index }))]
+        .filter(slot => slot.name).map(slot => ({ ...slot, player: P.find(item => item.n === slot.name) }))
+        .filter(slot => slot.player && playerMarketValue(slot.player) > 0 && canPlayerUseSlot(player.n, slot));
+      dialog.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
+        <div class="pick-dialog-title">اختار لاعبًا للاستبدال</div><p class="note">اللاعب القديم هيتباع بسعر السوق كاملًا.</p>
+        ${players.length ? "" : `<p class="note">مفيش خانة مناسبة للاستبدال؛ تقدر تبيع اللاعب الفائز.</p>`}
+        <div class="rows">${players.map(slot => `<button class="row" data-keeper-replace-area="${slot.area}" data-keeper-replace-index="${slot.index}"><span class="n">${esc(slot.player.n)} · ${slot.player.r}</span><span class="v">بيع ${formatCoins(playerMarketValue(slot.player))} 🪙</span></button>`).join("")}</div>
+        <button class="btn g w mt" id="back-keeper-choice">رجوع</button></div>`;
+      $("back-keeper-choice").onclick = () => showWonKeeperChoice(player);
+      dialog.querySelectorAll("[data-keeper-replace-area]").forEach(button => button.onclick = () =>
+        replaceClubPlayerWithWonKeeper(player, button.dataset.keeperReplaceArea, Number(button.dataset.keeperReplaceIndex)));
+    }
+
+    function starKeeperCoverHTML() {
+      const club = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      return `<div class="star-keeper-cover">${["Peter Schmeichel", "Jan Oblak", "David Raya"].map(name => P.find(p => p.n === name)).filter(Boolean)
+        .sort((a, b) => b.r - a.r).map(player => `<div class="star-keeper-cover-card ${starKeeperWonPlayers.includes(player.n) || club.includes(player.n) ? "is-owned" : ""}">${cardHTML(player, "pack-player-card")}</div>`).join("")}</div>`;
+    }
+
+    function screenPacks() {
+      _origPush(() => screenPacks());
+      ensureStarKeeperPack();
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">الحزم</span><span class="cnt">${freePackChances} فرصة فتح متاحة</span></div><button class="btn g sm" id="bk">رجوع</button></div>
+        <button class="star-keeper-pack-tile" id="open-star-keeper-pack"><span class="star-keeper-pack-tile-copy"><b>حزمة حارس نجم</b><small>11 حارسًا · ${freePackChances} فرصة فتح</small><small>3 حراس مميزون و8 حراس تقييمهم أقل من 83</small></span>${starKeeperCoverHTML()}</button>`;
+      $("bk").onclick = screenHome;
+      $("open-star-keeper-pack").onclick = screenStarKeeperPackDetails;
+    }
+
+    async function animateStarKeeperPackOpening(winnerName) {
+      const cards = Array.from(app.querySelectorAll(".keeper-pack-row:not(.is-owned)"));
+      const winnerIndex = cards.findIndex(card => card.dataset.playerName === winnerName);
+      if (!cards.length || winnerIndex < 0) return;
+      const loops = cards.length * 3;
+      const steps = loops + ((winnerIndex - ((loops - 1) % cards.length) + cards.length) % cards.length);
+      for (let step = 0; step < steps; step++) {
+        cards.forEach(card => card.classList.remove("opening-highlight"));
+        const card = cards[step % cards.length];
+        card.classList.add("opening-highlight");
+        const rect = card.getBoundingClientRect();
+        if (rect.top < 72 || rect.bottom > window.innerHeight - 56) card.scrollIntoView({ behavior: "smooth", block: "center" });
+        const easing = Math.max(0, step - Math.floor(steps * .52));
+        await new Promise(resolve => setTimeout(resolve, Math.min(360, 48 + Math.pow(easing, 1.55) * 1.5)));
+      }
+      cards.forEach(card => card.classList.remove("opening-highlight"));
+      cards[winnerIndex].classList.add("is-winner");
+    }
+
+    function screenStarKeeperPackDetails() {
+      _origPush(() => screenStarKeeperPackDetails());
+      const packPlayers = ensureStarKeeperPack();
+      processPendingStarKeeperPlayers();
+      const available = availableStarKeeperPlayers(packPlayers);
+      const pending = starKeeperPendingPlayers.map(name => P.find(player => player.n === name)).find(Boolean);
+      const clubPlayers = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">حزمة حارس نجم</span><span class="cnt">11 حارسًا · <span id="keeper-opening-count">${freePackChances}</span> فرصة فتح</span></div><button class="btn g sm" id="bk">رجوع</button></div>
+        ${pending ? `<div class="star-keeper-winner">${guestProgress.club ? `اختار مكانًا لـ${esc(pending.n)} أو بِعه بسعر السوق.` : `${esc(pending.n)} محفوظ وسيضاف لتشكيلتك بعد اختيارها.`}<button class="btn g w mt-s" id="manage-pending-keeper">التصرف في اللاعب الفائز</button></div>` : ""}
+        <div class="sec-title">اللاعبون داخل الحزمة · ${packPlayers.length}</div>
+        <div class="keeper-pack-list">${packPlayers.map((player, index) => { const owned = starKeeperWonPlayers.includes(player.n) || clubPlayers.includes(player.n); const tag = starKeeperWonPlayers.includes(player.n) ? "فزت به" : owned ? "في تشكيلتك" : ""; return `<div class="keeper-pack-row ${owned ? "is-owned" : ""}" data-pack-index="${index}" data-player-name="${esc(player.n)}">${cardHTML(player, "pack-player-card")}${tag ? `<span class="keeper-pack-owned-tag">${tag}</span>` : ""}</div>` }).join("")}</div>
+        <button class="btn ${freePackChances > 0 && available.length ? "" : "g"} w mt" id="buy-star-keeper-pack" ${freePackChances > 0 && available.length ? "" : "disabled"}>${!available.length ? "تم جمع كل لاعبي الحزمة" : freePackChances > 0 ? `فتح الحزمة مجانًا · ${freePackChances} فرصة` : "لا توجد فرص فتح"}</button>`;
+      $("bk").onclick = screenPacks;
+      if ($("manage-pending-keeper")) $("manage-pending-keeper").onclick = () => {
+        if (!guestProgress.club) return screenClubFormations();
+        const status = addWonKeeperToClub(pending);
+        if (status === "added" || status === "already-owned") return screenStarKeeperPackDetails();
+        if (status === "full") return showWonKeeperChoice(pending);
+      };
+      $("buy-star-keeper-pack").onclick = async event => {
+        const eligible = availableStarKeeperPlayers(packPlayers);
+        if (!freePackChances || !eligible.length) return;
+        const button = event.currentTarget, back = $("bk");
+        button.disabled = true; if (back) back.disabled = true;
+        freePackChances--;
+        starKeeperPackOpened = true;
+        const winner = eligible[Math.floor(Math.random() * eligible.length)];
+        starKeeperPackWinner = winner.n;
+        if (!starKeeperWonPlayers.includes(winner.n)) starKeeperWonPlayers.push(winner.n);
+        if (!starKeeperPendingPlayers.includes(winner.n)) starKeeperPendingPlayers.push(winner.n);
+        saveStarKeeperPlayerClaims(); savePackChances();
+        try { localStorage.setItem(STAR_KEEPER_PACK_OPENED_KEY, "true"); localStorage.setItem(STAR_KEEPER_PACK_WINNER_KEY, winner.n) } catch (_) { }
+        const count = $("keeper-opening-count"); if (count) count.textContent = String(freePackChances);
+        button.textContent = "جاري فتح الحزمة…";
+        await animateStarKeeperPackOpening(winner.n);
+        const winnerCard = Array.from(app.querySelectorAll(".keeper-pack-row")).find(card => card.dataset.playerName === winner.n);
+        if (winnerCard) { winnerCard.classList.add("is-owned"); winnerCard.insertAdjacentHTML("beforeend", `<span class="keeper-pack-owned-tag">فزت به</span>`) }
+        const result = addWonKeeperToClub(winner);
+        const remaining = availableStarKeeperPlayers(packPlayers).length;
+        button.disabled = !freePackChances || !remaining;
+        button.classList.toggle("g", button.disabled);
+        button.textContent = !remaining ? "تم جمع كل لاعبي الحزمة" : freePackChances ? `فتح الحزمة مجانًا · ${freePackChances} فرصة` : "لا توجد فرص فتح";
+        if (back) back.disabled = false;
+        if (result === "full") showWonKeeperChoice(winner);
+        else if (result === "added") toast(`كسبت ${winner.n} واتضاف للتشكيلة مجانًا`);
+        else if (result === "no-club") toast(`كسبت ${winner.n} · اختار تشكيلتك عشان يتضاف`);
+        else if (result === "save-failed") toast("كسبت اللاعب، لكن تعذر حفظ إضافته للتشكيلة");
+        else toast(`كسبت ${winner.n}`);
+      };
+    }
+
+    function startTournamentMatch() {
+      if (!activeTournament || !tournamentTeam) return screenEvents();
+      const team = tournamentTeam.team.slice(), formation = tournamentTeam.formation;
+      cancelGameTimers(); resetOpponent();
+      OPP = aiClubTeam(STAR_KEEPER_COMPUTER_LEVEL);
+      OPP.avg = OPP.baseAvg = 89;
+      opponentFormation = OPP.formation;
+      OPP.seed = Math.floor(Math.random() * 0x100000000);
+      S = { i: 11, team, used: new Set(team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
+        phase: "match", sel: null, formation, slots: formationSlots(formation), roles: formationRoleSlots(formation),
+        coach: tournamentTeam.coach, coachPool: [], coachShown: new Set(), coachSwap: 0, mode: "ai", entry: "event",
+        matchSeed: Math.floor(Math.random() * 0x100000000) };
+      eventTournamentRoundLabel = ["ربع النهائي", "نصف النهائي", "النهائي"][activeTournament.round - 1];
+      endGame();
+    }
+
+    let eventTournamentRoundLabel = "ربع النهائي";
+    function resolveTournamentMatch(goalsFor, goalsAgainst) {
+      if (!activeTournament || tournamentResult) return;
+      tournamentTeam = { team: S.team.slice(), formation: S.formation, coach: S.coach };
+      tournamentResult = { won: goalsFor > goalsAgainst, final: activeTournament.round >= activeTournament.total };
+      const button = $("again"); if (!button) return;
+      button.disabled = false;
+      button.textContent = tournamentResult.won ? tournamentResult.final ? "الجائزة والحزمة" : "الجولة التالية" : "محاولة مرة أخرى";
+    }
+
+    function continueTournament() {
+      if (!tournamentResult) return toast("استنى نتيجة المباراة الأول");
+      if (!tournamentResult.won) {
+        activeTournament.round = 1; tournamentResult = null;
+        toast("خسرت الجولة · جاهز تبدأ محاولة جديدة");
+        return startTournamentMatch();
+      }
+      if (tournamentResult.final) {
+        activeTournament = tournamentTeam = tournamentResult = null;
+        starKeeperCupWon = true;
+        if (!starKeeperCupOpeningGranted) {
+          starKeeperCupOpeningGranted = true; freePackChances++;
+          try { localStorage.setItem(STAR_KEEPER_CUP_WON_KEY, "true"); localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "true") } catch (_) { }
+          savePackChances();
+          return screenPacks();
+        }
+        try { localStorage.setItem(STAR_KEEPER_CUP_WON_KEY, "true") } catch (_) { }
+        screenEvents(); toast("كسبت البطولة · المكافأة اتاخدت قبل كده"); return;
+      }
+      activeTournament.round++; tournamentResult = null;
+      toast(`تأهلت إلى ${["ربع النهائي", "نصف النهائي", "النهائي"][activeTournament.round - 1]}`);
+      startTournamentMatch();
     }
 
     function screenDraftModes() {
       _origPush(screenDraftModes);
       app.innerHTML = `
   <main class="play-menu">
-    <header class="play-menu-head"><div class="logo">GG</div><div><h1 class="play-menu-title">دريفت الكروت</h1><p class="play-menu-subtitle">اختار الوقت وطريقة المنافسة</p></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <header class="hdr"><div class="l"><span class="pos">دريفت الكروت</span><span class="cnt">اختار الوقت وطريقة المنافسة</span></div><button class="btn g sm" id="bk">رجوع</button></header>
     <section class="draft-menu" aria-label="إعدادات الدريفت">
       <header class="draft-menu-head"><span class="play-mode-icon">⏱️</span><span><b>وقت كل اختيار</b><small>تقدر تغيّره قبل كل جولة</small></span></header>
       <div class="timer-options">${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}" aria-pressed="${s === TM}">${s} ثانية</button>`).join("")}</div>
@@ -4279,7 +4692,7 @@
       });
     }
 
-    function getClubMatchSetup(allowUnconfirmed = false) {
+    function getClubMatchSetup(allowUnconfirmed = false, allowIncompleteBench = false) {
       const club = guestProgress.club;
       if (!club) {
         toast("اختار تشكيلتك الأول");
@@ -4294,8 +4707,8 @@
 
       const missingStarters = !Array.isArray(club.starters) || club.starters.length !== 11 ||
         club.starters.some(name => !name);
-      const missingFixedBench = !Array.isArray(club.bench) ||
-        BENCH_SLOT_POSITIONS.some((position, index) => position !== null && !club.bench[index]);
+      const missingFixedBench = !allowIncompleteBench && (!Array.isArray(club.bench) ||
+        BENCH_SLOT_POSITIONS.some((position, index) => position !== null && !club.bench[index]));
       if (missingStarters || missingFixedBench) {
         selectedSquadSlot = null;
         showBench = missingFixedBench;
@@ -4866,10 +5279,10 @@
     </div>
     <p class="note">قوة اللاعبين ${baseAvg}، وتأثير المدرب ${coachMultiplier(S.coach).toFixed(3)}، فيصبح تقييم الفريق <b>${avg}</b>.</p>
     <div class="mt" style="display:flex;gap:10px">
-      <button class="btn" id="again" style="flex:1">إعادة المباراة</button>
+      <button class="btn" id="again" style="flex:1" ${S.entry === "event" ? "disabled" : ""}>${S.entry === "event" ? `مباراة ${esc(eventTournamentRoundLabel)} جارية` : "إعادة المباراة"}</button>
       <button class="btn g" id="hm" style="flex:1">الرئيسية</button>
     </div>`;
-      $("again").onclick = showRematchChoices;
+      $("again").onclick = () => S && S.entry === "event" ? continueTournament() : showRematchChoices();
       $("hm").onclick = () => { killNet(); screenHome() };
       runMatch(avg);
     }
@@ -5014,7 +5427,7 @@
     </div>`;
       sfxWhistle();
       let m = 0, a = 0, b = 0;
-      const TICK_MS = Math.round(60000 / 90);
+      const TICK_MS = Math.round(30000 / 90);
       const t = setInterval(() => {
         if (!$("sc") || S !== matchState) { clearInterval(t); return }
         m = Math.min(m + 1, 90);
@@ -5061,7 +5474,9 @@
           if (matchPitch) matchPitch.innerHTML = matchFormationHTML(
             S.team, S.formation, r.ratings[mySide], motm.me ? motm.who : null,
             opponentTeam, OPP.formation, r.ratings[opponentSide], motm.me ? null : motm.who
-          );          recordGuestMatch(mt, a, b);
+          );
+          recordGuestMatch(mt, a, b);
+          if (matchState.entry === "event") resolveTournamentMatch(a, b);
         }
       }, TICK_MS);
     }
