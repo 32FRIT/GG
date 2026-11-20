@@ -4028,7 +4028,7 @@
               salePrice !== null && salePrice > 0;
             /* The price already sits above the button, so the action label stays short
                enough for the narrow grid column. */
-            const label = owned ? canSellOwned ? `بيع · ${formatCoins(salePrice)} 🪙` : "مملوك" :
+            const label = owned ? canSellOwned ? `بيع${marketDisplaySettings.value ? ` · ${formatCoins(salePrice)} 🪙` : ""}` : "مملوك" :
               !guestProgress.club ? "اختار تشكيلتك" :
                 !hasPrice ? "مقترح" : !slot ? "لا يوجد مكان" :
                   !canAfford ? "رصيد غير كافٍ" :
