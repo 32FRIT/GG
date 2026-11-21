@@ -65,6 +65,10 @@
           return;
         }
         if (d.t === "pong") return;
+        if (d.t === "skip-request" || d.t === "skip-accept" || d.t === "skip-decline") {
+          handleMatchSkipMessage(d);
+          return;
+        }
         if (d.t === "team_ack") {
           stopTeamResultRetry();
           return;
