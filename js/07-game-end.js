@@ -234,7 +234,7 @@
 
       <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
       <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
-      <button class="btn g sm" id="skip-match" type="button" style="margin:6px auto 10px">تخطي للنتيجة</button>
+      <button class="btn g sm" id="skip-match" type="button" disabled style="margin:6px auto 10px">تخطي للنتيجة</button>
       <div id="match-pitch"></div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
@@ -306,7 +306,7 @@
         while (m < 90 && !matchFinished) tick();
       };
       const skipButton = $("skip-match");
-      if (skipButton) skipButton.onclick = requestMatchSkip;
+      if (skipButton) { skipButton.disabled = false; skipButton.onclick = requestMatchSkip; }
     }
 
 
