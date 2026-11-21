@@ -288,7 +288,7 @@
           <span class="r" style="font-size:11px">${teamName}</span>
         </div>`);
         });
-        $("sc").textContent = a + " - " + b;
+        $("sc").textContent = b + " - " + a;
         $("mn").textContent = m + "'";
         if (m >= 90) {
           if (matchFinished) return;
