@@ -8,7 +8,12 @@
   <meta name="description" content="GG">
   <title>GG</title>
   <link rel="icon" type="image/png" href="./Icon.png">
-  <link rel="apple-touch-icon" href="./Icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/icon-180.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GG">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
@@ -362,6 +367,21 @@
     .start-shortcut:last-child { border-color:rgba(245,196,81,.25);background:rgba(245,196,81,.06) }
     .start-bottom { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 3px 0;color:var(--mu);font-size:12px }
     .start-bottom button { border:0;background:transparent;color:inherit;padding:8px 2px;cursor:pointer }
+    .asset-slot { display:flex }
+    .asset-slot:empty { display:none }
+    .asset-card { width:100%;display:flex;flex-direction:column;gap:9px;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--card) }
+    .asset-row { display:flex;align-items:center;justify-content:space-between;gap:10px }
+    .asset-title { display:block;font-size:12.5px;font-weight:900 }
+    .asset-meta { display:block;margin-top:3px;color:var(--mu);font-size:11px;font-weight:700;line-height:1.45 }
+    .asset-track { height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden }
+    .asset-track i { display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--ac),#8df5c4);transition:width .2s ease }
+    .asset-dialog-title { margin-bottom:12px;color:var(--tx);font-size:16px;font-weight:900 }
+    .asset-progress-text { margin:14px 0 10px;font-size:14px;font-weight:800;color:var(--tx) }
+    .asset-progress-text b { color:var(--ac);font-size:20px }
+    .asset-hint { margin-top:10px;color:var(--mu);font-size:11.5px;line-height:1.6 }
+    .asset-pill { position:fixed;z-index:80;left:50%;bottom:calc(12px + var(--sab));transform:translateX(-50%);width:min(280px,calc(100vw - 28px));padding:9px 12px 10px;border:1px solid rgba(46,224,138,.32);border-radius:999px;background:rgba(7,19,13,.95);box-shadow:0 12px 30px rgba(0,0,0,.5);pointer-events:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px) }
+    .asset-pill-text { color:var(--tx);font-size:11px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+    .asset-pill .asset-track { height:5px;margin-top:6px }
     @media(max-height:720px) { .start-hero { min-height:260px } .start-screen { min-height:0 } }
     .play-menu { flex:1;display:flex;flex-direction:column;gap:14px }
     .play-club-card { width:100%;min-height:92px;display:flex;align-items:center;gap:12px;padding:15px;border:1px solid rgba(46,224,138,.35);border-radius:16px;background:linear-gradient(145deg,#123a26,#0d2418);text-align:right;cursor:pointer }
@@ -2325,6 +2345,36 @@
       }
     }
   </style>
+  <script>
+    (function () {
+      var shown = false;
+      function showError(detail) {
+        if (shown) return;
+        shown = true;
+        console.error("GG runtime error:", detail);
+        var app = document.getElementById("app");
+        if (!app) return;
+        if (app.childElementCount) {
+          if (typeof window.toast === "function") window.toast("حصل خطأ غير متوقع، جرّب تحديث الصفحة");
+          return;
+        }
+        app.innerHTML = '<div class="rows"><div class="row"><span class="n">حصل خطأ غير متوقع. حدّث الصفحة وجرّب تاني.</span></div></div>';
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn w mt";
+        button.textContent = "تحديث الصفحة";
+        button.onclick = function () { location.reload(); };
+        app.appendChild(button);
+      }
+      window.addEventListener("error", function (event) {
+        showError(event && event.error ? event.error.message : event && event.message);
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        var reason = event && event.reason;
+        showError(reason && reason.message ? reason.message : reason);
+      });
+    })();
+  </script>
 </head>
 
 <body>
@@ -2334,9 +2384,19 @@
   ["fut-data.js", "coach-art.js", "hi-cards.js",
    "js/01-data.js", "js/02-helpers.js", "js/03-state.js", "js/04-card-render.js",
    "js/05-screens.js", "js/06-game-flow.js", "js/07-game-end.js", "js/08-simulation.js",
-   "js/09-ai-opponent.js", "js/10-network.js", "js/11-navigation-boot.js"].forEach(function (f) {
+   "js/09-ai-opponent.js", "js/10-network.js", "js/11-navigation-boot.js",
+   "js/12-assets.js"].forEach(function (f) {
     document.write('<script src="./' + f + '?v=' + V + '"><\/script>');
   });
+</script>
+<script>
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js").catch(function (error) {
+        console.warn("Service worker registration failed:", error);
+      });
+    });
+  }
 </script>
   
 </body>

@@ -1,6 +1,7 @@
 /* ================= END ================= */
     function endGame() {
       cancelGameTimers();
+      gameLive = true;
       if (S) S.phase = "match";
       const returnToModeMenu = S.entry === "club" ? screenClubModes : screenModes;
       const baseAvg = Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11);
@@ -178,6 +179,8 @@
         baseAvg: Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11),
         names: S.team.map(t => t.n),
         benchNames: Array.isArray(matchState.bench) ? matchState.bench.map(player => player ? player.n : null) : null,
+        players: S.team.slice(),
+        benchPlayers: Array.isArray(matchState.bench) ? matchState.bench.slice() : null,
         formation: S.formation,
         slots: S.slots,
         coach: S.coach,
@@ -192,6 +195,8 @@
           baseAvg: mt.baseAvg,
           names: mt.names,
           benchNames: mt.benchNames,
+          players: mt.players,
+          benchPlayers: mt.benchPlayers,
           formation: mt.formation,
           coach: mt.coach.n,
           seed: mt.seed
@@ -248,7 +253,8 @@
     <div class="match-score-card" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center">
 
       <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
-      <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
+      <div dir="ltr" style="font-size:11px;font-weight:800;color:var(--mu)">فريقك · الخصم</div>
+      <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu);margin-top:2px">0'</div>
       <button class="btn g sm" id="skip-match" type="button" disabled style="margin:6px auto 10px">تخطي للنتيجة</button>
       <div id="match-pitch"></div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
@@ -282,11 +288,12 @@
           <span class="r" style="font-size:11px">${teamName}</span>
         </div>`);
         });
-        $("sc").textContent = b + " - " + a;
+        $("sc").textContent = a + " - " + b;
         $("mn").textContent = m + "'";
         if (m >= 90) {
           if (matchFinished) return;
           matchFinished = true;
+          gameLive = false;
           clearMatchSkipState();
           const skipButton = $("skip-match");
           if (skipButton) { skipButton.disabled = true; skipButton.textContent = "انتهت المباراة"; }
@@ -302,7 +309,7 @@
           <span class="r" dir="ltr" style="font-size:11px;direction:ltr;unicode-bidi:isolate;text-align:left">${esc(motm.reason)}</span>
         </div>`);
           const mySide = r.mine ? "A" : "B", opponentSide = r.mine ? "B" : "A";
-          const opponentTeam = OPP.names.map(name => P.find(player => player.n === name)).filter(Boolean);
+          const opponentTeam = (OPP.players || OPP.names.map(name => findPlayer(name))).filter(Boolean);
           const matchPitch = $("match-pitch");
           if (matchPitch) matchPitch.innerHTML = matchFormationHTML(
             S.team, S.formation, r.ratings[mySide], motm.me ? motm.who : null,

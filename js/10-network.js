@@ -13,6 +13,15 @@
       toast(msg || "مشكلة في الاتصال");
       setTimeout(returnScreen, 600);
     }
+    const ROOM_CODE_LENGTH = 6;
+    /* No 0/O/1/I/L so a code read aloud or typed by hand stays unambiguous. */
+    const ROOM_CODE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+    function newRoomCode() {
+      const bytes = new Uint8Array(ROOM_CODE_LENGTH);
+      if (window.crypto && typeof crypto.getRandomValues === "function") crypto.getRandomValues(bytes);
+      else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+      return Array.from(bytes, byte => ROOM_CODE_ALPHABET[byte % ROOM_CODE_ALPHABET.length]).join("");
+    }
     function roomPeerId(code, gameType) {
       return `${gameType === "club" ? "ggc-" : "ggf-"}${code}`;
     }
@@ -51,6 +60,30 @@
         link(false, gameType);
       });
       peer.on("error", () => netFail("مفيش غرفة بالكود ده", returnScreen));
+    }
+    function validNetworkPlayer(player) {
+      if (!player || typeof player !== "object" || typeof player.n !== "string" || !player.n) return false;
+      if (!["G", "D", "M", "F"].includes(player.p) || typeof player.role !== "string" || !POSITION_GROUP[player.role]) return false;
+      if (!Number.isInteger(player.r) || player.r < 1 || player.r > 99) return false;
+      if (player.alt != null && (!Array.isArray(player.alt) || player.alt.some(role => !POSITION_GROUP[role]))) return false;
+      if (player.art != null && (typeof player.art !== "string" || player.art.length > 300 ||
+        /(^|\/)\.\.(\/|$)/.test(player.art) || /^[a-z][a-z0-9+.-]*:/i.test(player.art))) return false;
+      return true;
+    }
+    function validOpponentPick(d) {
+      if (!d || !Number.isInteger(d.i) || d.i < 0 || d.i >= 11) return false;
+      if (typeof d.n !== "string" || !Array.isArray(d.p)) return false;
+      if (d.p.length !== 4 || new Set(d.p).size !== 4) return false;
+      const roundRole = formationRoleSlots(opponentFormation)[d.i];
+      if (!roundRole) return false;
+      const fitsRound = name => {
+        const player = PLAYER_BY_NAME.get(name);
+        return !!player && (playsRole(player, roundRole) || playsGroup(player, POSITION_GROUP[roundRole]));
+      };
+      if (!d.p.every(fitsRound) || !d.p.includes(d.n)) return false;
+      if (!(d.s === null || d.s === undefined ||
+        typeof d.s === "string" && d.s !== d.n && d.p.includes(d.s))) return false;
+      return !OPPK.slice(0, 11).some((name, index) => index !== d.i && name === d.n);
     }
     function link(isHost, gameType = "draft") {
       if (!conn) return;
@@ -127,10 +160,7 @@
           startGame();
         }
         if (d.t === "pick") {
-          const validPick = Number.isInteger(d.i) && d.i >= 0 && d.i < 11 && typeof d.n === "string" && Array.isArray(d.p) &&
-            d.p.length === 4 && new Set(d.p).size === 4 && d.p.every(name => PLAYER_BY_NAME.has(name)) && d.p.includes(d.n) &&
-            (d.s === null || d.s === undefined || d.p.includes(d.s));
-          if (!validPick || OPPK[d.i] && OPPK[d.i] !== d.n) return;
+          if (!validOpponentPick(d) || OPPK[d.i] && OPPK[d.i] !== d.n) return;
           OPPK[d.i] = d.n; OPPS[d.i] = d.s || null; OPPP[d.i] = d.p.slice();
           if (S && S.phase === "opp") paintOpp();
         }
@@ -138,18 +168,34 @@
           const coach = COACHES.find(item => item.n === d.coach);
           const formation = FORMATIONS.find(item => item.id === d.formation);
           const validNames = Array.isArray(d.names) && d.names.length === 11 && d.names.every(name => typeof name === "string") && new Set(d.names).size === 11;
-          const team = validNames ? d.names.map(name => P.find(player => player.n === name)) : [];
+          const payloadPlayers = gameType === "club" && Array.isArray(d.players) ? d.players : null;
+          const validPayload = !payloadPlayers || (payloadPlayers.length === 11 &&
+            payloadPlayers.every(validNetworkPlayer) &&
+            new Set(payloadPlayers.map(player => player.n)).size === 11 &&
+            payloadPlayers.every((player, index) => player.n === d.names[index]));
+          const team = payloadPlayers
+            ? validPayload ? payloadPlayers.map(player => ({ ...player, alt: Array.isArray(player.alt) ? player.alt.slice() : [] })) : []
+            : validNames ? d.names.map(name => P.find(player => player.n === name)) : [];
           const slots = formation ? formationSlots(formation.id) : [];
           const calculatedBaseAvg = team.length === 11 && team.every(Boolean) ? Math.round(team.reduce((sum, player) => sum + player.r, 0) / 11) : null;
           const calculatedAvg = coach && calculatedBaseAvg !== null ? coachAdjustedPower(calculatedBaseAvg, coach) : null;
           const validSeed = Number.isSafeInteger(d.seed) && d.seed >= 0 && d.seed < 0x100000000;
-          const validBench = gameType !== "club" || (validNames && Array.isArray(d.benchNames) &&
-            d.benchNames.length === BENCH_SLOT_POSITIONS.length && d.benchNames.slice(0, 4).every(Boolean) &&
-            d.benchNames.every((name, index) => name === null || typeof name === "string" && P.some(player => player.n === name) &&
-              (!BENCH_SLOT_POSITIONS[index] || playsGroup(P.find(player => player.n === name), BENCH_SLOT_POSITIONS[index]))) &&
-            new Set([...d.names, ...d.benchNames.filter(Boolean)]).size === 11 + d.benchNames.filter(Boolean).length);
+          const benchPlayers = gameType === "club" && Array.isArray(d.benchPlayers) ? d.benchPlayers : null;
+          const benchNames = benchPlayers ? benchPlayers.map(player => player ? player.n : null) : d.benchNames;
+          const validBench = gameType !== "club" || (validNames &&
+            (benchPlayers
+              ? benchPlayers.length === BENCH_SLOT_POSITIONS.length &&
+                benchPlayers.slice(0, 4).every(Boolean) &&
+                benchPlayers.every((player, index) => player === null || validNetworkPlayer(player) &&
+                  (!BENCH_SLOT_POSITIONS[index] || playsGroup(player, BENCH_SLOT_POSITIONS[index]))) &&
+                new Set([...d.names, ...benchPlayers.filter(Boolean).map(player => player.n)]).size === 11 + benchPlayers.filter(Boolean).length
+              : Array.isArray(benchNames) && benchNames.length === BENCH_SLOT_POSITIONS.length &&
+                benchNames.slice(0, 4).every(Boolean) &&
+                benchNames.every((name, index) => name === null || typeof name === "string" && !!P.find(player => player.n === name) &&
+                  (!BENCH_SLOT_POSITIONS[index] || playsGroup(P.find(player => player.n === name), BENCH_SLOT_POSITIONS[index]))) &&
+                new Set([...d.names, ...benchNames.filter(Boolean)]).size === 11 + benchNames.filter(Boolean).length));
           const validTeam = !!coach && !!formation && team.length === 11 && team.every(Boolean) &&
-            team.every((player, index) => playsGroup(player, slots[index])) && validNames &&
+            team.every((player, index) => validNetworkPlayer(player) && playsGroup(player, slots[index])) && validNames && validPayload &&
             Number.isSafeInteger(d.avg) && d.avg === calculatedAvg && Number.isSafeInteger(d.baseAvg) &&
             d.baseAvg === calculatedBaseAvg && validSeed && validBench;
           if (!validTeam) {
@@ -160,7 +206,9 @@
             avg: d.avg,
             baseAvg: d.baseAvg,
             names: d.names,
-            benchNames: Array.isArray(d.benchNames) ? d.benchNames.slice() : [],
+            benchNames: Array.isArray(benchNames) ? benchNames.slice() : [],
+            players: team,
+            benchPlayers: Array.isArray(benchPlayers) ? benchPlayers.slice() : [],
             name: "الخصم",
             formation: formation.id,
             slots,

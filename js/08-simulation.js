@@ -31,6 +31,20 @@
         : `${key(A)}#${key(B)}`;
       const r = rng32(hs(seedInput));
       const pickPlayer = x => x.names[Math.floor(r() * x.names.length)] || "لاعب";
+      const rosterFor = team => {
+        const map = new Map();
+        [...(team.players || []), ...(team.benchPlayers || [])].forEach(player => {
+          if (player && player.n) map.set(player.n, player);
+        });
+        return name => map.get(name) || findPlayer(name);
+      };
+      const ratingsByName = new Map();
+      [A, B].forEach(team => {
+        [...(team.players || []), ...(team.benchPlayers || [])].forEach(player => {
+          if (player && player.n) ratingsByName.set(player.n, player.r);
+        });
+      });
+      const ratingOf = name => ratingsByName.has(name) ? ratingsByName.get(name) : (findPlayer(name)?.r || 0);
       const ev = [];
       const occupiedEventMinutes = new Set();
       const pushEvent = event => {
@@ -52,6 +66,7 @@
       const redMinutes = { A: [], B: [] };
       ["A", "B"].forEach(side => {
         const team = side === "A" ? A : B;
+        const resolve = rosterFor(team);
         if (r() < 0.78) {
           const count = r() < 0.24 ? 2 : 1;
           const yellowedPlayers = new Set();
@@ -80,13 +95,13 @@
         }
         if (Array.isArray(team.benchNames) && team.benchNames.some(Boolean) && r() < 0.82) {
           const teamSlots = team.slots || formationSlots(team.formation);
-          const availableBench = team.benchNames.map(name => P.find(player => player.n === name)).filter(player => player && playerGroups(player).some(group => group !== "G"));
+          const availableBench = team.benchNames.map(name => resolve(name)).filter(player => player && playerGroups(player).some(group => group !== "G"));
           const subbedOut = new Set();
           const count = Math.min(availableBench.length, 1 + (r() < 0.42 ? 1 : 0) + (r() < 0.12 ? 1 : 0));
           for (let i = 0; i < count; i++) {
             if (!availableBench.length) break;
             const incoming = availableBench.splice(Math.floor(r() * availableBench.length), 1)[0];
-            const outgoingOptions = team.names.map((name, index) => ({ player: P.find(player => player.n === name), group: teamSlots[index] }))
+            const outgoingOptions = team.names.map((name, index) => ({ player: resolve(name), group: teamSlots[index] }))
               .filter(item => item.player && item.group !== "G" && !subbedOut.has(item.player.n) && playsGroup(incoming, item.group));
             if (!outgoingOptions.length) continue;
             const outgoing = outgoingOptions[Math.floor(r() * outgoingOptions.length)].player;
@@ -186,7 +201,7 @@
         const didNotLose = s => s === "A" ? ga >= gb : gb >= ga;
         const score = player => player.goals * 4 + player.assists * 2.5 + (player.saves >= 5 && goalsAgainst(player.s) <= 2 && didNotLose(player.s) ? player.saves * 0.6 : 0);
         return score(y) - score(x) ||
-          (P.find(player => player.n === y.who)?.r || 0) - (P.find(player => player.n === x.who)?.r || 0);
+          ratingOf(y.who) - ratingOf(x.who);
       });
       const best = candidates[0];
       const reasonParts = [];

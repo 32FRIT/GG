@@ -10,6 +10,7 @@
     let OPPK = [], OPPS = [], OPPP = [];
     let rematchContext = null, rematchPending = null, rematchRemote = null, rematchLaunching = false;
     let activeMatchSkip = null, skipMatchProposalSent = false, skipMatchRemotePending = false;
+    let gameLive = false;        // true while a draft or match is actually playing
 
     function stopTeamResultRetry() {
       clearInterval(teamRetryTimer);
@@ -66,12 +67,27 @@
         catch (e) { handleOpponentDisconnect(connection) }
       }, 3000);
     }
+    function gameInProgress() {
+      return gameLive && !!S;
+    }
+    function quitActiveGame() {
+      if (conn && conn.open) {
+        try { conn.send({ t: "resign" }) } catch (e) { }
+      }
+      gameLive = false;
+      cancelGameTimers();
+      if (typeof clearMatchSkipState === "function") clearMatchSkipState();
+      S = null;
+      killNet();
+      resetOpponent();
+    }
     function handleOpponentDisconnect(connection) {
       if (conn !== connection) return;
       const inGame = !!S;
       const returnScreen = activeRoomType === "club" || (S && S.entry === "club")
         ? screenClubModes
         : screenModes;
+      gameLive = false;
       cancelGameTimers();
       S = null;
       killNet();
@@ -94,13 +110,7 @@
       button.onclick = () => {
         if (!confirm("متأكد إنك عايز تنسحب من المباراة؟")) return;
         const returnScreen = S && S.entry === "club" ? screenClubModes : screenModes;
-        if (conn && conn.open) {
-          try { conn.send({ t: "resign" }) } catch (e) { }
-        }
-        cancelGameTimers();
-        S = null;
-        killNet();
-        resetOpponent();
+        quitActiveGame();
         returnScreen();
       };
     }

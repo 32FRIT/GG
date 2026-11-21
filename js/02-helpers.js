@@ -27,24 +27,156 @@
     const STAR_KEEPER_PENDING_PLAYERS_KEY = "gg_star_keeper_pending_players_v1";
     const STAR_KEEPER_TOURNAMENT_KEY = "gg_star_keeper_tournament_v1";
     const STAR_KEEPER_COMPUTER_LEVEL = { id: "star-keeper-89", name: "89", min: 86, max: 92, target: 89, coachTarget: 80 };
-    let activeTournament = null, tournamentTeam = null, tournamentResult = null;
-    let eventTournamentRoundLabel = "ربع النهائي";
-    function saveTournamentProgress() {
-      try {
-        if (!activeTournament) { localStorage.removeItem(STAR_KEEPER_TOURNAMENT_KEY); return true; }
-        const payload = { activeTournament, tournamentTeam: tournamentTeam ? {
-          names: tournamentTeam.team.map(player => player.n),
-          benchNames: (tournamentTeam.bench || Array(12).fill(null)).map(player => player ? player.n : null),
-          formation: tournamentTeam.formation, coach: tournamentTeam.coach.n
-        } : null, tournamentResult, eventTournamentRoundLabel };
-        localStorage.setItem(STAR_KEEPER_TOURNAMENT_KEY, JSON.stringify(payload));
-        return true;
-      } catch (error) { console.warn("Could not save Star Keeper tournament progress.", error); return false; }
+    const CENTER_BACKS_TOURNAMENT_KEY = "gg_center_backs_tournament_v1";
+    const CENTER_BACKS_CUP_WON_KEY = "gg_center_backs_cup_won_v1";
+    const CENTER_BACKS_CUP_OPENING_GRANTED_KEY = "gg_center_backs_cup_opening_granted_v1";
+    const CENTER_BACKS_FREE_OPENING_KEY = "gg_center_backs_free_opening_granted_v1";
+    const EVENT_TOURNAMENTS = {
+      "star-keeper": {
+        id: "star-keeper",
+        name: "بطولة حارس نجم",
+        icon: "🏆",
+        level: STAR_KEEPER_COMPUTER_LEVEL,
+        fixedAvg: 89,
+        computerLabel: "مستوى الكمبيوتر 89",
+        storageKey: STAR_KEEPER_TOURNAMENT_KEY,
+        cupWonKey: STAR_KEEPER_CUP_WON_KEY,
+        rewardKey: STAR_KEEPER_CUP_OPENING_GRANTED_KEY
+      },
+      "center-backs": {
+        id: "center-backs",
+        name: "بطولة قلوب الدفاع",
+        icon: "🛡️",
+        level: { id: "center-backs-88-91", name: "88–91", min: 88, max: 91, target: 89, coachTarget: 80 },
+        fixedAvg: null,
+        computerLabel: "مستوى الكمبيوتر 88–91",
+        storageKey: CENTER_BACKS_TOURNAMENT_KEY,
+        cupWonKey: CENTER_BACKS_CUP_WON_KEY,
+        rewardKey: CENTER_BACKS_CUP_OPENING_GRANTED_KEY
+      }
+    };
+    const TOURNAMENT_ROUND_LABELS = ["ربع النهائي", "نصف النهائي", "النهائي"];
+    const PACK_ROSTER_KEY = "gg_pack_players_v1";
+    const PACK_CLAIMS_KEY = "gg_pack_claims_v1";
+    const PACK_PENDING_KEY = "gg_pack_pending_v1";
+    let packRoster = {};
+    let packClaims = {};
+    let packPending = [];
+
+    function validPackPlayer(player, name) {
+      return !!player && typeof player === "object" && typeof player.n === "string" &&
+        player.n === name && ["G", "D", "M", "F"].includes(player.p) &&
+        typeof player.role === "string" && !!POSITION_GROUP[player.role] &&
+        Number.isInteger(player.r) && player.r >= 1 && player.r <= 99 &&
+        typeof player.nat === "string" && typeof player.club === "string";
     }
-    function restoreTournamentProgress() {
+
+    function readStoredJSON(key, fallback) {
       try {
-        const saved = JSON.parse(localStorage.getItem(STAR_KEEPER_TOURNAMENT_KEY) || "null");
-        if (!saved) return;
+        const parsed = JSON.parse(localStorage.getItem(key) || "null");
+        return parsed == null ? fallback : parsed;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    /* Pack cards are resolved before the base catalog so a pack version wins
+       over a same-named base card after it is claimed. */
+    function findPlayer(name) {
+      if (typeof name !== "string" || !name) return null;
+      return packRoster[name] || PLAYER_BY_NAME.get(name) || null;
+    }
+
+    function savePackRoster() {
+      try { localStorage.setItem(PACK_ROSTER_KEY, JSON.stringify(packRoster)); return true }
+      catch (error) { console.warn("Could not save pack players.", error); return false }
+    }
+
+    function savePackClaims() {
+      try { localStorage.setItem(PACK_CLAIMS_KEY, JSON.stringify(packClaims)); return true }
+      catch (error) { console.warn("Could not save pack claims.", error); return false }
+    }
+
+    function savePackPending() {
+      try { localStorage.setItem(PACK_PENDING_KEY, JSON.stringify(packPending)); return true }
+      catch (error) { console.warn("Could not save pending pack players.", error); return false }
+    }
+
+    (() => {
+      const savedRoster = readStoredJSON(PACK_ROSTER_KEY, {});
+      if (savedRoster && typeof savedRoster === "object" && !Array.isArray(savedRoster)) {
+        Object.entries(savedRoster).forEach(([name, player]) => {
+          if (validPackPlayer(player, name)) packRoster[name] = player;
+        });
+      }
+      const savedClaims = readStoredJSON(PACK_CLAIMS_KEY, {});
+      if (savedClaims && typeof savedClaims === "object" && !Array.isArray(savedClaims)) {
+        Object.entries(savedClaims).forEach(([id, names]) => {
+          if (Array.isArray(names)) packClaims[id] = [...new Set(names.filter(name => typeof name === "string" && name))];
+        });
+      }
+      const savedPending = readStoredJSON(PACK_PENDING_KEY, []);
+      if (Array.isArray(savedPending)) {
+        packPending = savedPending.filter(entry => entry && typeof entry.id === "string" &&
+          typeof entry.n === "string" && !!findPlayer(entry.n));
+      }
+    })();
+
+    function registerPackPlayer(player) {
+      if (!validPackPlayer(player, player && player.n)) return false;
+      packRoster[player.n] = { ...player, alt: Array.isArray(player.alt) ? player.alt.slice() : [] };
+      return savePackRoster();
+    }
+
+    function claimPackPlayer(packId, player) {
+      if (typeof packId !== "string" || !packId || !registerPackPlayer(player)) return false;
+      const won = packClaims[packId] || (packClaims[packId] = []);
+      if (!won.includes(player.n)) won.push(player.n);
+      savePackClaims();
+      return true;
+    }
+
+    function packWonName(packId, name) {
+      return !!(packClaims[packId] || []).includes(name);
+    }
+
+    function packPendingNames(packId) {
+      return packPending.filter(entry => entry.id === packId).map(entry => entry.n);
+    }
+
+    function pendingPackPlayers(packId) {
+      return packPending.filter(entry => !packId || entry.id === packId)
+        .map(entry => findPlayer(entry.n)).filter(Boolean);
+    }
+
+    function setPackPending(packId, name, pending) {
+      packPending = packPending.filter(entry => !(entry.id === packId && entry.n === name));
+      if (pending) packPending.push({ id: packId, n: name });
+      return savePackPending();
+    }
+
+    function clearPackPending(name) {
+      const before = packPending.length;
+      packPending = packPending.filter(entry => entry.n !== name);
+      if (packPending.length !== before) savePackPending();
+    }
+
+    let activeTournament = null, tournamentTeam = null, tournamentResult = null;
+    let activeTournamentEvent = null;
+    let eventTournamentRoundLabel = TOURNAMENT_ROUND_LABELS[0];
+    const savedTournamentStates = {};
+    const tournamentFlags = {};
+    function readFlag(key) {
+      try { return localStorage.getItem(key) === "true" } catch (_) { return false }
+    }
+    function writeFlag(key) {
+      try { localStorage.setItem(key, "true") } catch (_) { }
+    }
+    function readTournamentState(eventId) {
+      const config = EVENT_TOURNAMENTS[eventId];
+      try {
+        const saved = JSON.parse(localStorage.getItem(config.storageKey) || "null");
+        if (!saved) return null;
         const round = saved.activeTournament && saved.activeTournament.round, total = saved.activeTournament && saved.activeTournament.total;
         if (!Number.isInteger(round) || round < 1 || round > 3 || total !== 3) throw new Error("Invalid tournament stage");
         let restoredTeam = null;
@@ -52,41 +184,80 @@
           const names = saved.tournamentTeam.names, formation = FORMATIONS.find(item => item.id === saved.tournamentTeam.formation);
           const coach = COACHES.find(item => item.n === saved.tournamentTeam.coach);
           if (!Array.isArray(names) || names.length !== 11 || new Set(names).size !== 11 || !formation || !coach) throw new Error("Invalid tournament team");
-          const team = names.map(name => P.find(player => player.n === name)), slots = formationSlots(formation.id);
+          const team = names.map(name => findPlayer(name)), slots = formationSlots(formation.id);
           if (team.some((player, index) => !player || !playsGroup(player, slots[index]))) throw new Error("Invalid starters");
           const benchNames = Array.isArray(saved.tournamentTeam.benchNames) ? saved.tournamentTeam.benchNames : Array(12).fill(null);
           const validBench = benchNames.length === BENCH_SLOT_POSITIONS.length && benchNames.every((name, index) =>
-            name === null || typeof name === "string" && P.some(player => player.n === name) &&
-            (!BENCH_SLOT_POSITIONS[index] || playsGroup(P.find(player => player.n === name), BENCH_SLOT_POSITIONS[index]))) &&
+            name === null || typeof name === "string" && !!findPlayer(name) &&
+            (!BENCH_SLOT_POSITIONS[index] || playsGroup(findPlayer(name), BENCH_SLOT_POSITIONS[index]))) &&
             new Set([...names, ...benchNames.filter(Boolean)]).size === names.length + benchNames.filter(Boolean).length;
           if (!validBench) throw new Error("Invalid bench");
-          restoredTeam = { team, bench: benchNames.map(name => name ? P.find(player => player.n === name) : null), formation: formation.id, coach };
+          restoredTeam = { team, bench: benchNames.map(name => name ? findPlayer(name) : null), formation: formation.id, coach };
         }
         const result = saved.tournamentResult;
         if (result != null && (!result || typeof result.won !== "boolean" || typeof result.final !== "boolean")) throw new Error("Invalid result");
-        activeTournament = { round, total }; tournamentTeam = restoredTeam; tournamentResult = result || null;
-        eventTournamentRoundLabel = typeof saved.eventTournamentRoundLabel === "string" ? saved.eventTournamentRoundLabel : ["ربع النهائي", "نصف النهائي", "النهائي"][round - 1];
+        return {
+          activeTournament: { round, total, event: eventId },
+          tournamentTeam: restoredTeam,
+          tournamentResult: result || null,
+          label: typeof saved.eventTournamentRoundLabel === "string" ? saved.eventTournamentRoundLabel : TOURNAMENT_ROUND_LABELS[round - 1]
+        };
       } catch (error) {
-        console.warn("Invalid saved tournament.", error); activeTournament = tournamentTeam = tournamentResult = null;
-        try { localStorage.removeItem(STAR_KEEPER_TOURNAMENT_KEY) } catch (_) { }
+        console.warn("Invalid saved tournament.", error);
+        try { localStorage.removeItem(config.storageKey) } catch (_) { }
+        return null;
       }
     }
-    restoreTournamentProgress();
-    let starKeeperCupWon = false, starKeeperCupOpeningGranted = false;
+    Object.keys(EVENT_TOURNAMENTS).forEach(eventId => {
+      const state = readTournamentState(eventId);
+      if (state) savedTournamentStates[eventId] = state;
+      tournamentFlags[eventId] = {
+        won: readFlag(EVENT_TOURNAMENTS[eventId].cupWonKey),
+        granted: readFlag(EVENT_TOURNAMENTS[eventId].rewardKey)
+      };
+    });
+    function saveTournamentProgress() {
+      const eventId = activeTournament ? activeTournament.event : activeTournamentEvent;
+      const config = EVENT_TOURNAMENTS[eventId];
+      if (!config) return true;
+      try {
+        if (!activeTournament) {
+          localStorage.removeItem(config.storageKey);
+          delete savedTournamentStates[eventId];
+          return true;
+        }
+        const payload = { activeTournament, tournamentTeam: tournamentTeam ? {
+          names: tournamentTeam.team.map(player => player.n),
+          benchNames: (tournamentTeam.bench || Array(12).fill(null)).map(player => player ? player.n : null),
+          formation: tournamentTeam.formation, coach: tournamentTeam.coach.n
+        } : null, tournamentResult, eventTournamentRoundLabel };
+        localStorage.setItem(config.storageKey, JSON.stringify(payload));
+        savedTournamentStates[eventId] = { activeTournament, tournamentTeam, tournamentResult, label: eventTournamentRoundLabel };
+        return true;
+      } catch (error) { console.warn("Could not save tournament progress.", error); return false; }
+    }
+    function activateTournament(eventId) {
+      if (!EVENT_TOURNAMENTS[eventId]) return false;
+      activeTournamentEvent = eventId;
+      const state = savedTournamentStates[eventId] || null;
+      activeTournament = state ? state.activeTournament : null;
+      tournamentTeam = state ? state.tournamentTeam : null;
+      tournamentResult = state ? state.tournamentResult : null;
+      eventTournamentRoundLabel = state ? state.label : TOURNAMENT_ROUND_LABELS[0];
+      return true;
+    }
     let starKeeperPack = null, starKeeperPackOpened = false, starKeeperPackWinner = null;
     let starKeeperWonPlayers = [], starKeeperPendingPlayers = [];
     try {
-      starKeeperCupWon = localStorage.getItem(STAR_KEEPER_CUP_WON_KEY) === "true";
-      starKeeperCupOpeningGranted = localStorage.getItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY) === "true";
       starKeeperPack = JSON.parse(localStorage.getItem(STAR_KEEPER_PACK_KEY) || "null");
       starKeeperPackOpened = localStorage.getItem(STAR_KEEPER_PACK_OPENED_KEY) === "true";
       starKeeperPackWinner = localStorage.getItem(STAR_KEEPER_PACK_WINNER_KEY) || null;
       const savedWinners = JSON.parse(localStorage.getItem(STAR_KEEPER_WON_PLAYERS_KEY) || "[]");
       const savedPending = JSON.parse(localStorage.getItem(STAR_KEEPER_PENDING_PLAYERS_KEY) || "[]");
-      starKeeperWonPlayers = Array.isArray(savedWinners) ? [...new Set(savedWinners.filter(name => P.some(player => player.n === name)))] : [];
-      starKeeperPendingPlayers = Array.isArray(savedPending) ? [...new Set(savedPending.filter(name => starKeeperWonPlayers.includes(name)))] : [];
+      starKeeperWonPlayers = Array.isArray(savedWinners) ? [...new Set(savedWinners.filter(name => !!findPlayer(name)))] : [];
+      starKeeperPendingPlayers = Array.isArray(savedPending) ? [...new Set(savedPending.filter(name => starKeeperWonPlayers.includes(name) && !!findPlayer(name)))] : [];
     } catch (_) {
-      starKeeperCupWon = false; starKeeperCupOpeningGranted = false; starKeeperPack = null;
+      starKeeperPack = null;
       starKeeperPackOpened = false; starKeeperPackWinner = null; starKeeperWonPlayers = []; starKeeperPendingPlayers = [];
     }
     let freePackChances = 0;
@@ -105,7 +276,7 @@
         return true;
       } catch (error) { console.warn("Could not save Star Keeper players.", error); return false }
     }
-    if (starKeeperPackWinner && P.some(player => player.n === starKeeperPackWinner) && !starKeeperWonPlayers.includes(starKeeperPackWinner)) {
+    if (starKeeperPackWinner && findPlayer(starKeeperPackWinner) && !starKeeperWonPlayers.includes(starKeeperPackWinner)) {
       starKeeperWonPlayers.push(starKeeperPackWinner);
       starKeeperPendingPlayers.push(starKeeperPackWinner);
       saveStarKeeperPlayerClaims();
@@ -114,19 +285,26 @@
       starKeeperPackOpened = false;
       try { localStorage.removeItem(STAR_KEEPER_PACK_OPENED_KEY) } catch (_) { }
     }
-    let starterOpeningGranted = false;
-    try { starterOpeningGranted = localStorage.getItem(STAR_KEEPER_FREE_OPENING_KEY) === "true" } catch (_) { }
-    if (!starterOpeningGranted) {
+    if (!readFlag(STAR_KEEPER_FREE_OPENING_KEY)) {
       if (!starKeeperPackOpened && !starKeeperPackWinner) freePackChances = Math.max(1, freePackChances);
-      try { localStorage.setItem(STAR_KEEPER_FREE_OPENING_KEY, "true") } catch (_) { }
+      writeFlag(STAR_KEEPER_FREE_OPENING_KEY);
       savePackChances();
     }
-    if (starKeeperCupWon && !starKeeperCupOpeningGranted) {
+    if (!readFlag(CENTER_BACKS_FREE_OPENING_KEY)) {
       freePackChances++;
-      starKeeperCupOpeningGranted = true;
-      try { localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "true") } catch (_) { }
+      writeFlag(CENTER_BACKS_FREE_OPENING_KEY);
       savePackChances();
     }
+    Object.keys(EVENT_TOURNAMENTS).forEach(eventId => {
+      const flags = tournamentFlags[eventId];
+      if (flags.won && !flags.granted) {
+        freePackChances++;
+        flags.granted = true;
+        writeFlag(EVENT_TOURNAMENTS[eventId].rewardKey);
+        savePackChances();
+      }
+    });
+
     function emptyGuestProgress() {
       return {
         version: 7,
@@ -147,7 +325,7 @@
     function validLastTeam(lastTeam) {
       return lastTeam === null || !!(lastTeam &&
         Array.isArray(lastTeam.names) && lastTeam.names.length === 11 &&
-        lastTeam.names.every(name => P.some(player => player.n === name)) &&
+        lastTeam.names.every(name => !!findPlayer(name)) &&
         FORMATIONS.some(formation => formation.id === lastTeam.formation) &&
         COACHES.some(coach => coach.n === lastTeam.coach) &&
         Number.isInteger(lastTeam.rating) && lastTeam.rating >= 1 && lastTeam.rating <= 99);
@@ -188,22 +366,22 @@
       const starters = formationSlots(club.formation);
       const names = [...club.starters, ...club.bench].filter(name => name !== null);
       const costs = club.assetCosts;
-      if (names.some(name => !P.some(player => player.n === name)) ||
+      if (names.some(name => !findPlayer(name)) ||
         new Set(names).size !== names.length ||
         !costs ||
         !validCostTable(costs.players, names) ||
         !validCostTable(costs.coaches, club.coaches) ||
         !validCostTable(costs.formations, club.ownedFormations)) return false;
       if (club.starters.some((name, index) => name !== null &&
-        !playsGroup(P.find(player => player.n === name), starters[index]))) return false;
+        !playsGroup(findPlayer(name), starters[index]))) return false;
       return club.bench.every((name, index) => name === null || BENCH_SLOT_POSITIONS[index] === null ||
-        playsGroup(P.find(player => player.n === name), BENCH_SLOT_POSITIONS[index]));
+        playsGroup(findPlayer(name), BENCH_SLOT_POSITIONS[index]));
     }
 
     /* Saves written before the catalog encoding fix hold names like "PelÃ©".
        Repair them instead of silently dropping the card from the squad. */
     function coherenceName(raw) {
-      if (typeof raw !== "string" || PLAYER_BY_NAME.has(raw) || COACH_BY_NAME.has(raw)) return raw;
+      if (typeof raw !== "string" || packRoster[raw] || PLAYER_BY_NAME.has(raw) || COACH_BY_NAME.has(raw)) return raw;
       const chars = [...raw];
       if (!chars.some(char => char.charCodeAt(0) > 0x7F) ||
         chars.some(char => char.charCodeAt(0) > 0xFF)) return raw;
@@ -241,10 +419,10 @@
 
       const positions = formationSlots(club.formation);
       const candidates = [...new Set([...club.starters, ...club.bench]
-        .filter(name => typeof name === "string" && P.some(player => player.n === name)))];
+        .filter(name => typeof name === "string" && !!findPlayer(name)))];
       const takePlayer = requiredPosition => {
         const index = candidates.findIndex(name =>
-          !requiredPosition || playsGroup(P.find(player => player.n === name), requiredPosition));
+          !requiredPosition || playsGroup(findPlayer(name), requiredPosition));
         return index < 0 ? null : candidates.splice(index, 1)[0];
       };
       const starters = positions.map(takePlayer);
@@ -279,7 +457,7 @@
         coaches,
         coach: activeCoach,
         assetCosts: {
-          players: costsFor(savedCosts.players, playerNames, name => P.find(player => player.n === name).price),
+          players: costsFor(savedCosts.players, playerNames, name => findPlayer(name)?.price),
           coaches: costsFor(savedCosts.coaches, coaches, name => coachPrice(COACHES.find(coach => coach.n === name))),
           formations: costsFor(savedCosts.formations, ownedFormations,
             id => id === ownedFormations[0] ? 0 : FORMATION_PRICE)

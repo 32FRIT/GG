@@ -16,6 +16,13 @@
         localStorage.removeItem(STAR_KEEPER_WON_PLAYERS_KEY);
         localStorage.removeItem(STAR_KEEPER_PENDING_PLAYERS_KEY);
         localStorage.removeItem(STAR_KEEPER_TOURNAMENT_KEY);
+        localStorage.removeItem(CENTER_BACKS_TOURNAMENT_KEY);
+        localStorage.removeItem(CENTER_BACKS_CUP_WON_KEY);
+        localStorage.removeItem(CENTER_BACKS_CUP_OPENING_GRANTED_KEY);
+        localStorage.removeItem(CENTER_BACKS_FREE_OPENING_KEY);
+        localStorage.removeItem(PACK_ROSTER_KEY);
+        localStorage.removeItem(PACK_CLAIMS_KEY);
+        localStorage.removeItem(PACK_PENDING_KEY);
         localStorage.removeItem("gg_muted");
 
       } catch (error) {
@@ -24,17 +31,26 @@
         return;
       }
       guestProgress = emptyGuestProgress();
-      freePackChances = 1;
-      starKeeperCupWon = false;
-      starKeeperCupOpeningGranted = false;
+      freePackChances = 2;
+      Object.keys(tournamentFlags).forEach(eventId => { tournamentFlags[eventId] = { won: false, granted: false } });
+      Object.keys(savedTournamentStates).forEach(eventId => { delete savedTournamentStates[eventId] });
       starKeeperPack = null;
       starKeeperPackOpened = false;
       starKeeperPackWinner = null;
       starKeeperWonPlayers = [];
       starKeeperPendingPlayers = [];
-      try { localStorage.setItem(STAR_KEEPER_FREE_OPENING_KEY, "true"); localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "false") } catch (_) { }
+      packRoster = {};
+      packClaims = {};
+      packPending = [];
+      try {
+        localStorage.setItem(STAR_KEEPER_FREE_OPENING_KEY, "true");
+        localStorage.setItem(CENTER_BACKS_FREE_OPENING_KEY, "true");
+        localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "false");
+        localStorage.setItem(CENTER_BACKS_CUP_OPENING_GRANTED_KEY, "false");
+      } catch (_) { }
       savePackChances();
       activeTournament = tournamentTeam = tournamentResult = null;
+      activeTournamentEvent = null;
       muted = true;
       selectedSquadSlot = null;
       showBench = false;
@@ -46,13 +62,15 @@
     }
 
     function screenHome() {
+      gameLive = false;
       cancelGameTimers(); killNet();
       selectedSquadSlot = null;
       _navStack = [screenHome];
-      history.pushState({}, "");
+      _navKeys = [screenHome];
+      history.replaceState({}, "");
       const homeClub = guestProgress.club;
       const homeStarters = homeClub && Array.isArray(homeClub.starters)
-        ? homeClub.starters.map(name => name && P.find(player => player.n === name)).filter(Boolean)
+        ? homeClub.starters.map(name => name && findPlayer(name)).filter(Boolean)
         : [];
       const homeCoach = homeClub && COACHES.find(coach => coach.n === homeClub.coach);
       const homeBaseRating = homeStarters.length === 11
@@ -81,6 +99,7 @@
       <button class="start-shortcut" id="home-market">🛒 <span>السوق</span></button>
       <button class="start-shortcut" id="home-packs">🎁 <span>حزم· ${freePackChances}</span></button>
     </nav>
+    <div class="asset-slot" id="asset-slot"></div>
     <footer class="start-bottom"><button id="record">سجل المباريات</button><button id="how">طريقة اللعب</button><button id="reset-game-data">مسح البيانات</button></footer>
   </main>`;
       $("go").onclick = () => { buzz(8); screenModes() };
@@ -90,6 +109,7 @@
       $("home-team-summary").onclick = screenMyTeam;
       $("home-market").onclick = () => openMarket("ALL", null, "home");
       $("home-packs").onclick = () => screenPacks(false);
+      if (typeof window.renderAssetPanel === "function") window.renderAssetPanel();
     }
 
     function screenRecord() {
@@ -107,7 +127,7 @@
     <div class="row"><span class="n">أعلى تقييم فريق</span><span class="v">${record.bestRating || "—"}</span></div>
   </div>
   ${lastTeam ? `
-  ${formationHTML(lastTeam.names.map(name => P.find(player => player.n === name)).filter(Boolean), lastTeam.formation, "آخر فريق أونلاين")}
+  ${formationHTML(lastTeam.names.map(name => findPlayer(name)).filter(Boolean), lastTeam.formation, "آخر فريق أونلاين")}
   <div class="rows">
     <div class="row"><span class="n">المدرب</span><span class="v">${esc(lastTeam.coach)}</span></div>
     <div class="row"><span class="n">التقييم</span><span class="v">${lastTeam.rating}</span></div>
@@ -157,6 +177,7 @@
     }
 
     function screenClubFormations() {
+      _origPush(screenClubFormations);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">اختار تشكيلتك</span><span class="cnt">الخطة الأولى مجانية</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -190,7 +211,7 @@
           const pendingBeforeSetup = starKeeperPendingPlayers.slice();
           let addedStarKeepers = 0;
           starKeeperPendingPlayers.slice().forEach(name => {
-            const player = P.find(item => item.n === name);
+            const player = findPlayer(name);
             const slot = player && findPlayerSlot(player, null);
             if (!slot) return;
             guestProgress.club[slot.key][slot.index] = name;
@@ -213,7 +234,7 @@
     function arrangeClubForFormation(club, formationId) {
       const inventory = [...club.starters, ...club.bench]
         .filter(Boolean)
-        .map(name => P.find(player => player.n === name))
+        .map(name => findPlayer(name))
         .filter(Boolean);
       const remaining = new Set(inventory.map(player => player.n));
       const takePlayer = position => {
@@ -297,6 +318,7 @@
     }
 
     function screenOwnedClubFormations() {
+      _origPush(screenOwnedClubFormations);
       const club = guestProgress.club;
       if (!club) return screenClubFormations();
       const draft = !club.confirmed;
@@ -341,7 +363,7 @@
       const formation = formationById(club.formation);
       const slots = formationSlots(formation.id);
       const roles = formationRoleSlots(formation.id);
-      const clubPlayers = club.starters.map(name => name && P.find(player => player.n === name)).filter(Boolean);
+      const clubPlayers = club.starters.map(name => name && findPlayer(name)).filter(Boolean);
       const starters = alignTeamToFormation(clubPlayers, formation.id);
       const coach = COACHES.find(item => item.n === club.coach);
       const baseRating = clubPlayers.length
@@ -362,7 +384,7 @@
         const players = Array.from({ length: count }, () => {
           const index = offsets[position] + used[position]++;
           const name = club.starters[index];
-          const player = name && P.find(item => item.n === name);
+          const player = name && findPlayer(name);
           const selected = selectedSquadSlot && selectedSquadSlot.area === "starter" && selectedSquadSlot.index === index;
           return `<button class="pitch-player squad-slot ${player ? "has-player-card" : "empty"} ${selected ? "selected" : ""}"
             data-squad-slot="starter" data-index="${index}" data-position="${position}" aria-pressed="${!!selected}"
@@ -402,7 +424,7 @@
     function canPlayerUseSlot(playerName, slot) {
       const requiredPosition = squadSlotPosition(slot);
       const requiredRole = squadSlotRole(slot);
-      const player = P.find(item => item.n === playerName);
+      const player = findPlayer(playerName);
       return !!player && (requiredRole ? playsRole(player, requiredRole) : !requiredPosition || playsGroup(player, requiredPosition));
     }
 
@@ -411,7 +433,7 @@
         ? formationSlots(guestProgress.club.formation)
         : BENCH_SLOT_POSITIONS;
       const occupied = guestProgress.club[area === "starter" ? "starters" : "bench"];
-      const player = P.find(item => item.n === playerName);
+      const player = findPlayer(playerName);
       if (!player) return null;
       let index = area === "starter"
         ? bestStarterIndex(player, guestProgress.club.formation, occupied)
@@ -451,11 +473,12 @@
     function reservePlayersForSlot(target) {
       if (!guestProgress.club || target.area !== "starter") return [];
       return guestProgress.club.bench
-        .map((name, index) => ({ player: name && P.find(item => item.n === name), index }))
+        .map((name, index) => ({ player: name && findPlayer(name), index }))
         .filter(item => item.player && canPlayerUseSlot(item.player.n, target));
     }
 
     function screenReserveChoices(target) {
+      _origPush(screenReserveChoices);
       const candidates = reservePlayersForSlot(target);
       if (!candidates.length) {
         return openMarket(squadSlotPosition(target), {
@@ -534,7 +557,7 @@
       if (!selectedSquadSlot || !guestProgress.club) return;
       const slot = { ...selectedSquadSlot };
       const playerName = squadSlotPlayer(slot);
-      const player = P.find(item => item.n === playerName);
+      const player = findPlayer(playerName);
       if (!player) return toast("اللاعب المحدد غير موجود");
       const slotGroup = squadSlotPosition(slot) || player.p;
       openMarket(slotGroup, {
@@ -569,7 +592,7 @@
         selectedSquadSlot = null;
         return "";
       }
-      const player = P.find(item => item.n === playerName);
+      const player = findPlayer(playerName);
       if (!player) return "";
       const slot = selectedSquadSlot;
       const destination = slot.area === "starter" ? "الاحتياطي" : "التشكيلة الأساسية";
@@ -600,6 +623,7 @@
     function screenMyTeam() {
       if (!guestProgress.club) return screenClubFormations();
       processPendingStarKeeperPlayers();
+      processPendingPackPlayers();
       if (selectedSquadSlot && selectedSquadSlot.area === "bench") showBench = true;
       _origPush(screenMyTeam);
       const club = guestProgress.club;
@@ -618,7 +642,7 @@
   ${showBench ? `<p class="note mt">بديل لكل مركز رئيسي، و8 أماكن مرنة.</p><div class="bench-grid">
     ${BENCH_SLOT_POSITIONS.map((position, index) => {
         const name = club.bench[index];
-        const player = name && P.find(item => item.n === name);
+        const player = name && findPlayer(name);
         const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
         const selected = selectedSquadSlot && selectedSquadSlot.area === "bench" && selectedSquadSlot.index === index;
         return `<button class="bench-slot ${player ? "owned-slot" : ""} ${selected ? "selected" : ""}"
@@ -658,7 +682,7 @@
         $("auto-squad-move").onclick = moveSelectedPlayerBetweenSquadAreas;
         $("swap-selected-player").onclick = openSquadPlayerSwap;
         if ($("sell-selected-player")) {
-          const selectedPlayer = P.find(item => item.n === squadSlotPlayer(selectedSquadSlot));
+          const selectedPlayer = findPlayer(squadSlotPlayer(selectedSquadSlot));
           $("sell-selected-player").onclick = () => sellOwnedSquadPlayer(selectedPlayer);
         }
         if ($("remove-draft-player")) $("remove-draft-player").onclick = removeDraftSquadPlayer;
@@ -1026,6 +1050,7 @@
     }
 
     function screenClubCoaches() {
+      _origPush(screenClubCoaches);
       const club = guestProgress.club;
       if (!club) return screenMyTeam();
       const coaches = club.coaches
@@ -1069,6 +1094,7 @@
     }
 
     function screenMarket() {
+      _origPush(screenMarket);
       const { target, returnTo } = marketContext;
       const position = target && target.kind === "coach" ? "COACH" : marketContext.position;
       const isCoachMarket = position === "COACH";
@@ -1263,6 +1289,7 @@
     }
 
     function screenModes() {
+      gameLive = false;
       cancelGameTimers(); killNet();
       _origPush(screenModes);
       app.innerHTML = `
@@ -1278,52 +1305,63 @@
       $("mEvents").onclick = screenEvents;
     }
 
+    function tournamentProgressState(eventId) {
+      if (activeTournament && activeTournament.event === eventId) {
+        return { activeTournament, tournamentResult };
+      }
+      return savedTournamentStates[eventId] || null;
+    }
+
+    function tournamentTileHTML(eventId) {
+      const config = EVENT_TOURNAMENTS[eventId];
+      const flags = tournamentFlags[eventId] || {};
+      const state = tournamentProgressState(eventId);
+      const stage = state && state.activeTournament ? TOURNAMENT_ROUND_LABELS[Math.max(0, state.activeTournament.round - 1)] : null;
+      const inProgress = !!(state && state.activeTournament);
+      const icon = flags.won ? "🏆" : inProgress ? "▶️" : config.icon;
+      const title = flags.won
+        ? `العب ${config.name} مرة أخرى`
+        : inProgress
+          ? `استكمال البطولة · ${stage || "تجهيز الفريق"}`
+          : `ابدأ ${config.name}`;
+      const note = flags.won
+        ? `${config.computerLabel} · المكافأة اتاخدت قبل كده`
+        : inProgress
+          ? `كمّل التحدي · ${config.computerLabel}`
+          : `${config.computerLabel} · اربح فرصة فتح مجانية`;
+      return `<button class="play-club-card" data-event="${eventId}"><span class="play-mode-icon">${icon}</span><span class="play-mode-copy"><b>${title}</b><small>${note}</small></span><span class="play-mode-arrow">‹</span></button>`;
+    }
+
     function screenEvents() {
       _origPush(screenEvents);
-      const stages = ["ربع النهائي", "نصف النهائي", "النهائي"];
-      const currentStage = activeTournament ? stages[Math.max(0, activeTournament.round - 1)] : null;
       app.innerHTML = `
   <main class="play-menu">
-    <header class="hdr"><div class="l"><span class="pos">حارس نجم</span><span class="cnt">بطولة حراس · مستوى الكمبيوتر 89</span></div><button class="btn g sm" id="bk">رجوع</button></header>
-    <button class="play-club-card" id="event-start"><span class="play-mode-icon">${starKeeperCupWon ? "🏆" : activeTournament ? "▶️" : "⚽"}</span><span class="play-mode-copy"><b>${starKeeperCupWon ? "العب بطولة حارس نجم مرة أخرى" : activeTournament ? `استكمال البطولة · ${currentStage || "تجهيز الفريق"}` : "ابدأ بطولة حارس نجم"}</b><small>${starKeeperCupWon ? "المكافأة اتفتحت قبل كده · العب بدون مكافأة إضافية" : activeTournament ? "كمّل تحدي الكمبيوتر · التقييم 89" : "محاولة واحدة · العب بتشكيلتك"}</small></span><span class="play-mode-arrow">‹</span></button>
+    <header class="hdr"><div class="l"><span class="pos">الأحداث والبطولات</span><span class="cnt">بطولات إقصائية ضد الكمبيوتر · اربح فرص فتح</span></div><button class="btn g sm" id="bk">رجوع</button></header>
+    ${Object.keys(EVENT_TOURNAMENTS).map(tournamentTileHTML).join("")}
   </main>`;
       $("bk").onclick = screenModes;
-      $("event-start").onclick = () => {
-        try {
-        if (starKeeperCupWon) {
-          activeTournament = { round: 1, total: 3 };
-          tournamentTeam = tournamentResult = null;
-          const setup = getClubMatchSetup(true, true);
-          if (!setup) { activeTournament = null; saveTournamentProgress(); return; }
-          tournamentTeam = { team: setup.team, bench: setup.bench, formation: setup.club.formation, coach: setup.coach };
-          saveTournamentProgress();
-          eventTournamentRoundLabel = "ربع النهائي";
-          return startTournamentMatch();
-        }
+      app.querySelectorAll("[data-event]").forEach(button => button.onclick = () => startEventTournament(button.dataset.event));
+    }
+
+    function startEventTournament(eventId) {
+      if (!activateTournament(eventId)) return;
+      try {
+        if (tournamentResult) return continueTournament();
+        if (tournamentTeam) return startTournamentMatch();
         if (!activeTournament) {
           const setup = getClubMatchSetup(true, true);
           if (!setup) return;
-          activeTournament = { round: 1, total: 3 };
+          activeTournament = { round: 1, total: 3, event: eventId };
           tournamentTeam = { team: setup.team, bench: setup.bench, formation: setup.club.formation, coach: setup.coach };
-          saveTournamentProgress();
           tournamentResult = null;
-          eventTournamentRoundLabel = "ربع النهائي";
+          eventTournamentRoundLabel = TOURNAMENT_ROUND_LABELS[0];
           saveTournamentProgress();
-          return startTournamentMatch();
         }
-        if (tournamentResult) return continueTournament();
-        if (tournamentTeam) return startTournamentMatch();
-        const setup = getClubMatchSetup(true, true);
-        if (setup) {
-          tournamentTeam = { team: setup.team, bench: setup.bench, formation: setup.club.formation, coach: setup.coach };
-          saveTournamentProgress();
-          startTournamentMatch();
-        }
-        } catch (error) {
-          console.error("Could not start Star Keeper tournament.", error);
-          toast("حصل خطأ أثناء بدء البطولة · راجع التشكيلة وحاول مرة تانية");
-        }
-      };
+        return startTournamentMatch();
+      } catch (error) {
+        console.error("Could not start tournament.", error);
+        toast("حصل خطأ أثناء بدء البطولة · راجع التشكيلة وحاول مرة تانية");
+      }
     }
 
     function ensureStarKeeperPack() {
@@ -1368,7 +1406,7 @@
     function processPendingStarKeeperPlayers() {
       if (!guestProgress.club || !starKeeperPendingPlayers.length) return;
       for (const name of starKeeperPendingPlayers.slice()) {
-        const player = P.find(item => item.n === name);
+        const player = findPlayer(name);
         if (!player) {
           starKeeperPendingPlayers = starKeeperPendingPlayers.filter(pending => pending !== name);
           saveStarKeeperPlayerClaims();
@@ -1400,7 +1438,7 @@
       const club = guestProgress.club;
       const key = area === "starter" ? "starters" : "bench";
       const oldName = club && club[key][index];
-      const oldPlayer = oldName && P.find(item => item.n === oldName);
+      const oldPlayer = oldName && findPlayer(oldName);
       if (!club || !oldPlayer || !canPlayerUseSlot(player.n, { area, index })) return toast("اختار مكان حارس مناسب");
       const value = playerMarketValue(oldPlayer);
       if (!value) return toast("سعر السوق للاعب المحدد غير متاح");
@@ -1439,7 +1477,7 @@
       if (!dialog || !club) return;
       const players = [...club.starters.map((name, index) => ({ name, area: "starter", index })),
         ...club.bench.map((name, index) => ({ name, area: "bench", index }))]
-        .filter(slot => slot.name).map(slot => ({ ...slot, player: P.find(item => item.n === slot.name) }))
+        .filter(slot => slot.name).map(slot => ({ ...slot, player: findPlayer(slot.name) }))
         .filter(slot => slot.player && playerMarketValue(slot.player) > 0 && canPlayerUseSlot(player.n, slot));
       dialog.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
         <div class="pick-dialog-title">اختار لاعبًا للاستبدال</div><p class="note">اللاعب القديم هيتباع بسعر السوق كاملًا.</p>
@@ -1453,17 +1491,71 @@
 
     function starKeeperCoverHTML() {
       const club = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
-      return `<div class="star-keeper-cover">${["Peter Schmeichel", "Jan Oblak", "David Raya"].map(name => P.find(p => p.n === name)).filter(Boolean)
+      return `<div class="star-keeper-cover">${["Peter Schmeichel", "Jan Oblak", "David Raya"].map(name => findPlayer(name)).filter(Boolean)
         .sort((a, b) => b.r - a.r).map(player => `<div class="star-keeper-cover-card ${starKeeperWonPlayers.includes(player.n) || club.includes(player.n) ? "is-owned" : ""}">${cardHTML(player, "pack-player-card")}</div>`).join("")}</div>`;
     }
 
-    function screenPacks() {
-      _origPush(() => screenPacks());
+    let packsLoadPromise = null;
+    function loadPacks() {
+      if (window.GG_PACKS) return Promise.resolve(window.GG_PACKS);
+      if (!packsLoadPromise) {
+        packsLoadPromise = new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = `./packs/gg-packs.js?v=${typeof V !== "undefined" ? V : Date.now()}`;
+          script.onload = () => {
+            if (window.assetManager && typeof window.assetManager.addPackArt === "function") window.assetManager.addPackArt();
+            resolve(window.GG_PACKS || {});
+          };
+          script.onerror = () => { packsLoadPromise = null; reject(new Error("Pack file failed to load")) };
+          document.head.appendChild(script);
+        });
+      }
+      return packsLoadPromise;
+    }
+
+    function validPack(pack) {
+      return !!pack && typeof pack.id === "string" && !!pack.id && typeof pack.name === "string" &&
+        Array.isArray(pack.players) && pack.players.length > 0 &&
+        pack.players.every(player => validPackPlayer(player, player && player.n)) &&
+        new Set(pack.players.map(player => player.n)).size === pack.players.length;
+    }
+
+    function currentPack(packId) {
+      const pack = window.GG_PACKS && window.GG_PACKS[packId];
+      return validPack(pack) ? pack : null;
+    }
+
+    function packCoverHTML(pack) {
+      const owned = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      return `<div class="star-keeper-cover">${pack.players.slice().sort((a, b) => b.r - a.r).slice(0, 3)
+        .map(player => `<div class="star-keeper-cover-card ${packWonName(pack.id, player.n) || owned.includes(player.n) ? "is-owned" : ""}">${cardHTML(player, "pack-player-card")}</div>`).join("")}</div>`;
+    }
+
+    function renderPacksScreen() {
       ensureStarKeeperPack();
+      processPendingPackPlayers();
+      const packs = Object.values(window.GG_PACKS || {}).filter(validPack);
       app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">الحزم</span><span class="cnt">${freePackChances} فرصة فتح متاحة</span></div><button class="btn g sm" id="bk">رجوع</button></div>
-        <button class="star-keeper-pack-tile" id="open-star-keeper-pack"><span class="star-keeper-pack-tile-copy"><b>حزمة حارس نجم</b><small>11 حارسًا · ${freePackChances} فرصة فتح</small><small>3 حراس مميزون و8 حراس تقييمهم أقل من 83</small></span>${starKeeperCoverHTML()}</button>`;
+        <button class="star-keeper-pack-tile" id="open-star-keeper-pack"><span class="star-keeper-pack-tile-copy"><b>حزمة حارس نجم</b><small>11 حارسًا · ${freePackChances} فرصة فتح</small><small>3 حراس مميزون و8 حراس تقييمهم أقل من 83</small></span>${starKeeperCoverHTML()}</button>
+        ${packs.map(pack => `<button class="star-keeper-pack-tile" data-open-pack="${esc(pack.id)}"><span class="star-keeper-pack-tile-copy"><b>${esc(pack.name)}</b><small>${esc(pack.subtitle || `${pack.players.length} لاعب`)} · ${freePackChances} فرصة فتح</small></span>${packCoverHTML(pack)}</button>`).join("")}`;
       $("bk").onclick = screenHome;
       $("open-star-keeper-pack").onclick = screenStarKeeperPackDetails;
+      app.querySelectorAll("[data-open-pack]").forEach(button => button.onclick = () => screenPackDetails(button.dataset.openPack));
+    }
+
+    function screenPacks() {
+      _origPush(() => screenPacks(), "packs");
+      if (!window.GG_PACKS) {
+        app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">الحزم</span><span class="cnt">بنجهز الحزم…</span></div><button class="btn g sm" id="bk">رجوع</button></div><p class="note">بنحمّل ملف الحزم…</p>`;
+        $("bk").onclick = screenHome;
+        loadPacks().then(renderPacksScreen).catch(error => {
+          console.warn("Could not load packs.", error);
+          renderPacksScreen();
+          toast("تعذر تحميل الحزم — جرّب تاني");
+        });
+        return;
+      }
+      renderPacksScreen();
     }
 
     async function animateStarKeeperPackOpening(winnerName) {
@@ -1486,11 +1578,11 @@
     }
 
     function screenStarKeeperPackDetails() {
-      _origPush(() => screenStarKeeperPackDetails());
+      _origPush(() => screenStarKeeperPackDetails(), "star-keeper-pack");
       const packPlayers = ensureStarKeeperPack();
       processPendingStarKeeperPlayers();
       const available = availableStarKeeperPlayers(packPlayers);
-      const pending = starKeeperPendingPlayers.map(name => P.find(player => player.n === name)).find(Boolean);
+      const pending = starKeeperPendingPlayers.map(name => findPlayer(name)).find(Boolean);
       const clubPlayers = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
       app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">حزمة حارس نجم</span><span class="cnt">11 حارسًا · <span id="keeper-opening-count">${freePackChances}</span> فرصة فتح</span></div><button class="btn g sm" id="bk">رجوع</button></div>
         ${pending ? `<div class="star-keeper-winner">${guestProgress.club ? `اختار مكانًا لـ${esc(pending.n)} أو بِعه بسعر السوق.` : `${esc(pending.n)} محفوظ وسيضاف لتشكيلتك بعد اختيارها.`}<button class="btn g w mt-s" id="manage-pending-keeper">التصرف في اللاعب الفائز</button></div>` : ""}
@@ -1536,19 +1628,175 @@
       };
     }
 
+    function packEligiblePlayers(pack) {
+      const inClub = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      return pack.players.filter(player => !packWonName(pack.id, player.n) && !inClub.includes(player.n));
+    }
+
+    function addPackPlayerToClub(player) {
+      const club = guestProgress.club;
+      if (!club) return "no-club";
+      const owned = [...club.starters, ...club.bench].filter(Boolean);
+      if (owned.includes(player.n)) { clearPackPending(player.n); return "already-owned" }
+      const slot = findPlayerSlot(player, null);
+      if (!slot) return "full";
+      const previous = snapshotClubProgress();
+      club[slot.key][slot.index] = player.n;
+      club.assetCosts.players[player.n] = 0;
+      if (!commitClubProgress(previous)) return "save-failed";
+      clearPackPending(player.n);
+      return "added";
+    }
+
+    function processPendingPackPlayers() {
+      if (!guestProgress.club || !packPending.length) return;
+      for (const entry of packPending.slice()) {
+        const player = findPlayer(entry.n);
+        if (!player) { clearPackPending(entry.n); continue }
+        if (addPackPlayerToClub(player) === "full") break;
+      }
+    }
+
+    function screenPackDetails(packId) {
+      const pack = currentPack(packId);
+      if (!pack) { toast("الحزمة غير متاحة"); return screenPacks() }
+      _origPush(() => screenPackDetails(packId), "pack-" + packId);
+      processPendingPackPlayers();
+      const available = packEligiblePlayers(pack);
+      const sortedPlayers = pack.players.slice().sort((a, b) => b.r - a.r);
+      const pending = pendingPackPlayers(packId)[0];
+      const clubPlayers = guestProgress.club ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean) : [];
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">${esc(pack.name)}</span><span class="cnt">${pack.players.length} لاعب · <span id="pack-opening-count">${freePackChances}</span> فرصة فتح</span></div><button class="btn g sm" id="bk">رجوع</button></div>
+        ${pending ? `<div class="star-keeper-winner">${guestProgress.club ? `اختار مكانًا لـ${esc(pending.n)} أو بِعه بسعر السوق.` : `${esc(pending.n)} محفوظ وسيضاف لتشكيلتك بعد اختيارها.`}<button class="btn g w mt-s" id="manage-pending-pack">التصرف في اللاعب الفائز</button></div>` : ""}
+        <div class="sec-title">اللاعبون داخل الحزمة · ${pack.players.length}</div>
+        <div class="keeper-pack-list">${sortedPlayers.map((player, index) => {
+          const won = packWonName(pack.id, player.n);
+          const owned = won || clubPlayers.includes(player.n);
+          const tag = won ? "فزت به" : owned ? "في تشكيلتك" : "";
+          return `<div class="keeper-pack-row ${owned ? "is-owned" : ""}" data-pack-index="${index}" data-player-name="${esc(player.n)}">${cardHTML(player, "pack-player-card")}${tag ? `<span class="keeper-pack-owned-tag">${tag}</span>` : ""}</div>`;
+        }).join("")}</div>
+        <button class="btn ${freePackChances > 0 && available.length ? "" : "g"} w mt" id="open-pack" ${freePackChances > 0 && available.length ? "" : "disabled"}>${!available.length ? "تم جمع كل لاعبي الحزمة" : freePackChances > 0 ? `فتح الحزمة مجانًا · ${freePackChances} فرصة` : "لا توجد فرص فتح"}</button>`;
+      $("bk").onclick = screenPacks;
+      if ($("manage-pending-pack")) $("manage-pending-pack").onclick = () => {
+        if (!guestProgress.club) return screenClubFormations();
+        const status = addPackPlayerToClub(pending);
+        if (status === "added" || status === "already-owned") return screenPackDetails(packId);
+        if (status === "full") return showPackPlayerChoice(pending, packId);
+      };
+      $("open-pack").onclick = async event => {
+        const eligible = packEligiblePlayers(pack);
+        if (!freePackChances || !eligible.length) return;
+        const button = event.currentTarget, back = $("bk");
+        button.disabled = true; if (back) back.disabled = true;
+        const winner = eligible[Math.floor(Math.random() * eligible.length)];
+        freePackChances--;
+        if (!claimPackPlayer(pack.id, winner)) {
+          freePackChances++; savePackChances();
+          button.disabled = false; if (back) back.disabled = false;
+          return toast("تعذر حفظ اللاعب — جرّب تاني");
+        }
+        setPackPending(pack.id, winner.n, true);
+        savePackChances();
+        const count = $("pack-opening-count"); if (count) count.textContent = String(freePackChances);
+        button.textContent = "جاري فتح الحزمة…";
+        await animateStarKeeperPackOpening(winner.n);
+        const winnerCard = Array.from(app.querySelectorAll(".keeper-pack-row")).find(card => card.dataset.playerName === winner.n);
+        if (winnerCard) { winnerCard.classList.add("is-owned"); winnerCard.insertAdjacentHTML("beforeend", `<span class="keeper-pack-owned-tag">فزت به</span>`) }
+        const result = addPackPlayerToClub(winner);
+        const remaining = packEligiblePlayers(pack).length;
+        button.disabled = !freePackChances || !remaining;
+        button.classList.toggle("g", button.disabled);
+        button.textContent = !remaining ? "تم جمع كل لاعبي الحزمة" : freePackChances ? `فتح الحزمة مجانًا · ${freePackChances} فرصة` : "لا توجد فرص فتح";
+        if (back) back.disabled = false;
+        if (result === "full") showPackPlayerChoice(winner, pack.id);
+        else if (result === "added") toast(`كسبت ${winner.n} واتضاف للتشكيلة مجانًا`);
+        else if (result === "no-club") toast(`كسبت ${winner.n} · اختار تشكيلتك عشان يتضاف`);
+        else if (result === "save-failed") toast("كسبت اللاعب، لكن تعذر حفظ إضافته للتشكيلة");
+        else toast(`كسبت ${winner.n}`);
+      };
+    }
+
+    function finishPackPlayerAsSale(player, packId) {
+      const value = playerMarketValue(player);
+      if (!value) return toast("سعر السوق للاعب ده غير متاح");
+      const previous = guestProgress.coins;
+      guestProgress.coins = Math.min(Number.MAX_SAFE_INTEGER, guestProgress.coins + value);
+      if (!saveGuestProgress()) { guestProgress.coins = previous; return }
+      clearPackPending(player.n);
+      document.getElementById("pack-player-choice")?.remove();
+      toast(`تم بيع ${player.n} بسعر السوق · ${formatCoins(value)} 🪙`);
+      screenPackDetails(packId);
+    }
+
+    function replaceClubPlayerWithPackPlayer(player, area, index, packId) {
+      const club = guestProgress.club;
+      const key = area === "starter" ? "starters" : "bench";
+      const oldName = club && club[key][index];
+      const oldPlayer = oldName && findPlayer(oldName);
+      if (!club || !oldPlayer || !canPlayerUseSlot(player.n, { area, index })) return toast("اختار مكان مناسب");
+      const value = playerMarketValue(oldPlayer);
+      if (!value) return toast("سعر السوق للاعب المحدد غير متاح");
+      if (guestProgress.coins > Number.MAX_SAFE_INTEGER - value) return toast("رصيدك وصل للحد الأقصى للكوينز");
+      const previous = snapshotClubProgress();
+      guestProgress.coins += value;
+      delete club.assetCosts.players[oldName];
+      club[key][index] = player.n;
+      club.assetCosts.players[player.n] = 0;
+      if (!commitClubProgress(previous)) return;
+      clearPackPending(player.n);
+      document.getElementById("pack-player-choice")?.remove();
+      toast(`تمت إضافة ${player.n} وبيع ${oldName} بسعر السوق · ${formatCoins(value)} 🪙`);
+      screenPackDetails(packId);
+    }
+
+    function showPackPlayerReplacementList(player, packId) {
+      const dialog = $("pack-player-choice"), club = guestProgress.club;
+      if (!dialog || !club) return;
+      const players = [...club.starters.map((name, index) => ({ name, area: "starter", index })),
+        ...club.bench.map((name, index) => ({ name, area: "bench", index }))]
+        .filter(slot => slot.name).map(slot => ({ ...slot, player: findPlayer(slot.name) }))
+        .filter(slot => slot.player && playerMarketValue(slot.player) > 0 && canPlayerUseSlot(player.n, slot));
+      dialog.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
+        <div class="pick-dialog-title">اختار لاعبًا للاستبدال</div><p class="note">اللاعب القديم هيتباع بسعر السوق كاملًا.</p>
+        ${players.length ? "" : `<p class="note">مفيش خانة مناسبة للاستبدال؛ تقدر تبيع اللاعب الفائز.</p>`}
+        <div class="rows">${players.map(slot => `<button class="row" data-pack-replace-area="${slot.area}" data-pack-replace-index="${slot.index}"><span class="n">${esc(slot.player.n)} · ${slot.player.r}</span><span class="v">بيع ${formatCoins(playerMarketValue(slot.player))} 🪙</span></button>`).join("")}</div>
+        <button class="btn g w mt" id="back-pack-choice">رجوع</button></div>`;
+      $("back-pack-choice").onclick = () => showPackPlayerChoice(player, packId);
+      dialog.querySelectorAll("[data-pack-replace-area]").forEach(button => button.onclick = () =>
+        replaceClubPlayerWithPackPlayer(player, button.dataset.packReplaceArea, Number(button.dataset.packReplaceIndex), packId));
+    }
+
+    function showPackPlayerChoice(player, packId) {
+      document.getElementById("pack-player-choice")?.remove();
+      const overlay = document.createElement("div");
+      overlay.id = "pack-player-choice";
+      overlay.className = "pick-overlay sale-overlay";
+      overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
+        <div class="pick-dialog-title">كسبت ${esc(player.n)} · ${player.r}</div>
+        <p class="note">تشكيلتك ممتلئة. استبدل لاعبًا وبِع القديم بسعر السوق، أو بِع اللاعب الفائز.</p>
+        <button class="btn w" id="choose-pack-replacement">استبدال لاعب من التشكيلة</button>
+        <button class="btn g w mt-s" id="sell-won-pack-player">بيع اللاعب الفائز · ${formatCoins(playerMarketValue(player))} 🪙</button>
+        <button class="btn g w mt-s" id="close-pack-choice">لاحقًا</button></div>`;
+      document.body.appendChild(overlay);
+      $("choose-pack-replacement").onclick = () => showPackPlayerReplacementList(player, packId);
+      $("sell-won-pack-player").onclick = () => finishPackPlayerAsSale(player, packId);
+      $("close-pack-choice").onclick = () => overlay.remove();
+    }
+
     function startTournamentMatch() {
       if (!activeTournament || !tournamentTeam) return screenEvents();
+      const config = EVENT_TOURNAMENTS[activeTournament.event] || EVENT_TOURNAMENTS["star-keeper"];
       const team = tournamentTeam.team.slice(), formation = tournamentTeam.formation;
       cancelGameTimers(); resetOpponent();
-      OPP = aiClubTeam(STAR_KEEPER_COMPUTER_LEVEL);
-      OPP.avg = OPP.baseAvg = 89;
+      OPP = aiClubTeam(config.level);
+      OPP.avg = OPP.baseAvg = Number.isInteger(config.fixedAvg) ? config.fixedAvg : OPP.baseAvg;
       opponentFormation = OPP.formation;
       OPP.seed = Math.floor(Math.random() * 0x100000000);
       S = { i: 11, team, bench: tournamentTeam.bench || Array(12).fill(null), used: new Set(team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
         phase: "match", sel: null, formation, slots: formationSlots(formation), roles: formationRoleSlots(formation),
         coach: tournamentTeam.coach, coachPool: [], coachShown: new Set(), coachSwap: 0, mode: "ai", entry: "event",
         matchSeed: Math.floor(Math.random() * 0x100000000) };
-      eventTournamentRoundLabel = ["ربع النهائي", "نصف النهائي", "النهائي"][activeTournament.round - 1];
+      eventTournamentRoundLabel = TOURNAMENT_ROUND_LABELS[activeTournament.round - 1];
       saveTournamentProgress();
       endGame();
     }
@@ -1572,21 +1820,24 @@
         return startTournamentMatch();
       }
       if (tournamentResult.final) {
+        const eventId = activeTournament ? activeTournament.event : activeTournamentEvent;
+        const config = EVENT_TOURNAMENTS[eventId] || EVENT_TOURNAMENTS["star-keeper"];
         activeTournament = tournamentTeam = tournamentResult = null;
         saveTournamentProgress();
-        starKeeperCupWon = true;
-        if (!starKeeperCupOpeningGranted) {
-          starKeeperCupOpeningGranted = true; freePackChances++;
-          try { localStorage.setItem(STAR_KEEPER_CUP_WON_KEY, "true"); localStorage.setItem(STAR_KEEPER_CUP_OPENING_GRANTED_KEY, "true") } catch (_) { }
+        const flags = tournamentFlags[eventId] = tournamentFlags[eventId] || { won: false, granted: false };
+        flags.won = true;
+        writeFlag(config.cupWonKey);
+        if (!flags.granted) {
+          flags.granted = true; freePackChances++;
+          writeFlag(config.rewardKey);
           savePackChances();
           return screenPacks();
         }
-        try { localStorage.setItem(STAR_KEEPER_CUP_WON_KEY, "true") } catch (_) { }
         screenEvents(); toast("كسبت البطولة · المكافأة اتاخدت قبل كده"); return;
       }
       activeTournament.round++; tournamentResult = null;
       saveTournamentProgress();
-      toast(`تأهلت إلى ${["ربع النهائي", "نصف النهائي", "النهائي"][activeTournament.round - 1]}`);
+      toast(`تأهلت إلى ${TOURNAMENT_ROUND_LABELS[activeTournament.round - 1]}`);
       startTournamentMatch();
     }
 
@@ -1611,6 +1862,7 @@
     }
 
     function screenClubModes() {
+      gameLive = false;
       _origPush(screenClubModes);
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">مباريات تشكيلتي</span><span class="cnt" dir="ltr">${guestProgress.club ? formationById(guestProgress.club.formation).id : "—"}</span></div>
@@ -1685,8 +1937,8 @@
         return null;
       }
 
-      const team = club.starters.map(name => P.find(player => player.n === name));
-      const bench = club.bench.map(name => name ? P.find(player => player.n === name) : null);
+      const team = club.starters.map(name => findPlayer(name));
+      const bench = club.bench.map(name => name ? findPlayer(name) : null);
       if (team.some(player => !player) || new Set(team.map(player => player.n)).size !== 11) {
         toast("راجع لاعبي التشكيلة الأساسية قبل اللعب");
         screenMyTeam();
@@ -1748,7 +2000,7 @@
     }
 
     function screenFormations(onContinue) {
-      _origPush(() => screenFormations(onContinue));
+      _origPush(() => screenFormations(onContinue), "formations");
       app.innerHTML = `
   <div class="hdr"><div class="l"><span class="pos">اختار خطة فريقك</span><span class="cnt">الخطة هتحدد مراكز الكروت</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
@@ -1779,11 +2031,11 @@
     }
 
     function screenRoom(gameType = "draft") {
-      _origPush(() => screenRoom(gameType));
+      _origPush(() => screenRoom(gameType), "room");
       const isClubMatch = gameType === "club";
       const returnScreen = isClubMatch ? screenClubModes : screenModes;
       app.innerHTML = `
-  <div class="hdr"><div class="l"><span class="pos">${isClubMatch ? "مباراة تشكيلتي مع صاحبك" : "غرفة مع صاحبك"}</span><span class="cnt">كود من 4 حروف</span></div>
+  <div class="hdr"><div class="l"><span class="pos">${isClubMatch ? "مباراة تشكيلتي مع صاحبك" : "غرفة مع صاحبك"}</span><span class="cnt">كود من ${ROOM_CODE_LENGTH} حروف</span></div>
   <button class="btn g sm" id="bk">رجوع</button></div>
   <button class="mode primary" id="mk">
     <div class="ic">➕</div>
@@ -1791,16 +2043,16 @@
     <div class="arw">‹</div>
   </button>
   <div class="sec-title">أو ادخل بكود</div>
-  <input class="input" id="cd" placeholder="كود الغرفة" maxlength="4" inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false">
+  <input class="input" id="cd" placeholder="كود الغرفة" maxlength="${ROOM_CODE_LENGTH}" inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false">
   <button class="btn w mt-s" id="jn">ادخل الغرفة</button>`;
       $("bk").onclick = returnScreen;
       $("mk").onclick = () => {
         if (isClubMatch && !getClubMatchSetup()) return;
-        hostRoom(Math.random().toString(36).slice(2, 6), false, gameType);
+        hostRoom(newRoomCode(), false, gameType);
       };
       $("jn").onclick = () => {
         const c = ($("cd").value || "").trim().toLowerCase();
-        if (c.length !== 4) return toast("الكود 4 حروف");
+        if (c.length !== ROOM_CODE_LENGTH) return toast(`الكود ${ROOM_CODE_LENGTH} حروف`);
         if (isClubMatch && !getClubMatchSetup()) return;
         joinRoom(c, gameType);
       };

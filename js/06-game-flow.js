@@ -1,6 +1,7 @@
 /* ================= GAME FLOW ================= */
     function startGame() {
       cancelGameTimers();
+      gameLive = true;
       S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), roles: formationRoleSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai", matchSeed: Math.floor(Math.random() * 0x100000000) };
       round();
     }

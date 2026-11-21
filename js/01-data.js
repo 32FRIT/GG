@@ -1,9 +1,14 @@
 /* ================= DATA ================= */
     /* A broken catalog used to leave a blank screen; show the reason instead. */
     function fatalStartup(message) {
+      window.__GG_BOOT_ERROR = message;
       const target = document.getElementById("app");
       if (target) target.innerHTML = `<div class="rows"><div class="row"><span class="n">${message}</span></div></div>`;
       throw new Error(message);
+    }
+    if (typeof FUT_DATA === "undefined" || !FUT_DATA ||
+      !Array.isArray(FUT_DATA.players) || !Array.isArray(FUT_DATA.coaches)) {
+      fatalStartup("بيانات اللعبة الأساسية مش موجودة أو غير صالحة.");
     }
     const P = FUT_DATA.players.map(player => ({
       n: player.n,

@@ -18,7 +18,7 @@
       return "t-bronze";
     }
     function cardHTML(x, cls, extra) {
-      const cardArt = CARD_ART[x.eaId];
+      const cardArt = x.art || CARD_ART[x.eaId];
       const cardContent = cardArt
         ? `<img class="fc-card-art" src="${cardArt}" alt="كارت ${esc(x.n)}" loading="lazy" decoding="async" fetchpriority="low"><span class="sr">${esc(x.n)}</span>`
         : `
