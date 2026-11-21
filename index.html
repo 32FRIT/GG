@@ -2121,6 +2121,32 @@
       white-space: normal
     }
 
+    /* Compact draft selection on short screens: keep both card rows visible without page scrolling. */
+    @media (max-height: 760px) {
+      #app:has(.pick-grid) {
+        padding-top: calc(6px + var(--sat));
+        padding-bottom: calc(8px + var(--sab));
+      }
+      #app:has(.pick-grid) .note {
+        margin-top: 6px;
+        font-size: 11px;
+        line-height: 1.35;
+      }
+      .pick-grid {
+        gap: clamp(6px, 1vh, 10px);
+        margin-top: 8px !important;
+      }
+      .pick-grid > .fc,
+      .pick-grid > .fcwrap {
+        width: min(100%, 145px);
+        justify-self: center;
+      }
+      .squad { margin-top: 8px; }
+      .squad .lbl { margin-bottom: 4px; }
+      .slots { gap: 4px; }
+      .slot { min-width: 44px; height: 30px; padding-inline: 5px; font-size: 9px; }
+    }
+
     /* ---------- misc ---------- */
     .input {
       width: 100%;

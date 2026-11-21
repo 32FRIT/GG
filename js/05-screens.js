@@ -792,13 +792,16 @@
         club[target.area === "starter" ? "starters" : "bench"][target.index] !== oldName)) {
         return toast("اللاعب المحدد للتبديل لم يعد في مكانه");
       }
+      const pendingCosts = club.confirmed ? 0 : clubSetupCostBreakdown(club).total;
+      const available = club.confirmed
+        ? guestProgress.coins + (oldCost || 0)
+        : guestProgress.coins - (pendingCosts - (oldCost || 0));
+      if (!Number.isSafeInteger(available) || available < player.price) {
+        return toast(oldName ? "رصيد الكوينز غير كافٍ لتبديل اللاعب" : "رصيد الكوينز غير كافٍ لشراء اللاعب");
+      }
       const previous = snapshotClubProgress();
       let swapDifference = null;
       if (club.confirmed) {
-        const available = guestProgress.coins + (oldCost || 0);
-        if (!Number.isSafeInteger(available) || available < player.price) {
-          return toast("رصيد الكوينز غير كافٍ لتبديل اللاعب");
-        }
         const nextCoins = available - player.price;
         if (!Number.isSafeInteger(nextCoins)) return toast("رصيد الكوينز غير صالح");
         guestProgress.coins = nextCoins;
@@ -1073,6 +1076,9 @@
       const ownedPlayers = guestProgress.club
         ? [...guestProgress.club.starters, ...guestProgress.club.bench].filter(Boolean)
         : [];
+      const pendingClubCost = guestProgress.club && !guestProgress.club.confirmed
+        ? clubSetupCostBreakdown(guestProgress.club).total
+        : 0;
       /* Managers are listed best first so the elite names lead the market. */
       const items = isCoachMarket
         ? COACHES.slice().sort((a, b) => b.r - a.r || a.price - b.price)
@@ -1139,9 +1145,10 @@
             const refund = replacing && guestProgress.club
               ? guestProgress.club.assetCosts.players[target.replaceName] || 0
               : 0;
-            const available = guestProgress.coins + refund;
-            const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
-              Number.isSafeInteger(available) && available >= player.price;
+            const available = guestProgress.club && guestProgress.club.confirmed
+              ? guestProgress.coins + refund
+              : guestProgress.coins - (pendingClubCost - refund);
+            const canAfford = !guestProgress.club || Number.isSafeInteger(available) && available >= player.price;
             const difference = player.price - refund;
             const salePrice = cardSalePrice(player);
 

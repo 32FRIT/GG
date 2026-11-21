@@ -9,6 +9,7 @@
     let OPP = null;              // {avg,names,name}
     let OPPK = [], OPPS = [], OPPP = [];
     let rematchContext = null, rematchPending = null, rematchRemote = null, rematchLaunching = false;
+    let activeMatchSkip = null, skipMatchProposalSent = false, skipMatchRemotePending = false;
 
     function stopTeamResultRetry() {
       clearInterval(teamRetryTimer);
@@ -39,6 +40,9 @@
       OPPS = [];
       OPPP = [];
       window.__showOpp = null;
+      activeMatchSkip = null;
+      skipMatchProposalSent = false;
+      skipMatchRemotePending = false;
     }
 
     function stopNetMonitor() {
