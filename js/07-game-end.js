@@ -36,7 +36,7 @@
       <button class="btn g" id="hm" style="flex:1">الرئيسية</button>
     </div>`;
       $("again").onclick = () => S && S.entry === "event" ? continueTournament() : showRematchChoices();
-      $("hm").onclick = () => { killNet(); screenHome() };
+      $("hm").onclick = () => { clearMatchSkipState(); killNet(); screenHome() };
       runMatch(avg);
     }
 
@@ -98,6 +98,13 @@
       if (action === "new" && !club) return startGame();
     }
 
+    function clearMatchSkipState() {
+      activeMatchSkip = null;
+      skipMatchProposalSent = false;
+      skipMatchRemotePending = false;
+      document.querySelectorAll("[data-match-skip-overlay]").forEach(overlay => overlay.remove());
+    }
+
     function requestMatchSkip() {
       if (!activeMatchSkip) return;
       if (conn && conn.open) {
@@ -111,7 +118,14 @@
     }
 
     function handleMatchSkipMessage(message) {
-      if (!message || !S || S.phase !== "match" || !activeMatchSkip) return;
+      if (!message) return;
+      if (message.t === "skip-request" && (!S || S.phase !== "match" || !activeMatchSkip)) {
+        // The peer may have received the request before its match UI is ready.
+        // Decline explicitly so the proposer can try again instead of getting stuck.
+        try { conn && conn.open && conn.send({ t: "skip-decline" }); } catch (_) {}
+        return;
+      }
+      if (!S || S.phase !== "match" || !activeMatchSkip) return;
       if (message.t === "skip-request") {
         if (skipMatchRemotePending) return;
         if (skipMatchProposalSent) {
@@ -123,6 +137,7 @@
         skipMatchRemotePending = true;
         const overlay = document.createElement("div");
         overlay.className = "pick-overlay sale-overlay";
+        overlay.setAttribute("data-match-skip-overlay", "");
         overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
           <div class="pick-dialog-title">طلب تخطي المباراة</div>
           <p>صاحبك بيقترح تخطي المباراة والانتقال للنتيجة النهائية. توافق؟</p>
@@ -272,9 +287,7 @@
         if (m >= 90) {
           if (matchFinished) return;
           matchFinished = true;
-          activeMatchSkip = null;
-          skipMatchProposalSent = false;
-          skipMatchRemotePending = false;
+          clearMatchSkipState();
           const skipButton = $("skip-match");
           if (skipButton) { skipButton.disabled = true; skipButton.textContent = "انتهت المباراة"; }
           clearInterval(t);
@@ -301,9 +314,25 @@
       };
       t = setInterval(tick, TICK_MS);
       activeMatchSkip = () => {
-        if (matchFinished || S !== matchState) return;
+        if (matchFinished || S !== matchState || !$("sc")) {
+          activeMatchSkip = null;
+          return;
+        }
         clearInterval(t);
-        while (m < 90 && !matchFinished) tick();
+        while (m < 90 && !matchFinished) {
+          // tick() intentionally does nothing if the match screen was torn down.
+          // Detect that state before/after each tick to avoid an infinite loop.
+          if (!$("sc") || S !== matchState) {
+            activeMatchSkip = null;
+            break;
+          }
+          const before = m;
+          tick();
+          if (m === before) {
+            activeMatchSkip = null;
+            break;
+          }
+        }
       };
       const skipButton = $("skip-match");
       if (skipButton) { skipButton.disabled = false; skipButton.onclick = requestMatchSkip; }
