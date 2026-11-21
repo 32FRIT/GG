@@ -113,7 +113,13 @@
     function handleMatchSkipMessage(message) {
       if (!message || !S || S.phase !== "match" || !activeMatchSkip) return;
       if (message.t === "skip-request") {
-        if (skipMatchRemotePending || skipMatchProposalSent) return;
+        if (skipMatchRemotePending) return;
+        if (skipMatchProposalSent) {
+          skipMatchProposalSent = false;
+          try { conn && conn.open && conn.send({ t: "skip-accept" }); } catch (_) {}
+          activeMatchSkip();
+          return;
+        }
         skipMatchRemotePending = true;
         const overlay = document.createElement("div");
         overlay.className = "pick-overlay sale-overlay";
@@ -138,10 +144,12 @@
         return;
       }
       if (message.t === "skip-accept") {
+        if (!skipMatchProposalSent) return;
         skipMatchProposalSent = false;
         toast("صاحبك وافق على تخطي المباراة");
         activeMatchSkip();
       } else if (message.t === "skip-decline") {
+        if (!skipMatchProposalSent) return;
         skipMatchProposalSent = false;
         toast("صاحبك رفض تخطي المباراة");
       }
@@ -265,6 +273,10 @@
           if (matchFinished) return;
           matchFinished = true;
           activeMatchSkip = null;
+          skipMatchProposalSent = false;
+          skipMatchRemotePending = false;
+          const skipButton = $("skip-match");
+          if (skipButton) { skipButton.disabled = true; skipButton.textContent = "انتهت المباراة"; }
           clearInterval(t);
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
