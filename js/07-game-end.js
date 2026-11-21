@@ -1,6 +1,7 @@
 /* ================= END ================= */
     function endGame() {
       cancelGameTimers();
+      if (S) S.phase = "match";
       const returnToModeMenu = S.entry === "club" ? screenClubModes : screenModes;
       const baseAvg = Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11);
       const avg = coachAdjustedPower(baseAvg, S.coach);
@@ -97,6 +98,55 @@
       if (action === "new" && !club) return startGame();
     }
 
+    function requestMatchSkip() {
+      if (!activeMatchSkip) return;
+      if (conn && conn.open) {
+        if (skipMatchProposalSent) return toast("طلب التخطي اتبعت بالفعل");
+        skipMatchProposalSent = true;
+        try { conn.send({ t: "skip-request" }); toast("بعتّ لصاحبك طلب تخطي المباراة"); }
+        catch (error) { skipMatchProposalSent = false; toast("تعذر إرسال طلب التخطي"); }
+        return;
+      }
+      activeMatchSkip();
+    }
+
+    function handleMatchSkipMessage(message) {
+      if (!message || !S || S.phase !== "match" || !activeMatchSkip) return;
+      if (message.t === "skip-request") {
+        if (skipMatchRemotePending || skipMatchProposalSent) return;
+        skipMatchRemotePending = true;
+        const overlay = document.createElement("div");
+        overlay.className = "pick-overlay sale-overlay";
+        overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true">
+          <div class="pick-dialog-title">طلب تخطي المباراة</div>
+          <p>صاحبك بيقترح تخطي المباراة والانتقال للنتيجة النهائية. توافق؟</p>
+          <div class="pick-actions">
+            <button class="btn" type="button" data-skip-accept>موافق</button>
+            <button class="btn g" type="button" data-skip-decline>رفض</button>
+          </div></div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector("[data-skip-accept]").onclick = () => {
+          try { conn && conn.open && conn.send({ t: "skip-accept" }); } catch (_) {}
+          overlay.remove(); skipMatchRemotePending = false;
+          if (activeMatchSkip) activeMatchSkip();
+        };
+        overlay.querySelector("[data-skip-decline]").onclick = () => {
+          try { conn && conn.open && conn.send({ t: "skip-decline" }); } catch (_) {}
+          overlay.remove(); skipMatchRemotePending = false;
+          toast("رفضت طلب تخطي المباراة");
+        };
+        return;
+      }
+      if (message.t === "skip-accept") {
+        skipMatchProposalSent = false;
+        toast("صاحبك وافق على تخطي المباراة");
+        activeMatchSkip();
+      } else if (message.t === "skip-decline") {
+        skipMatchProposalSent = false;
+        toast("صاحبك رفض تخطي المباراة");
+      }
+    }
+
     function runMatch(me) {
       const box = $("match"); if (!box) return;
       const matchState = S;
@@ -176,13 +226,14 @@
 
       <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
       <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu)">0'</div>
+      <button class="btn g sm" id="skip-match" type="button" style="margin:6px auto 10px">تخطي للنتيجة</button>
       <div id="match-pitch"></div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
       sfxWhistle();
-      let m = 0, a = 0, b = 0;
+      let m = 0, a = 0, b = 0, matchFinished = false, t = null;
       const TICK_MS = Math.round(30000 / 90);
-      const t = setInterval(() => {
+      const tick = () => {
         if (!$("sc") || S !== matchState) { clearInterval(t); return }
         m = Math.min(m + 1, 90);
         evs.filter(e => e.m === m).forEach(e => {
@@ -211,6 +262,9 @@
         $("sc").textContent = b + " - " + a;
         $("mn").textContent = m + "'";
         if (m >= 90) {
+          if (matchFinished) return;
+          matchFinished = true;
+          activeMatchSkip = null;
           clearInterval(t);
           const win = a > b, draw = a === b;
           $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
@@ -232,7 +286,15 @@
           recordGuestMatch(mt, a, b);
           if (matchState.entry === "event") resolveTournamentMatch(a, b);
         }
-      }, TICK_MS);
+      };
+      t = setInterval(tick, TICK_MS);
+      activeMatchSkip = () => {
+        if (matchFinished || S !== matchState) return;
+        clearInterval(t);
+        while (m < 90 && !matchFinished) tick();
+      };
+      const skipButton = $("skip-match");
+      if (skipButton) skipButton.onclick = requestMatchSkip;
     }
 
 
