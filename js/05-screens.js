@@ -792,13 +792,13 @@
         club[target.area === "starter" ? "starters" : "bench"][target.index] !== oldName)) {
         return toast("اللاعب المحدد للتبديل لم يعد في مكانه");
       }
+      const available = guestProgress.coins + (oldCost || 0);
+      if (!Number.isSafeInteger(available) || available < player.price) {
+        return toast(oldName ? "رصيد الكوينز غير كافٍ لتبديل اللاعب" : "رصيد الكوينز غير كافٍ لشراء اللاعب");
+      }
       const previous = snapshotClubProgress();
       let swapDifference = null;
       if (club.confirmed) {
-        const available = guestProgress.coins + (oldCost || 0);
-        if (!Number.isSafeInteger(available) || available < player.price) {
-          return toast("رصيد الكوينز غير كافٍ لتبديل اللاعب");
-        }
         const nextCoins = available - player.price;
         if (!Number.isSafeInteger(nextCoins)) return toast("رصيد الكوينز غير صالح");
         guestProgress.coins = nextCoins;
@@ -1140,8 +1140,7 @@
               ? guestProgress.club.assetCosts.players[target.replaceName] || 0
               : 0;
             const available = guestProgress.coins + refund;
-            const canAfford = !guestProgress.club || !guestProgress.club.confirmed ||
-              Number.isSafeInteger(available) && available >= player.price;
+            const canAfford = !guestProgress.club || Number.isSafeInteger(available) && available >= player.price;
             const difference = player.price - refund;
             const salePrice = cardSalePrice(player);
 
