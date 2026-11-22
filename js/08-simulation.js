@@ -30,7 +30,6 @@
         ? `${stableKey(A)}#${stableKey(B)}`
         : `${key(A)}#${key(B)}`;
       const r = rng32(hs(seedInput));
-      const pickPlayer = x => x.names[Math.floor(r() * x.names.length)] || "لاعب";
       const rosterFor = team => {
         const map = new Map();
         [...(team.players || []), ...(team.benchPlayers || [])].forEach(player => {
@@ -62,53 +61,102 @@
         return event;
       };
 
-      /* Match incidents are generated before the result so dismissals affect team strength. */
+      /* Match incidents are generated before the result so dismissals affect team strength.
+         Substitutions run first so later cards and goals know who is still on the pitch. */
       const redMinutes = { A: [], B: [] };
+      const pickFreeMinute = (from = 1, to = 90) => {
+        let total = 0;
+        for (let minute = from; minute <= to; minute++) if (!occupiedEventMinutes.has(minute)) total++;
+        if (!total) return null;
+        let roll = Math.floor(r() * total);
+        for (let minute = from; minute <= to; minute++) {
+          if (!occupiedEventMinutes.has(minute) && roll-- === 0) return minute;
+        }
+        return null;
+      };
       ["A", "B"].forEach(side => {
         const team = side === "A" ? A : B;
         const resolve = rosterFor(team);
-        if (r() < 0.78) {
-          const count = r() < 0.24 ? 2 : 1;
-          const yellowedPlayers = new Set();
-          const yellowCards = [];
-          for (let i = 0; i < count; i++) {
-            const available = team.names.filter(n => !yellowedPlayers.has(n));
-            if (!available.length) break;
-            const who = available[Math.floor(r() * available.length)];
-            const minute = 12 + Math.floor(r() * 76);
-            yellowedPlayers.add(who);
-            const yellow = pushEvent({ m: minute, s: side, type: "yellow", who });
-            yellowCards.push({ who, minute: yellow.m });
-          }
-          yellowCards.forEach(card => {
-            if (r() < 0.04) {
-              const minute = Math.min(90, card.minute + 5 + Math.floor(r() * 36));
-              const red = pushEvent({ m: minute, s: side, type: "red", who: card.who, secondYellow: true });
-              redMinutes[side].push(red.m);
-            }
-          });
-        }
-        if (r() < 0.075) {
-          const minute = 8 + Math.floor(r() * 78);
-          const red = pushEvent({ m: minute, s: side, type: "red", who: pickPlayer(team) });
-          redMinutes[side].push(red.m);
-        }
+        const subbedOut = new Map();
         if (Array.isArray(team.benchNames) && team.benchNames.some(Boolean) && r() < 0.82) {
           const teamSlots = team.slots || formationSlots(team.formation);
           const availableBench = team.benchNames.map(name => resolve(name)).filter(player => player && playerGroups(player).some(group => group !== "G"));
-          const subbedOut = new Set();
           const count = Math.min(availableBench.length, 1 + (r() < 0.42 ? 1 : 0) + (r() < 0.12 ? 1 : 0));
           for (let i = 0; i < count; i++) {
             if (!availableBench.length) break;
+            const minute = pickFreeMinute(55, 88);
+            if (minute === null) break;
             const incoming = availableBench.splice(Math.floor(r() * availableBench.length), 1)[0];
             const outgoingOptions = team.names.map((name, index) => ({ player: resolve(name), group: teamSlots[index] }))
               .filter(item => item.player && item.group !== "G" && !subbedOut.has(item.player.n) && playsGroup(incoming, item.group));
             if (!outgoingOptions.length) continue;
             const outgoing = outgoingOptions[Math.floor(r() * outgoingOptions.length)].player;
-            subbedOut.add(outgoing.n);
-            pushEvent({ m: 55 + Math.floor(r() * 34), s: side, type: "sub", who: outgoing.n, for: incoming.n, impact: (incoming.r - outgoing.r) * 0.06 });
+            subbedOut.set(outgoing.n, minute);
+            pushEvent({ m: minute, s: side, type: "sub", who: outgoing.n, for: incoming.n, impact: (incoming.r - outgoing.r) * 0.06 });
           }
         }
+        const yellowedPlayers = new Set();
+        const yellowCards = [];
+        if (r() < 0.78) {
+          const count = r() < 0.24 ? 2 : 1;
+          for (let i = 0; i < count; i++) {
+            const minute = pickFreeMinute(12, 88);
+            if (minute === null) break;
+            const available = team.names.filter(name => !yellowedPlayers.has(name) && (subbedOut.get(name) ?? 91) > minute);
+            if (!available.length) break;
+            const who = available[Math.floor(r() * available.length)];
+            yellowedPlayers.add(who);
+            const yellow = pushEvent({ m: minute, s: side, type: "yellow", who });
+            yellowCards.push({ who, minute: yellow.m });
+          }
+        }
+        const sentOff = new Set();
+        yellowCards.forEach(card => {
+          if (r() < 0.04) {
+            const limit = Math.min(90, card.minute + 5 + Math.floor(r() * 36), (subbedOut.get(card.who) ?? 91) - 1);
+            const minute = limit > card.minute ? pickFreeMinute(card.minute + 1, limit) : null;
+            if (minute === null) return;
+            pushEvent({ m: minute, s: side, type: "red", who: card.who, secondYellow: true });
+            sentOff.add(card.who);
+            redMinutes[side].push(minute);
+          }
+        });
+        if (r() < 0.075) {
+          const minute = pickFreeMinute(8, 85);
+          if (minute !== null) {
+            const available = team.names.filter(name => !sentOff.has(name) && !yellowedPlayers.has(name) && (subbedOut.get(name) ?? 91) > minute);
+            if (available.length) {
+              const who = available[Math.floor(r() * available.length)];
+              pushEvent({ m: minute, s: side, type: "red", who });
+              sentOff.add(who);
+              redMinutes[side].push(minute);
+            }
+          }
+        }
+      });
+      /* A removed player takes no further part: goals, assists and cards only use active players. */
+      const removal = { A: new Map(), B: new Map() };
+      const markRemoval = (side, name, minute) => {
+        const previous = removal[side].get(name);
+        if (previous === undefined || minute < previous) removal[side].set(name, minute);
+      };
+      ev.forEach(event => {
+        if (event.type === "red") markRemoval(event.s, event.who, event.m);
+      });
+      const redMinuteOf = (side, name) => {
+        const red = ev.find(event => event.s === side && event.type === "red" && event.who === name);
+        return red ? red.m : Infinity;
+      };
+      /* Drop a substitution when its player was already sent off before that minute. */
+      for (let index = ev.length - 1; index >= 0; index--) {
+        const event = ev[index];
+        if (event.type === "sub" && redMinuteOf(event.s, event.who) <= event.m) ev.splice(index, 1);
+      }
+      const playersOn = { A: [], B: [] };
+      ev.forEach(event => {
+        if (event.type !== "sub") return;
+        markRemoval(event.s, event.who, event.m);
+        playersOn[event.s].push({ name: event.for, minute: event.m });
       });
 
       const redImpact = minutes => minutes.reduce((impact, minute) => impact + 3.2 * ((90 - minute) / 90), 0);
@@ -145,41 +193,53 @@
         gb = ga + 1;
       }
 
-      const pickScorer = x => {
-        const slots = x.slots || formationSlots(x.formation);
-        const w = x.names.map((n, k) => slots[k] === "F" ? 10 : slots[k] === "M" ? 3 : slots[k] === "D" ? 0.02 : 0);
-        const total = w.reduce((sum, value) => sum + value, 0);
-        if (!total) return x.names[0];
-        let t = total * r(), k = 0;
-        while (k < w.length - 1 && t >= w[k]) { t -= w[k]; k++ }
-        return x.names[k];
-      };
       const stats = new Map();
       const statsFor = (side, name) => {
         const id = `${side}|${name}`;
         if (!stats.has(id)) stats.set(id, { s: side, who: name, goals: 0, assists: 0, saves: 0 });
         return stats.get(id);
       };
-      const pickAssister = (team, scorer) => {
-        const teamSlots = team.slots || formationSlots(team.formation);
-        const weights = team.names.map((name, k) =>
-          name === scorer ? 0 : teamSlots[k] === "F" ? 5 : teamSlots[k] === "M" ? 2 : teamSlots[k] === "D" ? 0.02 : 0
-        );
-        const total = weights.reduce((sum, value) => sum + value, 0);
+      const groupWeights = group => group === "F" ? { goal: 10, assist: 5 }
+        : group === "M" ? { goal: 3, assist: 2 }
+          : group === "D" ? { goal: 0.02, assist: 0.02 }
+            : { goal: 0, assist: 0 };
+      const activePool = (team, side, minute) => {
+        const slots = team.slots || formationSlots(team.formation);
+        const pool = [];
+        team.names.forEach((name, index) => {
+          const off = removal[side].get(name);
+          if (off !== undefined && off <= minute) return;
+          pool.push({ name, ...groupWeights(slots[index]) });
+        });
+        playersOn[side].forEach(entry => {
+          if (entry.minute > minute) return;
+          const player = rosterFor(team)(entry.name);
+          const group = player ? (POSITION_GROUP[player.role] || player.p) : null;
+          if (!group || group === "G") return;
+          pool.push({ name: entry.name, ...groupWeights(group) });
+        });
+        return pool;
+      };
+      const pickWeighted = (pool, exclude, key) => {
+        const options = pool.filter(entry => entry.name !== exclude);
+        const total = options.reduce((sum, entry) => sum + entry[key], 0);
         if (!total) return null;
         let roll = total * r(), index = 0;
-        while (index < weights.length - 1 && roll >= weights[index]) {
-          roll -= weights[index++];
+        while (index < options.length - 1 && roll >= options[index][key]) {
+          roll -= options[index++][key];
         }
-        return weights[index] > 0 ? team.names[index] : null;
+        return options[index][key] > 0 ? options[index].name : null;
       };
       const addGoals = (team, side, count) => {
         for (let i = 0; i < count; i++) {
-          const scorer = pickScorer(team);
-          const assist = r() < 0.68 ? pickAssister(team, scorer) : null;
+          const minute = pickFreeMinute(1, 90);
+          if (minute === null) break;
+          const pool = activePool(team, side, minute);
+          const scorer = pickWeighted(pool, null, "goal") || team.names[0];
+          const assist = r() < 0.68 ? pickWeighted(pool, scorer, "assist") : null;
           statsFor(side, scorer).goals++;
           if (assist) statsFor(side, assist).assists++;
-          pushEvent({ m: 1 + Math.floor(r() * 90), s: side, type: "goal", who: scorer, assist });
+          pushEvent({ m: minute, s: side, type: "goal", who: scorer, assist });
         }
       };
       addGoals(A, "A", ga);
