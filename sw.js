@@ -1,5 +1,5 @@
 /* Offline shell for the GG static app. */
-const CACHE = "gg-app-v2";
+const CACHE = "gg-app-v3";
 const SHELL = [
   "./",
   "./index.html",
