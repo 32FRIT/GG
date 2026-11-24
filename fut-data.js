@@ -1504,7 +1504,7 @@ var FUT_DATA = {
       "nat": "England",
       "club": "ICON",
       "era": "L",
-      "r": 86,
+      "r": 92,
       "price": 1200000,
       "suggestedPrice": null,
       "rarity": "Base Icon",
