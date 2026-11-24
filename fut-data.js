@@ -124,7 +124,10 @@ var FUT_DATA = {
       "isIcon": true,
       "eaId": 238439,
       "id": 238439,
-      "role": "CB"
+      "role": "CB",
+      "alt": [
+        "LB"
+      ]
     },
     {
       "n": "Ronaldinho",
@@ -1111,7 +1114,10 @@ var FUT_DATA = {
       "isIcon": true,
       "eaId": 1041,
       "id": 1041,
-      "role": "RB"
+      "role": "RB",
+      "alt": [
+        "LB"
+      ]
     },
     {
       "n": "Jean-Pierre Papin",
@@ -1317,7 +1323,11 @@ var FUT_DATA = {
       "isIcon": true,
       "eaId": 121939,
       "id": 121939,
-      "role": "RB"
+      "role": "RB",
+      "alt": [
+        "LB"
+      ]
+      
     },
     {
       "n": "Rio Ferdinand",
@@ -2499,8 +2509,8 @@ var FUT_DATA = {
       "nat": "Spain",
       "club": "Real Madrid",
       "era": "2020s",
-      "r": 84,
-      "price": 33000,
+      "r": 88,
+      "price": 330000,
       "suggestedPrice": null,
       "rarity": "Rare",
       "isIcon": false,
