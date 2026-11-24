@@ -1173,18 +1173,18 @@ var FUT_DATA = {
       "nat": "Argentina",
       "club": "Inter Miami CF",
       "era": "2020s",
-      "r": 96,
+      "r": 98,
       "price": 1550000,
       "suggestedPrice": null,
       "rarity": "Rare",
       "isIcon": false,
       "eaId": 158023,
       "id": 158023,
-      "role": "RW",
+      "role": "ST",
       "alt": [
         "RM",
         "CAM",
-        "ST"
+        "RW"
       ]
     },
     {
@@ -3349,7 +3349,7 @@ var FUT_DATA = {
       "nat": "Portugal",
       "club": "Al Nassr",
       "era": "2020s",
-      "r": 95,
+      "r": 96,
       "price": 1200000,
       "suggestedPrice": null,
       "rarity": "Rare",
