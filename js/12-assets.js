@@ -1,5 +1,5 @@
 /* ================= ASSET DOWNLOAD ================= */
-    const ASSET_CACHE_NAME = "gg-app-v1"; // same cache the service worker reads from
+    const ASSET_CACHE_NAME = "gg-app-v3"; // shared cache used by the service worker
     const ASSET_STATE_KEY = "gg_assets_v1";
     const ASSET_SIZE_LABEL = "حوالي 100 ميجا";
     const assetManager = (() => {
