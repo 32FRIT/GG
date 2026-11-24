@@ -157,7 +157,7 @@
       const target = event.target;
       const clickedPlayerArea = target.closest("[data-squad-slot], .squad-action-panel");
       const currentSquadScreen = !!app.querySelector(".pitch") && !!$("bench-toggle");
-      const clickedSquadControl = target.closest(".pitch, .squad-topbar, .squad-action-panel, #bench-toggle, .setup-confirmation, .coach-management-row");
+      const clickedSquadControl = target.closest(".pitch, .squad-action-panel, #bench-toggle, .setup-confirmation, .coach-management-row");
       let rerenderSquad = false;
       if (selectedSquadSlot && !clickedPlayerArea && (currentSquadScreen || clickedSquadControl)) {
         selectedSquadSlot = null;
@@ -359,12 +359,8 @@
       });
     }
 
-    function squadPitchHTML(club) {
-      const formation = formationById(club.formation);
-      const slots = formationSlots(formation.id);
-      const roles = formationRoleSlots(formation.id);
+    function squadOverallInfo(club) {
       const clubPlayers = club.starters.map(name => name && findPlayer(name)).filter(Boolean);
-      const starters = alignTeamToFormation(clubPlayers, formation.id);
       const coach = COACHES.find(item => item.n === club.coach);
       const baseRating = clubPlayers.length
         ? Math.round(clubPlayers.reduce((sum, player) => sum + player.r, 0) / clubPlayers.length)
@@ -372,7 +368,16 @@
       const overall = baseRating === null
         ? null
         : coach ? coachAdjustedPower(baseRating, coach) : baseRating;
-      const ratingDetails = `${clubPlayers.length}/11 لاعبين · ${coach ? `مدرب ${coach.n}` : "بدون مدرب"}`;
+      return {
+        overall,
+        details: `${clubPlayers.length}/11 لاعبين · ${coach ? `مدرب ${coach.n}` : "بدون مدرب"}`
+      };
+    }
+
+    function squadPitchHTML(club, overlayHTML) {
+      const formation = formationById(club.formation);
+      const slots = formationSlots(formation.id);
+      const roles = formationRoleSlots(formation.id);
       const offsets = {
         G: 0,
         D: 1,
@@ -397,15 +402,7 @@
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
       }).join("");
-      return `<div class="squad-formation-title">
-          <div class="sec-title">التشكيلة الأساسية · <b dir="ltr">${formation.id}</b></div>
-        ${club.ownedFormations.length > 1 || !club.confirmed ? `<button class="btn g sm" id="change-club-formation">${club.confirmed ? "تغيير الخطة" : "اختيار الخطة"}</button>` : ""}
-        </div>
-        <div class="pitch squad-pitch">${rows}
-          <div class="squad-overall" title="${esc(ratingDetails)}" aria-label="التقييم الكلي OVR: ${overall === null ? "غير متاح" : overall}">
-            <b>${overall === null ? "—" : overall}</b><span>OVR</span>
-          </div>
-        </div>`;
+      return `<div class="pitch squad-pitch" style="--rows:${formation.lines.length};--cols:${Math.max(...formation.lines.map(line => line[1]))}">${overlayHTML || ""}${rows}</div>`;
     }
 
     function squadSlotPlayer(slot) {
@@ -609,14 +606,14 @@
           <div class="squad-selection-copy">
             <small>${selectedPlace} · ${POS_NAME[selectedGroup] || selectedGroup}</small>
             <strong>${esc(playerName)}</strong>
-            <span>OVR ${player.r}${saleValue ? ` · بيع ${formatCoins(saleValue)} 🪙` : ""}</span>
+            <span>OVR ${player.r}</span>
           </div>
         </div>
-        <p class="squad-selection-hint">اضغط على لاعب آخر في الملعب أو الاحتياطي لتبديل المكان.</p>
+        <p class="squad-selection-hint">اضغط على لاعب آخر للتبديل</p>
         <div class="squad-action-buttons">
-          <button class="btn" id="auto-squad-move" ${hasTarget ? "" : "disabled"}>نقل إلى ${destination}</button>
-          <button class="btn g" id="swap-selected-player">استبدال من السوق</button>
-          ${saleValue ? `<button class="btn sell" id="sell-selected-player">بيع · ${formatCoins(saleValue)} 🪙</button>` : ""}
+          <button class="btn" id="auto-squad-move" ${hasTarget ? "" : "disabled"}>${slot.area === "starter" ? "نقل للاحتياطي" : "نقل للأساسي"}</button>
+          <button class="btn g" id="swap-selected-player">استبدال</button>
+          ${saleValue ? `<button class="btn sell" id="sell-selected-player">بيع ${formatCoins(saleValue)} 🪙</button>` : ""}
           ${guestProgress.club.confirmed ? "" : `<button class="btn g" id="remove-draft-player">إزالة</button>`}
           <button class="btn g" id="cancel-squad-selection">إلغاء</button>
         </div>
@@ -631,18 +628,9 @@
       _origPush(screenMyTeam);
       const club = guestProgress.club;
       const setupCost = club.confirmed ? null : clubSetupCostBreakdown(club);
-      app.innerHTML = `
-  <div class="hdr"><div class="l"><span class="pos">تشكيلتي</span><span class="cnt" dir="ltr">${formationById(club.formation).id}</span></div>
-  <button class="btn g sm" id="bk">رجوع</button></div>
-  <div class="squad-topbar">
-    <div class="wallet-badge">🪙 <b>${formatCoins(guestProgress.coins)}</b></div>
-    <button class="btn g sm" id="team-market">السوق</button>
-  </div>
-  ${rematchContext ? `<button class="btn w mt" id="start-rematch-edit">${rematchContext.online ? "جاهز بعد التعديل · ابدأ مع صاحبك" : "ابدأ المباراة بالتشكيلة دي"}</button>` : ""}
-  ${squadPitchHTML(club)}
-  ${squadSelectionHTML()}
-  <button class="btn g w mt" id="bench-toggle" aria-expanded="${showBench}">${showBench ? "إخفاء الاحتياطي" : "عرض الاحتياطي · 12"}</button>
-  ${showBench ? `<p class="note mt">بديل لكل مركز رئيسي، و8 أماكن مرنة.</p><div class="bench-grid">
+      const { overall, details: ratingDetails } = squadOverallInfo(club);
+      const selectionHTML = squadSelectionHTML();
+      const benchHTML = showBench ? `<div class="bench-grid">
     ${BENCH_SLOT_POSITIONS.map((position, index) => {
         const name = club.bench[index];
         const player = name && findPlayer(name);
@@ -653,19 +641,35 @@
         ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `<small>${label}</small><b>＋ إضافة</b>`}
         </button>`;
       }).join("")}
-  </div>` : ""}
-  <div class="sec-title">المدرب الحالي</div>
-  <div class="coach-management-row">
-    <button class="btn g" id="club-coach">${club.coach ? esc(club.coach) : "＋ إضافة مدرب"}</button>
-    <button class="btn" id="club-coaches">المدربين · ${club.coaches.length}</button>
-  </div>
+  </div>` : "";
+      const pitchOverlay = `<div class="squad-topline">
+      <button class="squad-back" id="bk" type="button" aria-label="رجوع" title="رجوع">‹</button>
+      <div class="squad-overall" title="${esc(ratingDetails)}" aria-label="التقييم الكلي OVR: ${overall === null ? "غير متاح" : overall}">
+        <b>${overall === null ? "—" : overall}</b><span>OVR</span>
+      </div>
+      <span aria-hidden="true"></span>
+    </div>
+    <div class="squad-substrip">
+      <button class="btn g sm" id="team-market">السوق</button>
+      <button class="btn g sm" id="change-club-formation">الخطة · <span dir="ltr">${formationById(club.formation).id}</span></button>
+    </div>
+    <div class="squad-pitch-actions">
+      <button class="btn g sm" id="bench-toggle" aria-expanded="${showBench}">${showBench ? "إخفاء الاحتياطي" : "الاحتياطي · 12"}</button>
+      <button class="btn g sm" id="club-coach" type="button">${club.coach ? esc(club.coach) : "＋ إضافة مدرب"}</button>
+    </div>
+    ${selectionHTML || benchHTML ? `<div class="squad-sheet">${selectionHTML}${benchHTML}</div>` : ""}`;
+      app.innerHTML = `<div class="squad-screen">
+  ${rematchContext ? `<button class="btn w" id="start-rematch-edit">${rematchContext.online ? "جاهز بعد التعديل · ابدأ مع صاحبك" : "ابدأ المباراة بالتشكيلة دي"}</button>` : ""}
+  ${squadPitchHTML(club, pitchOverlay)}
   ${setupCost ? `<div class="setup-confirmation">
-    <b>تجهيز مجاني قبل التأكيد</b>
-    <p>غيّر اللاعبين أو المدرب أو الخطط براحتك؛ مفيش كوينز هتتخصم قبل التأكيد.</p>
-    <div>إجمالي الأسعار عند التأكيد: <strong>${formatCoins(setupCost.total)} 🪙</strong></div>
-    ${guestProgress.coins < setupCost.total ? `<small>رصيدك الحالي ${formatCoins(guestProgress.coins)}؛ عدّل اختياراتك قبل التأكيد.</small>` : ""}
-    <button class="btn w" id="confirm-club-setup">مراجعة وتأكيد التشكيلة</button>
+    <div class="setup-info">
+      <b>تجهيز مجاني قبل التأكيد</b>
+      <span>الإجمالي <strong>${formatCoins(setupCost.total)} 🪙</strong></span>
+      ${guestProgress.coins < setupCost.total ? `<small>رصيدك ${formatCoins(guestProgress.coins)}؛ عدّل اختياراتك</small>` : ""}
+    </div>
+    <button class="btn w" id="confirm-club-setup">مراجعة وتأكيد</button>
   </div>` : ""}
+  </div>
   `;
       $("bk").onclick = screenHome;
       if ($("start-rematch-edit")) $("start-rematch-edit").onclick = () => {
@@ -680,6 +684,8 @@
         }
       };
       $("bench-toggle").onclick = () => { showBench = !showBench; screenMyTeam() };
+      const selectedBenchSlot = app.querySelector(".squad-sheet .bench-slot.selected");
+      if (selectedBenchSlot) selectedBenchSlot.scrollIntoView({ inline: "center", block: "nearest" });
       if ($("cancel-squad-selection")) {
         $("cancel-squad-selection").onclick = () => { selectedSquadSlot = null; screenMyTeam() };
         $("auto-squad-move").onclick = moveSelectedPlayerBetweenSquadAreas;
@@ -690,8 +696,7 @@
         }
         if ($("remove-draft-player")) $("remove-draft-player").onclick = removeDraftSquadPlayer;
       }
-      $("club-coach").onclick = () => openMarket("COACH", { kind: "coach" }, "team");
-      $("club-coaches").onclick = screenClubCoaches;
+      $("club-coach").onclick = screenClubCoaches;
       if ($("change-club-formation")) $("change-club-formation").onclick = screenOwnedClubFormations;
       if ($("confirm-club-setup")) $("confirm-club-setup").onclick = openClubSetupConfirmation;
       $("team-market").onclick = () => openMarket("ALL", null, "team");
