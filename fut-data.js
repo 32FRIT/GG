@@ -1232,14 +1232,17 @@ var FUT_DATA = {
       "nat": "Portugal",
       "club": "PSG",
       "era": "2020s",
-      "r": 86,
-      "price": 190000,
+      "r": 89,
+      "price": 290000,
       "suggestedPrice": null,
       "rarity": "Rare",
       "isIcon": false,
       "eaId": 252145,
       "id": 252145,
-      "role": "LB"
+      "role": "LB",
+      "alt": [
+        "LM"
+      ]
     },
     {
       "n": "Paul Scholes",
