@@ -252,11 +252,12 @@
     <div class="sec-title">المباراة</div>
     <div class="match-score-card" style="background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center">
 
-      <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px">0 - 0</div>
+      <div class="score" id="sc" dir="ltr" style="font-size:clamp(38px,12vw,52px);margin:8px 0 4px;display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,14px)"><span id="sc-opp">0</span><i id="mn" style="font-style:normal;font-size:clamp(15px,4.5vw,20px);font-weight:900;color:var(--mu);min-width:clamp(34px,10vw,46px);text-align:center">0'</i><span id="sc-mine">0</span></div>
       <div dir="ltr" style="font-size:11px;font-weight:800;color:var(--mu)">فريقك · الخصم</div>
-      <div id="mn" style="font-size:13px;font-weight:800;color:var(--mu);margin-top:2px">0'</div>
-      <button class="btn g sm" id="skip-match" type="button" disabled style="margin:6px auto 10px">تخطي للنتيجة</button>
-      <div id="match-pitch"></div>
+      <div id="match-live" style="display:flex;justify-content:center;margin:4px 0 0">
+        <button class="btn g sm" id="skip-match" type="button" disabled>تخطي للنتيجة</button>
+      </div>
+      <div id="match-pitch" style="margin-top:10px"></div>
       <div id="lg" style="margin-top:12px;text-align:right"></div>
     </div>`;
       sfxWhistle();
@@ -288,18 +289,19 @@
           <span class="r" style="font-size:11px">${teamName}</span>
         </div>`);
         });
-        $("sc").textContent = b + " - " + a;
-        $("mn").textContent = m + "'";
+        const scoreOpp = $("sc-opp"), scoreMine = $("sc-mine"), mn = $("mn");
+        if (scoreOpp) scoreOpp.textContent = b;
+        if (scoreMine) scoreMine.textContent = a;
+        if (mn) mn.textContent = m + "'";
         if (m >= 90) {
           if (matchFinished) return;
           matchFinished = true;
           gameLive = false;
           clearMatchSkipState();
-          const skipButton = $("skip-match");
-          if (skipButton) { skipButton.disabled = true; skipButton.textContent = "انتهت المباراة"; }
+          const liveBar = $("match-live");
+          if (liveBar) liveBar.remove();
           clearInterval(t);
-          const win = a > b, draw = a === b;
-          $("mn").innerHTML = `<span style="color:${win ? "var(--ac)" : draw ? "var(--gold)" : "var(--bad)"};font-size:15px">${win ? "كسبت 🏆" : draw ? "تعادل" : "خسرت"}</span>`;
+          const win = a > b;
           sfxWhistle();
           if (win) buzz([20, 60, 20]);
           const mvpTeamLabel = motm.me ? "فريقك" : esc(OPP.name);
@@ -311,10 +313,28 @@
           const mySide = r.mine ? "A" : "B", opponentSide = r.mine ? "B" : "A";
           const opponentTeam = (OPP.players || OPP.names.map(name => findPlayer(name))).filter(Boolean);
           const matchPitch = $("match-pitch");
-          if (matchPitch) matchPitch.innerHTML = matchFormationHTML(
-            S.team, S.formation, r.ratings[mySide], motm.me ? motm.who : null,
-            opponentTeam, OPP.formation, r.ratings[opponentSide], motm.me ? null : motm.who
-          );
+          if (matchPitch) {
+            matchPitch.innerHTML = matchFormationHTML(
+              S.team, S.formation, r.ratings[mySide], motm.me ? motm.who : null,
+              opponentTeam, OPP.formation, r.ratings[opponentSide], motm.me ? null : motm.who
+            );
+            matchPitch.querySelectorAll("[data-match-view]").forEach(button => {
+              button.onclick = () => {
+                const view = button.dataset.matchView;
+                const lineup = matchPitch.querySelector(".match-lineup");
+                if (!lineup) return;
+                lineup.dataset.view = view;
+                lineup.querySelectorAll("[data-lineup]").forEach(panel => {
+                  panel.hidden = panel.dataset.lineup !== view;
+                });
+                matchPitch.querySelectorAll("[data-match-view]").forEach(item => {
+                  const active = item.dataset.matchView === view;
+                  item.classList.toggle("active", active);
+                  item.setAttribute("aria-pressed", String(active));
+                });
+              };
+            });
+          }
           recordGuestMatch(mt, a, b);
           if (matchState.entry === "event") resolveTournamentMatch(a, b);
         }

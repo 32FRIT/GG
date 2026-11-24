@@ -702,6 +702,22 @@
     .match-pitch .pitch-row { gap:3px;align-items:center }
     .match-pitch .pitch-player.has-player-card>.fc { width:100%;margin:0 }
     .match-pitch .match-rating-badge { font-size:8px;padding-inline:4px }
+    .match-lineup-view[hidden] { display:none !important }
+    .match-pitch.single { grid-template-rows:repeat(var(--match-row-count),minmax(0,1fr)) }
+    .match-pitch.single .pitch-row { justify-content:space-evenly }
+    .match-pitch.single .pitch-player { flex:1 1 0;min-width:0;max-width:88px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 2px }
+    .match-pitch.single .match-rating-badge { font-size:9px;padding-inline:5px }
+    #match-pitch { margin-inline:-8px }
+    .match-role-tag { display:inline-flex;align-items:center;gap:3px;margin-top:2px;padding:0 6px;border:1px solid rgba(47,213,198,.45);border-radius:4px;background:rgba(5,52,55,.94);color:#eafffb;font-size:9px;font-weight:900;line-height:1.4;letter-spacing:.03em;white-space:nowrap }
+    .match-role-tag i { font-style:normal }
+    .match-role-tag b { font-size:8px;line-height:1;color:#36e6c8 }
+    .match-role-tag.warn { border-color:rgba(255,84,84,.75);background:rgba(70,10,10,.94) }
+    .match-role-tag.warn b { color:#ff5757;font-size:11px }
+    .match-lineup { position:relative }
+    .match-pitch-tools { position:absolute;left:6px;bottom:6px;z-index:6;display:flex;gap:6px;margin:0 }
+    .match-view-btn { width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:9px;background:#0c0c0c;color:var(--mu);cursor:pointer }
+    .match-view-btn.active { border-color:rgba(245,196,81,.8);color:var(--gold);background:rgba(245,196,81,.1);box-shadow:0 0 10px rgba(245,196,81,.18) }
+    .match-view-btn svg { width:22px;height:22px;display:block }
     .pitch-row {
       display: flex;
       justify-content: center;
@@ -767,6 +783,11 @@
       outline-offset: 2px;
       box-shadow: 0 0 16px rgba(245, 196, 81, .3)
     }
+
+    .squad-pitch .pitch-row { justify-content: space-evenly }
+    .squad-pitch .squad-slot { flex: 1 1 0;min-width: 0;max-width: 88px;display: flex;flex-direction: column;align-items: center;justify-content: flex-start;padding: 0 2px }
+    .squad-pitch .squad-slot.empty { padding: 8px 2px 6px }
+    .squad-pitch .squad-slot .match-role-tag { margin-top: 3px }
 
     .squad-action-panel {
       display: grid;

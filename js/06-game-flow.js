@@ -99,6 +99,12 @@
       return `<div class="sec-title">${esc(title)} · <b dir="ltr">${formation.id}</b></div><div class="pitch">${rows}</div>`;
     }
 
+    function matchRoleTag(role, warn) {
+      const text = POS_SHORT[role] || role || "";
+      if (!text) return "";
+      return `<span class="match-role-tag${warn ? " warn" : ""}" dir="ltr" aria-label="${text}${warn ? " · مركز غير مناسب" : ""}"><i>${text}</i><b aria-hidden="true">${warn ? "!" : "◆"}</b></span>`;
+    }
+
     function matchFormationRows(team, formationId, ratings, mvpName, reverseRows) {
       const formation = formationById(formationId);
       team = alignTeamToFormation(team, formation.id);
@@ -116,11 +122,12 @@
         const players = Array.from({ length: count }, (_, rowIndex) => {
           const index = start + rowIndex;
           const player = team[index];
-          if (!player) return `<div class="pitch-player"><small>${POS_SHORT[roles[index]] || ""}</small><b>—</b></div>`;
+          const role = roles[index];
+          if (!player) return `<div class="pitch-player"><small>${POS_SHORT[role] || ""}</small><b>—</b></div>`;
           const rating = Number.isFinite(ratings[player.n]) ? ratings[player.n] : 6;
           const tone = rating < 6 ? "low" : rating < 7 ? "average" : "";
           const isMvp = player.n === mvpName;
-          return `<div class="pitch-player has-player-card"><div class="match-player-art"><span class="match-rating-badge ${tone} ${isMvp ? "mvp" : ""}" aria-label="تقييم المباراة ${rating.toFixed(1)}">${rating.toFixed(1)}${isMvp ? `<span class="star">★</span>` : ""}</span>${cardHTML(player, "formation-player-card")}</div></div>`;
+          return `<div class="pitch-player has-player-card"><div class="match-player-art"><span class="match-rating-badge ${tone} ${isMvp ? "mvp" : ""}" aria-label="تقييم المباراة ${rating.toFixed(1)}">${rating.toFixed(1)}${isMvp ? `<span class="star">★</span>` : ""}</span>${cardHTML(player, "formation-player-card")}</div>${matchRoleTag(role, !playsRole(player, role))}</div>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
       }).join("");
@@ -128,13 +135,22 @@
 
     function matchFormationHTML(myTeam, myFormation, myRatings, myMvp, opponentTeam, opponentFormation, opponentRatings, opponentMvp) {
       const mine = formationById(myFormation), theirs = formationById(opponentFormation);
-      const ownLines = mine.lines, opponentLines = theirs.lines;
-      const pitchHeight = Math.max(ownLines.length, opponentLines.length) * 66 * 2;
-      return `<div class="sec-title">تقييمات اللاعبين في المباراة</div>
-        <div class="match-formation-label">تشكيلتك · <b dir="ltr">${mine.id}</b></div>
-        <div class="match-pitch" style="--match-pitch-height:${pitchHeight}px"><div class="match-pitch-half" style="--match-row-count:${ownLines.length}">${matchFormationRows(myTeam, mine.id, myRatings, myMvp, true)}</div>
-        <div class="match-pitch-half" style="--match-row-count:${opponentLines.length}">${matchFormationRows(opponentTeam, theirs.id, opponentRatings, opponentMvp, false)}</div></div>
-        <div class="match-formation-label">تشكيلة الخصم · <b dir="ltr">${theirs.id}</b></div>`;
+      const pitchHeight = Math.max(mine.lines.length, theirs.lines.length) * 136;
+      const pitchIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/><circle cx="12" cy="12" r="3.2"/></svg>`;
+      return `<div class="match-lineup" data-view="mine">
+          <div class="match-lineup-view" data-lineup="mine">
+            <div class="match-formation-label">تشكيلتك · <b dir="ltr">${mine.id}</b></div>
+            <div class="match-pitch single" style="--match-pitch-height:${pitchHeight}px;--match-row-count:${mine.lines.length}">${matchFormationRows(myTeam, mine.id, myRatings, myMvp, false)}</div>
+          </div>
+          <div class="match-lineup-view" data-lineup="opp" hidden>
+            <div class="match-formation-label">تشكيلة الخصم · <b dir="ltr">${theirs.id}</b></div>
+            <div class="match-pitch single" style="--match-pitch-height:${pitchHeight}px;--match-row-count:${theirs.lines.length}">${matchFormationRows(opponentTeam, theirs.id, opponentRatings, opponentMvp, false)}</div>
+          </div>
+          <div class="match-pitch-tools" dir="ltr">
+            <button type="button" class="match-view-btn active" data-match-view="mine" aria-pressed="true" aria-label="تشكيلتي" title="تشكيلتي">${pitchIcon}</button>
+            <button type="button" class="match-view-btn" data-match-view="opp" aria-pressed="false" aria-label="تشكيلة الخصم" title="تشكيلة الخصم">${pitchIcon}</button>
+          </div>
+        </div>`;
     }
     function coachCardHTML(coach, cls) {
       const tierKey = COACH_TIER[coach.tier] ? coach.tier : "regular";

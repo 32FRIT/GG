@@ -386,10 +386,13 @@
           const name = club.starters[index];
           const player = name && findPlayer(name);
           const selected = selectedSquadSlot && selectedSquadSlot.area === "starter" && selectedSquadSlot.index === index;
+          const role = roles[index];
+          const warn = player && role && !playsRole(player, role);
           return `<button class="pitch-player squad-slot ${player ? "has-player-card" : "empty"} ${selected ? "selected" : ""}"
             data-squad-slot="starter" data-index="${index}" data-position="${position}" aria-pressed="${!!selected}"
-            aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[roles[index]]}`}">
-            ${player ? cardHTML(player, "squad-player-card") : `<small>${POS_SHORT[roles[index]]}</small><b>＋ إضافة</b>`}
+            aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[role]}`}">
+            ${player ? cardHTML(player, "squad-player-card") : `<b>＋ إضافة</b>`}
+            ${role ? `<span class="match-role-tag${warn ? " warn" : ""}" dir="ltr" aria-hidden="true"><i>${POS_SHORT[role] || role}</i><b>${warn ? "!" : "◆"}</b></span>` : ""}
           </button>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
@@ -398,7 +401,7 @@
           <div class="sec-title">التشكيلة الأساسية · <b dir="ltr">${formation.id}</b></div>
         ${club.ownedFormations.length > 1 || !club.confirmed ? `<button class="btn g sm" id="change-club-formation">${club.confirmed ? "تغيير الخطة" : "اختيار الخطة"}</button>` : ""}
         </div>
-        <div class="pitch">${rows}
+        <div class="pitch squad-pitch">${rows}
           <div class="squad-overall" title="${esc(ratingDetails)}" aria-label="التقييم الكلي OVR: ${overall === null ? "غير متاح" : overall}">
             <b>${overall === null ? "—" : overall}</b><span>OVR</span>
           </div>
