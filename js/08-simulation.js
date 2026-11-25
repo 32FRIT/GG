@@ -255,31 +255,25 @@
       statsFor("A", goalkeeper(A)).saves = shotsOnTargetB - gb;
       statsFor("B", goalkeeper(B)).saves = shotsOnTargetA - ga;
 
-      const candidates = [...stats.values()];
-      candidates.sort((x, y) => {
-        const goalsAgainst = s => s === "A" ? gb : ga;
-        const didNotLose = s => s === "A" ? ga >= gb : gb >= ga;
-        const score = player => player.goals * 4 + player.assists * 2.5 + (player.saves >= 5 && goalsAgainst(player.s) <= 2 && didNotLose(player.s) ? player.saves * 0.6 : 0);
-        return score(y) - score(x) ||
-          ratingOf(y.who) - ratingOf(x.who);
-      });
-      const best = candidates[0];
-      const reasonParts = [];
-      if (best.assists) reasonParts.push(`${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}`);
-      if (best.goals) reasonParts.push(`${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}`);
-      const reason = best.saves >= 5 && best.goals === 0 && best.assists === 0 && (best.s === "A" ? gb : ga) <= 2 && (best.s === "A" ? ga >= gb : gb >= ga)
-        ? `${best.saves} SAVES`
-        : reasonParts.join(" · ") || (best.saves >= 3 ? `${best.saves} SAVES` : "IMPACTFUL PERFORMANCE");
       const ratings = { A: {}, B: {} };
+      const participants = { A: new Map(), B: new Map() };
       ["A", "B"].forEach(side => {
         const team = side === "A" ? A : B;
+        const slots = team.slots || formationSlots(team.formation);
+        team.names.forEach((name, index) => participants[side].set(name, slots[index] || "M"));
+        ev.filter(event => event.s === side && event.type === "sub").forEach(event => {
+          const player = rosterFor(team)(event.for);
+          const slot = player ? (POSITION_GROUP[player.role] || player.p || "M") : "M";
+          participants[side].set(event.for, slot);
+        });
+      });
+      ["A", "B"].forEach(side => {
         const conceded = side === "A" ? gb : ga;
         const won = result === side, drew = result === "draw";
-        team.names.forEach((name, index) => {
+        participants[side].forEach((slot, name) => {
           const playerStats = stats.get(`${side}|${name}`) || { goals: 0, assists: 0, saves: 0 };
           const yellowCount = ev.filter(event => event.s === side && event.type === "yellow" && event.who === name).length;
           const redCount = ev.filter(event => event.s === side && event.type === "red" && event.who === name).length;
-          const slot = (team.slots || formationSlots(team.formation))[index];
           let rating = 6 + playerStats.goals * 1.15 + playerStats.assists * 0.7 - yellowCount * 0.25 - redCount * 1.1;
           if (slot === "G") rating += playerStats.saves * 0.12 - conceded * 0.3;
           else if (slot === "D") rating += conceded === 0 ? 0.35 : -conceded * 0.08;
@@ -288,6 +282,31 @@
           ratings[side][name] = Math.round(Math.max(4, Math.min(10, rating)) * 10) / 10;
         });
       });
+
+      // MVP is selected from every player who appeared, using the same final match rating shown in the UI.
+      // Performance stats only break a rating tie; unused substitutes are not eligible.
+      const candidates = ["A", "B"].flatMap(side =>
+        Object.keys(ratings[side]).map(who => ({
+          s: side,
+          who,
+          ...(stats.get(`${side}|${who}`) || { goals: 0, assists: 0, saves: 0 }),
+          rating: ratings[side][who]
+        }))
+      );
+      candidates.sort((x, y) =>
+        y.rating - x.rating ||
+        y.goals - x.goals ||
+        y.assists - x.assists ||
+        y.saves - x.saves ||
+        ratingOf(y.who) - ratingOf(x.who)
+      );
+      const best = candidates[0];
+      const reasonParts = [];
+      if (best.assists) reasonParts.push(`${best.assists} ${best.assists === 1 ? "ASSIST" : "ASSISTS"}`);
+      if (best.goals) reasonParts.push(`${best.goals} ${best.goals === 1 ? "GOAL" : "GOALS"}`);
+      const reason = best.saves >= 5 && best.goals === 0 && best.assists === 0 && (best.s === "A" ? gb : ga) <= 2 && (best.s === "A" ? ga >= gb : gb >= ga)
+        ? `${best.saves} SAVES`
+        : reasonParts.join(" · ") || (best.saves >= 3 ? `${best.saves} SAVES` : `MATCH RATING ${best.rating.toFixed(1)}`);
       ev.sort((x, y) => x.m - y.m);
       return { mine: mineFirst, ev, ratings, motm: { s: best.s, who: best.who, reason } };
     }
