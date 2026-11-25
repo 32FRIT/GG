@@ -44,7 +44,9 @@
     function showRematchChoices() {
       rematchLaunching = false;
       const isClub = S && S.entry === "club";
-      const online = !!(conn && conn.open);
+      // Keep the session's original mode: a dropped peer must never turn
+      // an online rematch into two unrelated local matches.
+      const online = !!(S && S.mode === "online");
       const overlay = document.createElement("div");
       overlay.className = "pick-overlay sale-overlay";
       overlay.innerHTML = `<div class="pick-dialog" role="dialog" aria-modal="true" aria-labelledby="rematch-title">
@@ -60,7 +62,10 @@
       overlay.querySelectorAll("[data-rematch]").forEach(button => button.onclick = () => {
         const action = button.dataset.rematch; overlay.remove();
         if (online) {
-          rematchPending = action; rematchRemote = null; rematchLaunching = false;
+          if (!conn || !conn.open) return netFail("اتصال المباراة انقطع، ارجعوا للغرفة وحاولوا تاني", isClub ? screenClubModes : screenModes);
+          // Do not clear rematchRemote here: the other player may have chosen
+          // first while this device was still showing the result screen.
+          rematchPending = action; rematchLaunching = false;
           try { conn.send({ t: "rematch-choice", action }) }
           catch (e) { return netFail("الاتصال بالخصم غير جاهز", isClub ? screenClubModes : screenModes) }
           toast("مستني اختيار صاحبك"); checkRematchAgreement();
@@ -73,7 +78,10 @@
     function launchSameLineupRematch() {
       if (!S) return;
       const previous = S, club = previous.entry === "club";
-      if (club) return startClubMatch(previous.mode === "online" && conn && conn.open ? "online" : "ai", previous.difficulty);
+      if (previous.mode === "online" && (!conn || !conn.open)) {
+        return netFail("اتصال المباراة انقطع، مش هنبدأ مباراة منفصلة", club ? screenClubModes : screenModes);
+      }
+      if (club) return startClubMatch(previous.mode === "online" ? "online" : "ai", previous.difficulty);
       cancelGameTimers(); resetOpponent();
       S = { i: 11, team: previous.team.slice(), used: new Set(previous.team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
         phase: "match", sel: null, formation: previous.formation, slots: formationSlots(previous.formation), roles: formationRoleSlots(previous.formation),
@@ -89,6 +97,11 @@
 
     function checkRematchAgreement() {
       if (rematchLaunching || !rematchPending || !rematchRemote || rematchPending !== rematchRemote) return;
+      if (S && S.mode === "online" && (!conn || !conn.open)) {
+        rematchPending = rematchRemote = null;
+        rematchLaunching = false;
+        return netFail("اتصال المباراة انقطع، ارجعوا للغرفة وحاولوا تاني", S.entry === "club" ? screenClubModes : screenModes);
+      }
       rematchLaunching = true;
       const action = rematchPending;
       rematchPending = rematchRemote = null;
