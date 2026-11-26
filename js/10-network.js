@@ -134,6 +134,16 @@
             catch (e) { handleOpponentDisconnect(connection); return }
             return netFail("نوع المباراة مختلف بين اللاعبين", returnScreen);
           }
+          if (draftMode !== (d.draftMode === "choice" ? "choice" : "hidden")) {
+            try { connection.send({ t: "mode_error" }) }
+            catch (e) { handleOpponentDisconnect(connection); return }
+            return netFail("نوع الدريفت مختلف بين اللاعبين", returnScreen);
+          }
+          if (draftMode === "choice" && Number.isInteger(d.choiceMatchMinutes) && d.choiceMatchMinutes !== choiceMatchMinutes) {
+            try { connection.send({ t: "mode_error" }) }
+            catch (e) { handleOpponentDisconnect(connection); return }
+            return netFail("وقت التشكيلة مختلف بين اللاعبين", returnScreen);
+          }
           const formation = FORMATIONS.find(item => item.id === d.formation);
           if (!formation) return netFail("خطة الخصم غير صالحة", returnScreen);
           opponentFormation = formation.id;
@@ -142,9 +152,10 @@
             catch (e) { handleOpponentDisconnect(connection); return }
             return startClubMatch("online");
           }
-          try { connection.send({ t: "cfg", tm: TM, formation: selectedFormation, gameType }) }
+          try { connection.send({ t: "cfg", tm: TM, formation: selectedFormation, gameType, draftMode, choiceMatchMinutes }) }
           catch (e) { handleOpponentDisconnect(connection); return }
-          startGame();
+          if (draftMode === "choice") startChoiceDraft();
+          else startGame();
         }
         if (d.t === "club-ready" && !isHost && gameType === "club") {
           return startClubMatch("online");
@@ -156,8 +167,32 @@
           const formation = FORMATIONS.find(item => item.id === d.formation);
           if (!formation) return netFail("خطة الخصم غير صالحة", returnScreen);
           TM = d.tm || TM;
+          if (Number.isInteger(d.choiceMatchMinutes) && [3,5,10].includes(d.choiceMatchMinutes)) choiceMatchMinutes = d.choiceMatchMinutes;
           opponentFormation = formation.id;
-          startGame();
+          draftMode = d.draftMode === "choice" ? "choice" : "hidden";
+          if (draftMode === "choice") startChoiceDraft();
+          else startGame();
+        }
+        if (d.t === "choice-timeout") {
+          stopChoiceDeadline();
+          toast("خصمك انتهى وقته — كسبت المباراة");
+          gameLive = false;
+          cancelGameTimers();
+          killNet();
+          resetOpponent();
+          screenModes();
+          return;
+        }
+        if (d.t === "choice-ready") {
+          choiceReadyRemote = true;
+          toast("الخصم مستعد");
+          if (choiceReadyLocal && S && S.draftMode === "choice") finishChoiceDraft();
+          return;
+        }
+        if (d.t === "choice-unready") {
+          choiceReadyRemote = false;
+          toast("الخصم عدّل التشكيلة ولم يعد مستعدًا");
+          return;
         }
         if (d.t === "pick") {
           if (!validOpponentPick(d) || OPPK[d.i] && OPPK[d.i] !== d.n) return;
@@ -177,7 +212,9 @@
             ? validPayload ? payloadPlayers.map(player => ({ ...player, alt: Array.isArray(player.alt) ? player.alt.slice() : [] })) : []
             : validNames ? d.names.map(name => P.find(player => player.n === name)) : [];
           const slots = formation ? formationSlots(formation.id) : [];
-          const calculatedBaseAvg = team.length === 11 && team.every(Boolean) ? Math.round(team.reduce((sum, player) => sum + player.r, 0) / 11) : null;
+          const calculatedBaseAvg = team.length === 11 && team.every(Boolean)
+            ? (lineupBaseRating(team, formation.id) || Math.round(team.reduce((sum, player) => sum + player.r, 0) / 11))
+            : null;
           const calculatedAvg = coach && calculatedBaseAvg !== null ? coachAdjustedPower(calculatedBaseAvg, coach) : null;
           const validSeed = Number.isSafeInteger(d.seed) && d.seed >= 0 && d.seed < 0x100000000;
           const benchPlayers = gameType === "club" && Array.isArray(d.benchPlayers) ? d.benchPlayers : null;
@@ -229,7 +266,7 @@
           const formation = gameType === "club" && guestProgress.club
             ? guestProgress.club.formation
             : selectedFormation;
-          try { connection.send({ t: "hello", formation, gameType }) }
+          try { connection.send({ t: "hello", formation, gameType, draftMode, choiceMatchMinutes }) }
           catch (e) { handleOpponentDisconnect(connection) }
         }
       };
