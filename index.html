@@ -408,7 +408,7 @@
     .draft-submode { min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px;border:1px solid var(--line);border-radius:12px;background:var(--card2);font-size:12px;font-weight:800;cursor:pointer }
     .draft-submode span:first-child { font-size:20px }
     .draft-submode.active { border-color:rgba(46,224,138,.62);background:rgba(46,224,138,.12);box-shadow:0 0 0 1px rgba(46,224,138,.12) inset }
-    .choice-grid { grid-template-columns:repeat(3,minmax(0,1fr));gap:8px }
+    .grid.choice-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px }
     .choice-card { min-width:0;border:0;padding:0;background:transparent;color:inherit;cursor:pointer }
     .choice-card .fc { width:100%;margin:0 }
     .choice-position-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px }
@@ -2732,6 +2732,14 @@
       .pick-grid {
         gap: clamp(6px, 1vh, 10px);
         margin-top: 8px !important;
+      }
+      .choice-grid {
+        row-gap: clamp(5px, 1vh, 8px);
+        column-gap: 8px;
+      }
+      .choice-grid > .fc,
+      .choice-grid > .fcwrap {
+        width: min(100%, 112px);
       }
       .pick-grid > .fc,
       .pick-grid > .fcwrap {
