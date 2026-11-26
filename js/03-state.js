@@ -9,8 +9,12 @@
     let OPP = null;              // {avg,names,name}
     let OPPK = [], OPPS = [], OPPP = [];
     let rematchContext = null, rematchPending = null, rematchRemote = null, rematchLaunching = false;
+    let choiceReadyLocal = false, choiceReadyRemote = false;
+    let choiceMatchMinutes = 5;
+    let choiceDeadline = 0, choiceDeadlineTimer = null;
     let activeMatchSkip = null, skipMatchProposalSent = false, skipMatchRemotePending = false;
     let gameLive = false;        // true while a draft or match is actually playing
+    let draftMode = "hidden";
 
     function stopTeamResultRetry() {
       clearInterval(teamRetryTimer);
@@ -99,10 +103,48 @@
     function stopTimer() { if (tmr) { clearInterval(tmr); tmr = null } tCb = null }
     function cancelGameTimers() {
       stopTimer();
+      stopChoiceDeadline();
       clearTimeout(phaseTimeout);
       phaseTimeout = null;
       clearInterval(advanceTimer);
       advanceTimer = null;
+    }
+    function stopChoiceDeadline() {
+      if (choiceDeadlineTimer) clearInterval(choiceDeadlineTimer);
+      choiceDeadlineTimer = null;
+      choiceDeadline = 0;
+      document.querySelectorAll(".choice-match-clock").forEach(element => element.remove());
+    }
+    function startChoiceDeadline() {
+      stopChoiceDeadline();
+      choiceDeadline = Date.now() + choiceMatchMinutes * 60 * 1000;
+      const clock = document.createElement("div");
+      clock.className = "choice-match-clock";
+      clock.setAttribute("aria-live", "polite");
+      clock.textContent = `${choiceMatchMinutes}:00`;
+      document.body.appendChild(clock);
+      choiceDeadlineTimer = setInterval(() => {
+        if (!S || S.draftMode !== "choice") return stopChoiceDeadline();
+        const remaining = Math.max(0, choiceDeadline - Date.now());
+        const clock = document.querySelector(".choice-match-clock");
+        if (clock) {
+          const minutes = Math.floor(remaining / 60000);
+          const seconds = Math.floor((remaining % 60000) / 1000);
+          clock.textContent = `${minutes}:${String(seconds).padStart(2, "0")}`;
+          clock.classList.toggle("warn", remaining <= 30000);
+        }
+        if (remaining <= 0) choiceDraftTimedOut();
+      }, 250);
+    }
+    function choiceDraftTimedOut() {
+      stopChoiceDeadline();
+      if (!S || S.draftMode !== "choice") return;
+      if (conn && conn.open) {
+        try { conn.send({ t: "choice-timeout" }); } catch (_) {}
+      }
+      quitActiveGame();
+      toast(conn && conn.open ? "انتهى وقت تجهيز التشكيلة" : "انتهى وقت تجهيز التشكيلة");
+      screenModes();
     }
     function bindQuitButton() {
       const button = $("quit");
