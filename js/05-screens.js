@@ -110,6 +110,39 @@
       $("home-market").onclick = () => openMarket("ALL", null, "home");
       $("home-packs").onclick = () => screenPacks(false);
       if (typeof window.renderAssetPanel === "function") window.renderAssetPanel();
+      showWelcomeGuide();
+    }
+
+    function showWelcomeGuide() {
+      const key = "gg_welcome_seen";
+      let seen = false;
+      try { seen = localStorage.getItem(key) === "1"; } catch (_) {}
+      if (seen) return;
+      setTimeout(() => {
+        if (document.querySelector("[data-welcome-guide]") || document.querySelector("[data-asset-prompt]")) return;
+        const overlay = document.createElement("div");
+        overlay.className = "pick-overlay sale-overlay";
+        overlay.setAttribute("data-welcome-guide", "");
+        overlay.innerHTML = `<div class="pick-dialog welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+          <span class="welcome-kicker">أهلًا بك في GG FOOTBALL</span>
+          <h2 id="welcome-title">ابدأ رحلتك في 3 خطوات</h2>
+          <p>كوّن فريقك واختار طريقة اللعب، ثم شوف النتيجة على الملعب.</p>
+          <div class="welcome-steps">
+            <div class="welcome-step"><span>1</span><b>كوّن تشكيلة من 11 لاعب</b></div>
+            <div class="welcome-step"><span>2</span><b>اختار مباراة عادية أو دريفت كروت</b></div>
+            <div class="welcome-step"><span>3</span><b>خلّي التقييم والنتيجة يحسموا المواجهة</b></div>
+          </div>
+          <div class="pick-actions"><button class="btn w" id="welcome-start" type="button">فهمت، يلا نبدأ</button></div>
+        </div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector("#welcome-start").onclick = () => {
+          try { localStorage.setItem(key, "1"); } catch (_) {}
+          overlay.remove();
+          if (document.getElementById("asset-slot") && typeof window.assetManager === "object") {
+            window.assetManager.renderPanel();
+          }
+        };
+      }, 650);
     }
 
     function screenRecord() {
@@ -362,8 +395,8 @@
     function squadOverallInfo(club) {
       const clubPlayers = club.starters.map(name => name && findPlayer(name)).filter(Boolean);
       const coach = COACHES.find(item => item.n === club.coach);
-      const baseRating = clubPlayers.length
-        ? Math.round(clubPlayers.reduce((sum, player) => sum + player.r, 0) / clubPlayers.length)
+      const baseRating = clubPlayers.length === 11
+        ? lineupBaseRating(clubPlayers, club.formation)
         : null;
       const overall = baseRating === null
         ? null
@@ -396,8 +429,8 @@
           return `<button class="pitch-player squad-slot ${player ? "has-player-card" : "empty"} ${selected ? "selected" : ""}"
             data-squad-slot="starter" data-index="${index}" data-position="${position}" aria-pressed="${!!selected}"
             aria-label="${player ? `اختيار ${esc(player.n)}` : `إضافة ${POS_NAME[role]}`}">
-            ${player ? cardHTML(player, "squad-player-card") : `<b>＋ إضافة</b>`}
-            ${role ? `<span class="match-role-tag${warn ? " warn" : ""}" dir="ltr" aria-hidden="true"><i>${POS_SHORT[role] || role}</i><b>${warn ? "!" : "◆"}</b></span>` : ""}
+            ${player ? cardHTML(player, "squad-player-card") : emptySlotCardHTML(role)}
+            ${player && role ? `<span class="match-role-tag${warn ? " warn" : ""}" dir="ltr" aria-hidden="true"><i>${POS_SHORT[role] || role}</i><b>${warn ? "!" : "◆"}</b></span>` : ""}
           </button>`;
         }).join("");
         return `<div class="pitch-row">${players}</div>`;
@@ -638,7 +671,7 @@
         const selected = selectedSquadSlot && selectedSquadSlot.area === "bench" && selectedSquadSlot.index === index;
         return `<button class="bench-slot ${player ? "owned-slot" : ""} ${selected ? "selected" : ""}"
           data-squad-slot="bench" data-index="${index}" data-position="${position || "ANY"}" aria-pressed="${!!selected}">
-        ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `<small>${label}</small><b>＋ إضافة</b>`}
+        ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `${emptySlotCardHTML(position || "M")}`}
         </button>`;
       }).join("")}
   </div>` : "";
@@ -1853,19 +1886,36 @@
       _origPush(screenDraftModes);
       app.innerHTML = `
   <main class="play-menu">
-    <header class="hdr"><div class="l"><span class="pos">دريفت الكروت</span><span class="cnt">اختار الوقت وطريقة المنافسة</span></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <header class="hdr"><div class="l"><span class="pos">دريفت الكروت</span><span class="cnt">اختار نوع الدريفت وطريقة المنافسة</span></div><button class="btn g sm" id="bk">رجوع</button></header>
+    <section class="draft-menu" aria-label="نوع الدريفت">
+      <header class="draft-menu-head"><span class="play-mode-icon">🃏</span><span><b>نوع الدريفت</b><small>اختار شكل الكروت وطريقة الاختيار</small></span></header>
+      <div class="draft-submodes">
+        <button class="draft-submode ${draftMode === "hidden" ? "active" : ""}" data-draft-mode="hidden" aria-pressed="${draftMode === "hidden"}"><span>🎴</span><b>كروت مخفية</b></button>
+        <button class="draft-submode ${draftMode === "choice" ? "active" : ""}" data-draft-mode="choice" aria-pressed="${draftMode === "choice"}"><span>⚽</span><b>اختار لاعب</b></button>
+      </div>
+    </section>
     <section class="draft-menu" aria-label="إعدادات الدريفت">
-      <header class="draft-menu-head"><span class="play-mode-icon">⏱️</span><span><b>وقت كل اختيار</b><small>تقدر تغيّره قبل كل جولة</small></span></header>
-      <div class="timer-options">${[15, 30, 45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}" aria-pressed="${s === TM}">${s} ثانية</button>`).join("")}</div>
+      <header class="draft-menu-head"><span class="play-mode-icon">⏱️</span><span><b>${draftMode === "choice" ? "وقت تجهيز التشكيلة" : "وقت كل اختيار"}</b><small>${draftMode === "choice" ? "الوقت يبدأ عند دخول الدريفت" : "تقدر تغيّره قبل كل جولة"}</small></span></header>
+      ${draftMode === "choice"
+        ? `<div class="timer-options">${[3,5,10].map(minutes => `<button class="btn ${minutes === choiceMatchMinutes ? "" : "g"} sm" data-choice-time="${minutes}" aria-pressed="${minutes === choiceMatchMinutes}">${minutes} دقائق</button>`).join("")}</div>`
+        : `<div class="timer-options">${[15,30,45].map(s => `<button class="btn ${s === TM ? "" : "g"} sm" data-t="${s}" aria-pressed="${s === TM}">${s} ثانية</button>`).join("")}</div>`}
     </section>
     <button class="play-club-card" id="mAi"><span class="play-mode-icon">🤖</span><span class="play-mode-copy"><b>ضد الكمبيوتر</b><small>ابدأ دريفت فردي</small></span><span class="play-mode-arrow">‹</span></button>
     <button class="play-club-card secondary" id="mRoom"><span class="play-mode-icon">👥</span><span class="play-mode-copy"><b>العب مع صاحبك</b><small>اعمل غرفة وابعتله الكود</small></span><span class="play-mode-arrow">‹</span></button>
     <button class="play-club-card secondary" id="mOn"><span class="play-mode-icon">🌐</span><span class="play-mode-copy"><b>أونلاين</b><small>قابل لاعب عشوائي</small></span><span class="play-mode-arrow">‹</span></button>
   </main>`;
       $("bk").onclick = screenModes;
+      app.querySelectorAll("[data-draft-mode]").forEach(b => b.onclick = () => {
+        draftMode = b.dataset.draftMode;
+        screenDraftModes();
+      });
       app.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { TM = +b.dataset.t; screenDraftModes() });
-      $("mAi").onclick = () => screenFormations(startAIGame);
-      $("mRoom").onclick = () => screenFormations(screenRoom);
+      app.querySelectorAll("[data-choice-time]").forEach(b => b.onclick = () => {
+        choiceMatchMinutes = +b.dataset.choiceTime;
+        screenDraftModes();
+      });
+      $("mAi").onclick = () => draftMode === "choice" ? startAIGame() : screenFormations(startAIGame);
+      $("mRoom").onclick = () => draftMode === "choice" ? screenRoom("draft") : screenFormations(screenRoom);
       $("mOn").onclick = () => screenFormations(() => hostRoom("lobby", true));
     }
 
