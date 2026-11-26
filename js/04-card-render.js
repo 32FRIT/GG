@@ -37,5 +37,16 @@
       return `<button class="fc back ${used ? "used" : ""}" data-k="${k}" aria-label="كارت مخفي ${k + 1}">
     <span>${used ? "✕" : "GG"}</span></button>`;
     }
+    function emptySlotCardHTML(role) {
+      const short = POS_SHORT[role] || POS_SHORT[POSITION_GROUP[role]] || "—";
+      const name = POS_NAME[role] || "مركز فارغ";
+      return `<div class="empty-slot-card" aria-hidden="true">
+        <span class="empty-slot-rating">—</span>
+        <span class="empty-slot-position" dir="ltr">${esc(short)}</span>
+        <span class="empty-slot-plus">＋</span>
+        <span class="empty-slot-name">${esc(name)}</span>
+        <span class="empty-slot-diamond">◆</span>
+      </div>`;
+    }
 
 
