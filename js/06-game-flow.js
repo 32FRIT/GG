@@ -2,6 +2,7 @@
     function startGame() {
       cancelGameTimers();
       gameLive = true;
+      if (draftMode === "choice") return startChoiceDraft();
       S = { i: 0, team: [], used: new Set(), pool: [], shown: new Set(), sw: 1, phase: "pick", sel: null, formation: selectedFormation, slots: formationSlots(selectedFormation), roles: formationRoleSlots(selectedFormation), coach: null, coachPool: [], coachShown: new Set(), coachSwap: 1, mode: conn && conn.open ? "online" : "ai", matchSeed: Math.floor(Math.random() * 0x100000000) };
       round();
     }
@@ -184,6 +185,469 @@
       <div class="fc back stack-back" aria-hidden="true"><span>GG</span></div>
       <div class="fcwrap pick-card-front">${frontCard}</div>
     </div>`;
+    }
+
+    function choicePlayerFitsRole(player, role) {
+      if (!player || !role) return false;
+      return playsRole(player, role);
+    }
+
+    function choicePlayerFitsGroup(player, group) {
+      if (!player || !group) return false;
+      return playsGroup(player, group);
+    }
+
+    function choiceBenchGroup(index) {
+      return BENCH_SLOT_POSITIONS[index] || null;
+    }
+
+    function choicePool(poolSize, role) {
+      const used = new Set(S && S.used ? S.used : []);
+      if (S && S.captain) used.add(S.captain.n);
+      let available = P.filter(player => !used.has(player.n));
+      if (role) {
+        available = available.filter(player => choicePlayerFitsRole(player, role));
+      }
+      const strong = available.filter(player => player.r >= 90);
+      const regular = available.filter(player => player.r >= 80 && player.r < 90);
+      const weak = available.filter(player => player.r < 80);
+      const pool = [];
+      const strongLimit = 3;
+      if (strong.length && S.choiceStrongCount < strongLimit && Math.random() < .58) pool.push(shuffle(strong)[0]);
+      shuffle(regular).forEach(player => {
+        if (pool.length < poolSize && !pool.includes(player)) pool.push(player);
+      });
+      shuffle(weak).forEach(player => {
+        if (pool.length < poolSize && !pool.includes(player)) pool.push(player);
+      });
+      shuffle(available).forEach(player => {
+        if (pool.length < poolSize && !pool.includes(player)) pool.push(player);
+      });
+      return shuffle(pool.slice(0, poolSize));
+    }
+
+    function startChoiceDraft() {
+      gameLive = true;
+      startChoiceDeadline();
+      choiceReadyLocal = false;
+      choiceReadyRemote = false;
+      S = {
+        i: 0, team: [], starters: [], bench: Array(12).fill(null), used: new Set(), pool: [], captain: null, coach: null,
+        formation: selectedFormation, phase: "choice-coach", draftMode: "choice",
+        choiceStrongCount: 0, choiceStrongLimit: 3,
+        choiceBenchVisible: false, choiceBenchSelectedIndex: null,
+        mode: conn && conn.open ? "online" : "ai", entry: "draft"
+      };
+      drawChoiceFormation();
+    }
+
+    function drawChoiceCoach() {
+      S.phase = "choice-coach";
+      S.coachPool = shuffle(COACHES).slice(0, 6);
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">اختار المدرب</span><span class="cnt">الجولة الثانية · اختار واحد من 6</span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <p class="note">اختار المدرب المكشوف لفريقك.</p>
+        <div class="grid pick-grid choice-grid">${S.coachPool.map((coach, index) => `<button class="fcwrap choice-card" data-choice-coach="${index}" aria-label="اختار مدرب ${esc(coach.n)}">${coachCardHTML(coach, "pick")}</button>`).join("")}</div>`;
+      bindQuitButton();
+      app.querySelectorAll("[data-choice-coach]").forEach(button => {
+        button.onclick = () => {
+          S.coach = S.coachPool[+button.dataset.choiceCoach];
+          buzz(8);
+          drawChoiceCaptain();
+        };
+      });
+    }
+
+    function drawChoiceCaptain() {
+      S.phase = "choice-captain";
+      const availableRoles = [...new Set(S.roles.filter(Boolean))];
+      S.captainPool = shuffle(P.filter(player =>
+        player.r >= 90 &&
+        availableRoles.some(role => choicePlayerFitsRole(player, role))
+      )).slice(0, 6);
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">اختار الكابتن</span><span class="cnt">الجولة الثالثة · اختار قائد قوي</span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <p class="note">الكابتن اختياري قوي من 90 فما فوق.</p>
+        <div class="grid pick-grid choice-grid">${S.captainPool.map((player, index) => `<button class="fcwrap choice-card" data-choice-captain="${index}" aria-label="اختار كابتن ${esc(player.n)}">${cardHTML(player, "pick")}</button>`).join("")}</div>`;
+      bindQuitButton();
+      app.querySelectorAll("[data-choice-captain]").forEach(button => {
+        button.onclick = () => {
+          S.captain = S.captainPool[+button.dataset.choiceCaptain];
+          S.team = [S.captain];
+          S.used = new Set([S.captain.n]);
+          S.starters = Array(S.roles.length).fill(null);
+          let captainIndex = S.roles.findIndex(role => choicePlayerFitsRole(S.captain, role));
+          if (captainIndex < 0) captainIndex = -1;
+          if (captainIndex < 0) {
+            toast("الكابتن غير مناسب لأي دور في الخطة");
+            return;
+          }
+          S.starters[captainIndex] = S.captain;
+          S.choiceStrongCount = 1;
+          buzz(10);
+          drawChoiceLineup();
+        };
+      });
+    }
+
+    function drawChoiceFormation() {
+      S.phase = "choice-formation";
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">اختار التشكيلة</span><span class="cnt">الجولة الأولى · اختار خطتك</span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <p class="note">اختار الخطة قبل توزيع اللاعبين على المراكز.</p>
+        <div class="formation-grid">${FORMATIONS.map(formation => `<button class="formation-option ${formation.id === selectedFormation ? "active" : ""}" data-choice-formation="${formation.id}" aria-pressed="${formation.id === selectedFormation}">
+          <b>${formation.id}</b><small>${formation.name}</small>
+        </button>`).join("")}</div>`;
+      bindQuitButton();
+      app.querySelectorAll("[data-choice-formation]").forEach(button => {
+        button.onclick = () => {
+          selectedFormation = button.dataset.choiceFormation;
+          S.formation = selectedFormation;
+          S.roles = formationRoleSlots(selectedFormation);
+          drawChoiceCoach();
+        };
+      });
+    }
+
+    function drawChoiceLineup() {
+      if (!S) return;
+      S.phase = "choice-position";
+      const filled = S.starters.filter(Boolean).length;
+      const benchFilled = S.bench ? S.bench.slice(0,4).filter(Boolean).length : 0;
+      const teamReady = filled >= 11 && benchFilled >= 4;
+      const lineupTeam = S.starters;
+      const lineupRating = lineupTeam.length === 11
+        ? lineupBaseRating(lineupTeam, S.formation)
+        : null;
+      const liveOverall = lineupRating === null
+        ? "—"
+        : coachAdjustedPower(lineupRating, S.coach);
+      const formation = formationById(S.formation);
+      const slots = formationSlots(S.formation);
+      const offsets = {
+        G: 0,
+        D: 1,
+        M: 1 + slots.filter(position => position === "D").length,
+        F: 1 + slots.filter(position => position === "D").length + slots.filter(position => position === "M").length
+      };
+      const used = { G: 0, D: 0, M: 0, F: 0 };
+      const rows = formation.lines.map(([position, count]) => {
+        const cells = Array.from({ length: count }, () => {
+          const index = offsets[position] + used[position]++;
+          const role = S.roles[index];
+          const player = S.starters[index];
+          return player
+            ? player.n === (S.captain && S.captain.n)
+              ? `<button class="pitch-player squad-slot has-player-card ${S.choiceSelectedIndex === index ? "selected" : ""}" data-choice-edit="${index}" data-choice-role="${role}" type="button" aria-label="الكابتن ${esc(player.n)}">
+                ${cardHTML(player, "choice-slot-card")}
+                ${role ? `<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span>` : ""}
+              </button>`
+              : `<button class="pitch-player squad-slot has-player-card ${S.choiceSelectedIndex === index ? "selected" : ""}" data-choice-edit="${index}" data-choice-role="${role}" type="button" aria-label="تبديل ${esc(player.n)} في مركز ${POS_NAME[role]}">
+                ${cardHTML(player, "choice-slot-card")}
+                ${role ? `<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span>` : ""}
+              </button>`
+            : `<button class="pitch-player squad-slot empty" data-choice-role="${role}" data-choice-index="${index}" type="button" aria-label="اختار لاعب ${POS_NAME[role]}">
+                ${emptySlotCardHTML(role)}
+              </button>`;
+        }).join("");
+        return `<div class="pitch-row">${cells}</div>`;
+      }).join("");
+      app.innerHTML = `<div class="choice-draft-screen">
+        <div class="hdr"><div class="l"><span class="pos">تشكيلتي</span><span class="cnt">الأساسي ${filled} من 11 · <b dir="ltr">${S.formation}</b></span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <div class="choice-draft-top">
+          <span>مدربك: <b>${esc(S.coach.n)}</b></span>
+          <span>كابتن: <b>${esc(S.captain.n)}</b></span>
+          <span class="choice-live-ovr">OVR <b dir="ltr">${liveOverall}</b></span>
+        </div>
+        <div class="pitch squad-pitch choice-draft-pitch">${rows}</div>
+        ${S.choiceBenchVisible ? `<div class="choice-bench-sheet"><div class="bench-grid">
+          ${BENCH_SLOT_POSITIONS.map((position, index) => {
+            if (index >= 4) return `<button class="bench-slot choice-bench-lock" type="button" disabled aria-label="مكان احتياطي مقفل">🔒<small>مقفل</small></button>`;
+            const player = S.bench[index];
+            const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
+            return `<button class="bench-slot ${player ? "owned-slot" : ""} ${S.choiceBenchSelectedIndex === index ? "selected" : ""}" data-choice-bench-slot="${index}" data-position="${position || "ANY"}" type="button" aria-label="${player ? `تبديل ${esc(player.n)}` : `إضافة ${esc(label)}`}">
+              ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `${emptySlotCardHTML(position || "M")}`}
+            </button>`;
+          }).join("")}
+        </div></div>` : ""}
+        <div class="choice-draft-actions" dir="ltr">
+          <button class="choice-bench-inline" id="choice-bench-inline" type="button">${S.choiceBenchVisible ? "إخفاء الاحتياطي" : "الاحتياطي"}</button>
+          ${teamReady ? `<button class="choice-ready-inline" id="choice-ready-inline" type="button">${choiceReadyLocal ? "مستعد ✓" : "مستعد"}</button>` : ""}
+        </div>
+      </div>`;
+      bindQuitButton();
+      app.querySelectorAll("[data-choice-role]").forEach(button => {
+        button.onclick = () => {
+          const targetIndex = +button.dataset.choiceIndex;
+          if (Number.isInteger(S.choiceSelectedIndex)) {
+            const sourceIndex = S.choiceSelectedIndex;
+            const sourcePlayer = S.starters[sourceIndex];
+            const targetRole = S.roles[targetIndex];
+            if (!sourcePlayer || !choicePlayerFitsRole(sourcePlayer, targetRole)) {
+              toast(`هذا اللاعب لا يلائم مركز ${POS_NAME[targetRole] || targetRole}`);
+              S.choiceSelectedIndex = null;
+              drawChoiceLineup();
+              return;
+            }
+            S.starters[targetIndex] = S.starters[sourceIndex];
+            S.starters[sourceIndex] = null;
+            S.choiceSelectedIndex = null;
+            S.team = S.starters.filter(Boolean);
+            if (choiceReadyLocal) {
+              choiceReadyLocal = false;
+              if (conn && conn.open) try { conn.send({ t: "choice-unready" }); } catch (_) {}
+            }
+            buzz(6);
+            drawChoiceLineup();
+            return;
+          }
+          drawChoicePlayerRound(button.dataset.choiceRole, targetIndex);
+        };
+      });
+      app.querySelectorAll("[data-choice-edit]").forEach(button => {
+        button.onclick = () => {
+          const index = +button.dataset.choiceEdit;
+          if (Number.isInteger(S.choiceBenchSelectedIndex)) {
+            const benchIndex = S.choiceBenchSelectedIndex;
+            const benchPlayer = S.bench[benchIndex];
+            const role = S.roles[index];
+            if (!benchPlayer || !choicePlayerFitsRole(benchPlayer, role)) {
+              toast("الاحتياطي لا يناسب هذا المركز");
+              S.choiceBenchSelectedIndex = null;
+              drawChoiceLineup();
+              return;
+            }
+            const oldStarter = S.starters[index];
+            S.starters[index] = benchPlayer;
+            const benchGroup = choiceBenchGroup(benchIndex);
+            S.bench[benchIndex] = oldStarter && (!benchGroup || choicePlayerFitsGroup(oldStarter, benchGroup)) ? oldStarter : null;
+            S.choiceBenchSelectedIndex = null;
+            S.team = S.starters.filter(Boolean);
+            drawChoiceLineup();
+            return;
+          }
+          if (!Number.isInteger(S.choiceSelectedIndex)) {
+            S.choiceSelectedIndex = index;
+            buzz(6);
+            drawChoiceLineup();
+            return;
+          }
+          if (S.choiceSelectedIndex === index) {
+            S.choiceSelectedIndex = null;
+            drawChoiceLineup();
+            return;
+          }
+          const sourceIndex = S.choiceSelectedIndex;
+          const sourcePlayer = S.starters[sourceIndex];
+          const targetPlayer = S.starters[index];
+          const sourceRole = S.roles[sourceIndex];
+          const targetRole = S.roles[index];
+          const sourceFitsTarget = sourcePlayer && targetRole && choicePlayerFitsRole(sourcePlayer, targetRole);
+          const targetFitsSource = targetPlayer && sourceRole && choicePlayerFitsRole(targetPlayer, sourceRole);
+          if (!sourceFitsTarget || !targetFitsSource) {
+            toast("التبديل غير مناسب للمركزين");
+            S.choiceSelectedIndex = null;
+            drawChoiceLineup();
+            return;
+          }
+          [S.starters[sourceIndex], S.starters[index]] = [S.starters[index], S.starters[sourceIndex]];
+          S.choiceSelectedIndex = null;
+          S.team = S.starters.filter(Boolean);
+          if (choiceReadyLocal) {
+            choiceReadyLocal = false;
+            if (conn && conn.open) try { conn.send({ t: "choice-unready" }); } catch (_) {}
+          }
+          buzz(8);
+          drawChoiceLineup();
+        };
+      });
+      if ($("choice-bench-inline")) $("choice-bench-inline").onclick = () => {
+        S.choiceBenchVisible = !S.choiceBenchVisible;
+        drawChoiceLineup();
+      };
+      app.querySelectorAll("[data-choice-bench-slot]").forEach(button => {
+        button.onclick = () => {
+          const index = +button.dataset.choiceBenchSlot;
+          if (index >= 4) return toast("مكان الاحتياطي المقفل غير متاح في الدريفت");
+          const position = button.dataset.position;
+          if (Number.isInteger(S.choiceSelectedIndex)) {
+            const starterIndex = S.choiceSelectedIndex;
+            const starterPlayer = S.starters[starterIndex];
+            const benchGroup = choiceBenchGroup(index);
+            if (!starterPlayer || (benchGroup && !choicePlayerFitsGroup(starterPlayer, benchGroup))) {
+              toast("اللاعب لا يناسب مكان الاحتياطي");
+              return;
+            }
+            S.bench[index] = starterPlayer;
+            S.starters[starterIndex] = null;
+            S.choiceSelectedIndex = null;
+            S.team = S.starters.filter(Boolean);
+            drawChoiceLineup();
+            return;
+          }
+          if (S.bench[index]) {
+            S.choiceBenchSelectedIndex = S.choiceBenchSelectedIndex === index ? null : index;
+            drawChoiceLineup();
+            return;
+          }
+          if (Number.isInteger(S.choiceBenchSelectedIndex)) {
+            const sourceIndex = S.choiceBenchSelectedIndex;
+            const sourcePlayer = S.bench[sourceIndex];
+            if (!sourcePlayer) {
+              S.choiceBenchSelectedIndex = null;
+              return drawChoiceLineup();
+            }
+            if (choiceBenchGroup(index) && !choicePlayerFitsGroup(sourcePlayer, choiceBenchGroup(index))) {
+              toast("اللاعب لا يناسب مكان الاحتياطي");
+              return;
+            }
+            S.bench[index] = sourcePlayer;
+            S.bench[sourceIndex] = null;
+            S.choiceBenchSelectedIndex = null;
+            drawChoiceLineup();
+            return;
+          }
+          drawChoiceBenchPlayerRound(index);
+        };
+      });
+      if ($("choice-ready-inline")) $("choice-ready-inline").onclick = () => markChoiceReady();
+    }
+
+    function drawChoicePlayerRound(role, slotIndex) {
+      if (!S) return;
+      S.phase = "choice-player";
+      S.choiceRole = role;
+      S.choiceSlotIndex = slotIndex;
+      S.pool = choicePool(6, role);
+      S.pool = S.pool.filter(player => player.n !== S.captain.n).slice(0, 6);
+      app.innerHTML = `<div class="hdr"><div class="l"><span class="pos">${role} · ${POS_NAME[role] || role}</span><span class="cnt">اختيار اللاعب · الأساسيات ${S.team.length} من 11</span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <p class="note">اختار واحدًا من 6 كروت مكشوفة لهذا المركز.</p>
+        <div class="grid pick-grid choice-grid">${S.pool.map((player, index) => `<button class="fcwrap choice-card" data-choice-player="${index}" aria-label="اختار ${esc(player.n)}">${cardHTML(player, "pick")}</button>`).join("")}</div>`;
+      bindQuitButton();
+      app.querySelectorAll("[data-choice-player]").forEach(button => {
+        button.onclick = () => keepChoicePlayer(+button.dataset.choicePlayer);
+      });
+    }
+
+    function keepChoicePlayer(index) {
+      if (!S || S.phase !== "choice-player") return;
+      const player = S.pool[index];
+      if (!player) return;
+      if (!Number.isInteger(S.choiceSlotIndex) || S.starters[S.choiceSlotIndex]) return;
+      S.starters[S.choiceSlotIndex] = player;
+      S.team = S.starters.filter(Boolean);
+      if (choiceReadyLocal) {
+        choiceReadyLocal = false;
+        if (conn && conn.open) try { conn.send({ t: "choice-unready" }); } catch (_) {}
+      }
+      S.used.add(player.n);
+      if (player.r >= 90) S.choiceStrongCount++;
+      buzz(10); sfxGood();
+      setTimeout(() => {
+        if (S && S.phase === "choice-player") drawChoiceLineup();
+      }, 350);
+    }
+
+    function markChoiceReady() {
+      if (!S || !S.starters || S.starters.filter(Boolean).length < 11) return toast("اكمل التشكيلة الأساسية أولًا");
+      if (!S.bench || S.bench.slice(0,4).filter(Boolean).length < 4) return toast("اختار أربعة احتياطيين أولًا");
+      choiceReadyLocal = true;
+      buzz(10);
+      if (conn && conn.open) {
+        try { conn.send({ t: "choice-ready" }); } catch (_) { return netFail("تعذر إرسال حالة الاستعداد", screenModes); }
+        toast(choiceReadyRemote ? "الطرفان مستعدان — بنبدأ المباراة" : "انت مستعد — مستني خصمك");
+      }
+      drawChoiceLineup();
+      if (!conn || !conn.open) finishChoiceDraft();
+      else if (choiceReadyRemote) finishChoiceDraft();
+    }
+
+    function choiceLineupPitchHTML() {
+      if (!S || !S.formation) return "";
+      const formation = formationById(S.formation);
+      const slots = formationSlots(S.formation);
+      const offsets = {
+        G: 0,
+        D: 1,
+        M: 1 + slots.filter(position => position === "D").length,
+        F: 1 + slots.filter(position => position === "D").length + slots.filter(position => position === "M").length
+      };
+      const used = { G: 0, D: 0, M: 0, F: 0 };
+      const rows = formation.lines.map(([position, count]) => {
+        const cells = Array.from({ length: count }, () => {
+          const index = offsets[position] + used[position]++;
+          const role = S.roles[index];
+          const player = S.starters[index];
+          return player
+            ? `<div class="pitch-player squad-slot has-player-card">${cardHTML(player, "choice-slot-card")}<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span></div>`
+            : `<div class="pitch-player squad-slot empty">${emptySlotCardHTML(role)}</div>`;
+        }).join("");
+        return `<div class="pitch-row">${cells}</div>`;
+      }).join("");
+      return `<div class="pitch squad-pitch choice-draft-pitch choice-bench-lineup">${rows}</div>`;
+    }
+
+    function drawChoiceBenchRound() {
+      if (!S) return;
+      S.choiceBenchVisible = true;
+      drawChoiceLineup();
+    }
+
+    function drawChoiceBenchPlayerRound(benchIndex) {
+      if (!S || benchIndex < 0 || benchIndex >= 4 || S.bench[benchIndex]) return drawChoiceBenchRound();
+      const position = BENCH_SLOT_POSITIONS[benchIndex];
+      const role = position === "G" ? "GK" : position === "D" ? "CB" : position === "M" ? "CM" : position === "F" ? "ST" : null;
+      S.phase = "choice-bench-player";
+      if (position === "D") {
+        S.pool = shuffle(P.filter(player =>
+          !S.used.has(player.n) &&
+          ["LB","CB","RB"].some(defenderRole => choicePlayerFitsRole(player, defenderRole))
+        )).slice(0,6);
+      } else if (position === "M") {
+        S.pool = shuffle(P.filter(player =>
+          !S.used.has(player.n) &&
+          ["CM","CDM","CAM","LM","RM"].some(midRole => choicePlayerFitsRole(player, midRole))
+        )).slice(0,6);
+      } else if (position === "F") {
+        S.pool = shuffle(P.filter(player =>
+          !S.used.has(player.n) &&
+          ["LW","ST","RW"].some(forwardRole => choicePlayerFitsRole(player, forwardRole))
+        )).slice(0,6);
+      } else {
+        S.pool = choicePool(6, role);
+      }
+      app.innerHTML = `<div class="choice-draft-screen">
+        <div class="hdr"><div class="l"><span class="pos">${POS_NAME[position]}</span><span class="cnt">اختيار الاحتياطي · ${benchIndex + 1} من 4</span></div><button class="btn g sm" id="quit">انسحاب</button></div>
+        <div class="choice-draft-top"><span>اختار لاعبًا احتياطيًا لـ <b>${POS_NAME[position]}</b></span><span dir="ltr">${role}</span></div>
+        <div class="grid pick-grid choice-grid">${S.pool.map((player, index) => `<button class="fcwrap choice-card" data-choice-bench="${index}" aria-label="اختار احتياطي ${esc(player.n)}">${cardHTML(player, "pick")}</button>`).join("")}</div>
+        <button class="btn g w mt" id="bench-change-slot">تغيير المركز</button>
+      </div>`;
+      bindQuitButton();
+      $("bench-change-slot").onclick = drawChoiceBenchRound;
+      app.querySelectorAll("[data-choice-bench]").forEach(button => {
+        button.onclick = () => {
+          const player = S.pool[+button.dataset.choiceBench];
+          if (!player) return;
+          S.bench[benchIndex] = player;
+          S.used.add(player.n);
+          if (choiceReadyLocal) {
+            choiceReadyLocal = false;
+            if (conn && conn.open) try { conn.send({ t: "choice-unready" }); } catch (_) {}
+          }
+          buzz(10); sfxGood();
+          drawChoiceBenchRound();
+        };
+      });
+    }
+
+    function finishChoiceDraft() {
+      stopChoiceDeadline();
+      S.phase = "choice-result";
+      S.team = S.starters.filter(Boolean);
+      S.bench = S.bench.map(player => player || null);
+      S.slots = formationSlots(S.formation);
+      S.roles = formationRoleSlots(S.formation);
+      S.i = 11;
+      S.matchSeed = Math.floor(Math.random() * 0x100000000);
+      OPP = aiTeam(opponentFormation || S.formation);
+      endGame();
     }
 
     function startCoachDraft() {
