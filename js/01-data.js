@@ -126,6 +126,21 @@
       const roles = FORMATION_ROLE_LINES[formationById(id).id];
       return ["GK", ...roles.D, ...roles.M, ...roles.F];
     };
+    const lineupBaseRating = (team, formationId) => {
+      const players = Array.isArray(team) ? team : [];
+      if (players.length !== 11 || players.some(player => !player)) return null;
+      const roles = formationRoleSlots(formationId);
+      const slots = formationSlots(formationId);
+      const values = players.map((player, index) => {
+        const role = roles[index];
+        if (!role) return player.r;
+        if (player.role === role) return player.r;
+        if (playsRole(player, role)) return player.r - 2;
+        if (playsGroup(player, POSITION_GROUP[role] || slots[index])) return player.r - 5;
+        return player.r - 8;
+      });
+      return Math.round(values.reduce((sum, rating) => sum + rating, 0) / 11);
+    };
     /* Main role + optional extra roles ("alt" in fut-data.js). */
     const playerRoles = player => [player.role, ...(player.alt || [])];
     const playsRole = (player, role) => playerRoles(player).includes(role);
