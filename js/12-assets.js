@@ -1,5 +1,5 @@
 /* ================= ASSET DOWNLOAD ================= */
-    const ASSET_CACHE_NAME = "gg-app-v3"; // shared cache used by the service worker
+    const ASSET_CACHE_NAME = "gg-app-v1"; // same cache the service worker reads from
     const ASSET_STATE_KEY = "gg_assets_v1";
     const ASSET_SIZE_LABEL = "حوالي 100 ميجا";
     const assetManager = (() => {
@@ -150,6 +150,10 @@
         if (promptBox || done || state.running) return;
         if (!document.querySelector(".start-screen")) return;
         if (typeof gameInProgress === "function" && gameInProgress()) return;
+        if (document.querySelector("[data-welcome-guide]")) {
+          setTimeout(showPrompt, 1000);
+          return;
+        }
         promptBox = document.createElement("div");
         promptBox.className = "pick-overlay sale-overlay";
         promptBox.setAttribute("data-asset-prompt", "");
@@ -345,9 +349,12 @@
             if (loaded) state.done++;
             else state.failed.push(url);
             scheduleRender();
+            if (state.mode === "background") {
+              await new Promise(resolve => setTimeout(resolve, 55));
+            }
           }
         };
-        await Promise.all(Array.from({ length: 4 }, worker));
+        await Promise.all(Array.from({ length: 2 }, worker));
         finish();
       }
 
@@ -387,7 +394,7 @@
         if (done) return;
         if (stored.version === version && stored.declined) {
           if (navigator.onLine !== false) start("background");
-        } else setTimeout(showPrompt, 450);
+        } else setTimeout(showPrompt, 1200);
       }
 
       return { urls, state, boot, start, renderPanel, done: () => done, addPackArt };
