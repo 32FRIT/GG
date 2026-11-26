@@ -1,10 +1,25 @@
 /* ================= AI OPPONENT ================= */
+    function aiPlayerPool(role, used) {
+      const exact = P.filter(player => playsRole(player, role) && !used.has(player.n));
+      const available = exact.length
+        ? exact
+        : P.filter(player => playsGroup(player, POSITION_GROUP[role]) && !used.has(player.n));
+      const strong = shuffle(available.filter(player => player.r >= 88));
+      const medium = shuffle(available.filter(player => player.r >= 75 && player.r < 88));
+      const weak = shuffle(available.filter(player => player.r < 75));
+      const pool = [strong[0], medium[0], weak[0], weak[1]].filter(Boolean);
+      shuffle(available).forEach(player => {
+        if (pool.length < 4 && !pool.includes(player)) pool.push(player);
+      });
+      return shuffle(pool);
+    }
+
     function aiTeam(formationId) {
       let sum = 0; const names = [], sws = [], pools = [], used = new Set();
       const slots = formationSlots(formationId);
       const roles = formationRoleSlots(formationId);
       roles.forEach(role => {
-        const c = mkPool(role, used);
+        const c = aiPlayerPool(role, used);
         let i = 0;
         if (c[0] && c[0].r < 80 && c[1]) i = 1;
         const x = c[i] || c[0];
