@@ -702,10 +702,21 @@
           ctx.fillStyle = shade;
           ctx.fillRect(174, 430, 379, 250);
         } else {
-          ctx.fillStyle = "rgba(9,34,22,.55)";
-          ctx.fillRect(174, 76, 379, 604);
-          ctx.fillStyle = "rgba(255,255,255,.72)";
-          ctx.font = "700 30px system-ui, sans-serif";
+          ctx.save();
+          ctx.globalAlpha = .16;
+          ctx.fillStyle = style.infoColor;
+          ctx.beginPath();
+          ctx.arc(363, 270, 72, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(258, 610);
+          ctx.bezierCurveTo(266, 430, 302, 382, 363, 382);
+          ctx.bezierCurveTo(424, 382, 460, 430, 468, 610);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = "rgba(255,255,255,.92)";
+          ctx.font = "700 26px system-ui, sans-serif";
           ctx.textAlign = "center";
           ctx.fillText("ارفع صورة اللاعب", 363, 390);
         }
