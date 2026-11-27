@@ -1327,7 +1327,7 @@ var FUT_DATA = {
       "alt": [
         "LB"
       ]
-      
+
     },
     {
       "n": "Rio Ferdinand",
