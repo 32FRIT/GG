@@ -29,7 +29,7 @@
     <div class="fc-name">${esc(x.n)}</div>
     <div class="fc-rule"></div>
     <div class="fc-meta">${esc(x.nat)}<br>${esc(x.club)}</div>`;
-      return `<div class="fc ${tier(x)} ${cls || ""} ${cardArt ? "has-card-art" : ""}" ${extra || ""}>
+      return `<div class="fc ${tier(x)} ${cls || ""} ${cardArt ? "has-card-art" : ""} ${x.isCustom ? "custom-player-card" : ""}" ${extra || ""}>
     ${cardContent}
   </div>`;
     }

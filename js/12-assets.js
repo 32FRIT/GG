@@ -7,6 +7,7 @@
       const urls = [...new Set([
         ...Object.values(typeof CARD_ART !== "undefined" ? CARD_ART : {}),
         ...Object.values(typeof COACH_ART !== "undefined" ? COACH_ART : {}),
+        ...P.map(player => player.art),
         "./Background.jpg"
       ].filter(path => typeof path === "string" && path.length))]
         .map(path => new URL(path, document.baseURI).href);

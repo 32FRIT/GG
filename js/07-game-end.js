@@ -4,7 +4,11 @@
       gameLive = true;
       if (S) S.phase = "match";
       const returnToModeMenu = S.entry === "club" ? screenClubModes : screenModes;
-      const baseAvg = Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11);
+      const lineupTeam = S.draftMode === "choice" && S.starters ? S.starters : S.team;
+      const lineupBaseAvg = lineupBaseRating(lineupTeam, S.formation);
+      const baseAvg = lineupBaseAvg === null
+        ? Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11)
+        : lineupBaseAvg;
       const avg = coachAdjustedPower(baseAvg, S.coach);
       app.innerHTML = `
     <div id="match" class="mt"></div>
@@ -83,7 +87,7 @@
       }
       if (club) return startClubMatch(previous.mode === "online" ? "online" : "ai", previous.difficulty);
       cancelGameTimers(); resetOpponent();
-      S = { i: 11, team: previous.team.slice(), used: new Set(previous.team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
+      S = { i: 11, team: previous.team.slice(), bench: previous.bench ? previous.bench.slice() : Array(12).fill(null), used: new Set(previous.team.map(player => player.n)), pool: [], shown: new Set(), sw: 0,
         phase: "match", sel: null, formation: previous.formation, slots: formationSlots(previous.formation), roles: formationRoleSlots(previous.formation),
         coach: previous.coach, coachPool: [], coachShown: new Set(), coachSwap: 0, mode: conn && conn.open ? "online" : "ai", entry: "draft",
         matchSeed: Math.floor(Math.random() * 0x100000000) };
@@ -187,9 +191,14 @@
     function runMatch(me) {
       const box = $("match"); if (!box) return;
       const matchState = S;
+      const lineupTeam = S.draftMode === "choice" && S.starters ? S.starters : S.team;
+      const lineupBaseAvg = lineupBaseRating(lineupTeam, S.formation);
+      const baseAvg = lineupBaseAvg === null
+        ? Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11)
+        : lineupBaseAvg;
       const mt = {
         avg: me,
-        baseAvg: Math.round(S.team.reduce((a, t) => a + t.r, 0) / 11),
+        baseAvg: baseAvg,
         names: S.team.map(t => t.n),
         benchNames: Array.isArray(matchState.bench) ? matchState.bench.map(player => player ? player.n : null) : null,
         players: S.team.slice(),

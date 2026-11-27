@@ -1,15 +1,17 @@
 /* Offline shell for the GG static app. */
-const CACHE = "gg-app-v1";
+const CACHE = "gg-app-v2";
 const SHELL = [
   "./",
   "./index.html",
   "./Background.jpg",
   "./Icon.png",
   "./manifest.webmanifest",
-  "./fut-data.js",
-  "./custom-players.js",
-  "./coach-art.js",
-  "./hi-cards.js",
+  "./css/app.css",
+  "./data/fut-data.js",
+  "./data/custom-players.js",
+  "./data/coach-art.js",
+  "./data/hi-cards.js",
+  "./packs/gg-packs.js",
   "./js/01-data.js",
   "./js/02-helpers.js",
   "./js/03-state.js",
