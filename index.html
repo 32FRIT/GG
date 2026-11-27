@@ -2929,6 +2929,18 @@
         border-radius: 18px
       }
     }
+    .fc.custom-player-card {
+      width: 90%;
+      margin-inline: auto
+    }
+    .pitch-player.has-player-card > .fc.custom-player-card,
+    .match-pitch .pitch-player.has-player-card > .fc.custom-player-card {
+      width: 90%;
+      margin-inline: auto
+    }
+    .squad-screen .squad-pitch .squad-slot > .fc.custom-player-card {
+      width: min(90%, var(--card-w))
+    }
   </style>
   <script>
     (function () {
@@ -2966,7 +2978,7 @@
   <div id="app" aria-live="polite"></div>
 <script>
   var V = Math.floor(Date.now() / 3600000); // يتغير كل ساعة
-  ["fut-data.js", "coach-art.js", "hi-cards.js",
+  ["fut-data.js", "custom-players.js", "coach-art.js", "hi-cards.js",
    "js/01-data.js", "js/02-helpers.js", "js/03-state.js", "js/04-card-render.js",
    "js/05-screens.js", "js/06-game-flow.js", "js/07-game-end.js", "js/08-simulation.js",
    "js/09-ai-opponent.js", "js/10-network.js", "js/11-navigation-boot.js",
