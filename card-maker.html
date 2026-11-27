@@ -292,7 +292,9 @@
       function traceCardShape(ctx) {
         ctx.beginPath();
         ctx.moveTo(44, 34);
-        ctx.bezierCurveTo(150, 12, 450, 12, 556, 34);
+        ctx.bezierCurveTo(150, 12, 228, 12, 270, 12);
+        ctx.quadraticCurveTo(300, 58, 330, 12);
+        ctx.bezierCurveTo(372, 12, 450, 12, 556, 34);
         ctx.bezierCurveTo(570, 40, 580, 59, 588, 88);
         ctx.lineTo(574, 674);
         ctx.quadraticCurveTo(572, 710, 540, 724);
@@ -371,7 +373,7 @@
         ctx.shadowColor = "rgba(0,0,0,.42)";
         ctx.shadowBlur = 14;
         ctx.strokeStyle = style.metal[0];
-        ctx.lineWidth = 20;
+        ctx.lineWidth = 10;
         ctx.stroke();
         ctx.shadowBlur = 0;
         const metal = ctx.createLinearGradient(0, 0, 600, 0);
@@ -383,7 +385,7 @@
         metal.addColorStop(.88, style.metal[0]);
         metal.addColorStop(1, style.metal[2]);
         ctx.strokeStyle = metal;
-        ctx.lineWidth = 12;
+        ctx.lineWidth = 6;
         ctx.stroke();
         ctx.strokeStyle = "rgba(255,255,255,.86)";
         ctx.lineWidth = 2;
