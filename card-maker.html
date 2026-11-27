@@ -347,6 +347,12 @@
         }
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = style.pattern === "marble" ? "rgba(155,125,72,.55)" : "rgba(255,255,255,.26)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(24, 598);
+        ctx.lineTo(576, 598);
+        ctx.stroke();
         ctx.stroke();
         ctx.restore();
       }
@@ -584,25 +590,33 @@
             ctx.stroke();
           }
         } else if (style.pattern === "marble") {
-          ctx.globalAlpha = .12;
-          ctx.lineWidth = 2;
+          ctx.globalAlpha = .16;
+          ctx.lineWidth = 3;
           [
-            [[28, 205], [108, 146], [132, 261], [220, 202]],
-            [[75, 384], [166, 335], [188, 447], [270, 398]],
-            [[388, 52], [465, 105], [470, 160], [566, 192]],
-            [[22, 532], [112, 486], [138, 565], [208, 552]],
-            [[382, 565], [453, 500], [500, 573], [574, 520]]
+            [[12, 126], [126, 92], [154, 214], [282, 168]],
+            [[28, 326], [118, 262], [168, 390], [314, 314]],
+            [[356, 48], [438, 92], [452, 184], [592, 216]],
+            [[330, 472], [420, 408], [482, 548], [590, 470]],
+            [[16, 540], [112, 474], [156, 608], [264, 552]]
           ].forEach(([start, first, second, end]) => {
             ctx.beginPath();
             ctx.moveTo(start[0], start[1]);
             ctx.bezierCurveTo(first[0], first[1], second[0], second[1], end[0], end[1]);
             ctx.stroke();
           });
+          ctx.globalAlpha = .12;
+          ctx.strokeStyle = "#c49d58";
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(34, 180);
+          ctx.bezierCurveTo(150, 250, 195, 128, 322, 192);
+          ctx.bezierCurveTo(430, 248, 470, 160, 588, 244);
+          ctx.stroke();
           ctx.globalAlpha = .08;
-          ctx.lineWidth = 1;
-          for (let radius = 30; radius <= 58; radius += 14) {
+          ctx.lineWidth = 2;
+          for (let radius = 48; radius <= 220; radius += 43) {
             ctx.beginPath();
-            ctx.arc(300, 67, radius, Math.PI * 1.08, Math.PI * 1.92);
+            ctx.arc(300, 330, radius, 0, Math.PI * 2);
             ctx.stroke();
           }
         } else if (style.pattern === "gold") {
@@ -721,6 +735,30 @@
         ctx.lineTo(34, 705);
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = style.pattern === "marble" ? "rgba(155,125,72,.55)" : "rgba(255,255,255,.26)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(24, 598);
+        ctx.lineTo(576, 598);
+        ctx.stroke();
+        ctx.save();
+        ctx.clip();
+        if (style.pattern === "marble") {
+          ctx.globalAlpha = .12;
+          ctx.strokeStyle = "#b89558";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(18, 700);
+          ctx.bezierCurveTo(115, 620, 178, 735, 278, 650);
+          ctx.bezierCurveTo(374, 575, 442, 715, 582, 626);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(42, 756);
+          ctx.bezierCurveTo(145, 682, 210, 742, 300, 690);
+          ctx.bezierCurveTo(392, 638, 472, 720, 558, 658);
+          ctx.stroke();
+        }
+        ctx.restore();
 
         drawMetalFrame(ctx, style);
 
