@@ -40,6 +40,14 @@
     .photo-range span { display: flex; justify-content: space-between; gap: 8px; }
     .photo-range output { color: var(--accent); direction: ltr; font-variant-numeric: tabular-nums; }
     .photo-reset { min-height: 36px; margin-top: 8px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 11px; }
+    .photo-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 10px; }
+    .photo-pad.two { grid-template-columns: repeat(2, 1fr); margin-top: 7px; }
+    .photo-pad button {
+      min-height: 42px; border: 1px solid var(--line); border-radius: 10px;
+      background: #091a11; color: var(--accent); font-size: 16px; font-weight: 900;
+      touch-action: none; user-select: none; -webkit-user-select: none;
+    }
+    .photo-pad button:active { background: rgba(46,224,138,.18); }
     .position-controls { padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(5,18,11,.48); }
     .position-controls summary { cursor: pointer; font-size: 12px; font-weight: 900; }
     .position-controls[open] summary { margin-bottom: 12px; }
@@ -145,6 +153,17 @@
             <span>تحريك رأسي <output id="photo-y-value" for="photo-y">35%</output></span>
             <input id="photo-y" type="range" min="0" max="100" value="35">
           </label>
+          <div class="photo-pad" role="group" aria-label="تحريك الصورة بدقة">
+            <button type="button" data-nudge="photo-x:1" aria-label="تحريك الصورة شمال">◀</button>
+            <button type="button" data-nudge="photo-y:1" aria-label="تحريك الصورة فوق">▲</button>
+            <button type="button" data-nudge="photo-y:-1" aria-label="تحريك الصورة تحت">▼</button>
+            <button type="button" data-nudge="photo-x:-1" aria-label="تحريك الصورة يمين">▶</button>
+          </div>
+          <div class="photo-pad two" role="group" aria-label="تقريب الصورة">
+            <button type="button" data-nudge="photo-zoom:-2" aria-label="إبعاد الصورة">− زووم آوت</button>
+            <button type="button" data-nudge="photo-zoom:2" aria-label="تقريب الصورة">＋ زووم إن</button>
+          </div>
+          <p class="hint">دوس مطولًا على أي زرار للتحريك المستمر بخطوات صغيرة.</p>
           <button class="photo-reset" id="photo-reset" type="button">إرجاع موضع الصورة</button>
         </details>
         <p class="hint">اختار صورة تملك حق استخدامها. هتتقص تلقائيًا جوه الكارت، والتصدير WebP خفيف بدقة 700×854.</p>
@@ -183,6 +202,10 @@
       exportCanvas.width = 700;
       exportCanvas.height = 854;
       const exportContext = exportCanvas.getContext("2d");
+      const blurCanvas = document.createElement("canvas");
+      blurCanvas.width = 600;
+      blurCanvas.height = 732;
+      const blurContext = blurCanvas.getContext("2d");
       const status = document.getElementById("status");
       const download = document.getElementById("download");
       let playerImage = null;
@@ -358,13 +381,6 @@ const cardStyles = {
         }
         ctx.closePath();
         ctx.fill();
-        ctx.strokeStyle = style.pattern === "marble" ? "rgba(155,125,72,.55)" : "rgba(255,255,255,.26)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(24, 530);
-        ctx.lineTo(576, 530);
-        ctx.stroke();
-        ctx.stroke();
         ctx.restore();
       }
 
@@ -619,6 +635,34 @@ const cardStyles = {
         ctx.restore();
       }
 
+      function drawBlurLayer(ctx, blur, fadeStart, fadeEnd) {
+        const zoom = Number(zoomInput.value) / 100;
+        const focusX = Number(photoXInput.value);
+        const focusY = Number(photoYInput.value);
+        const b = blurContext;
+        b.setTransform(1, 0, 0, 1, 0, 0);
+        b.clearRect(0, 0, 600, 732);
+        b.filter = `blur(${blur}px) saturate(1.08) contrast(1.04)`;
+        drawCover(b, playerImage, 0, 0, 600, 732, zoom, focusX, focusY);
+        b.filter = "none";
+        b.globalCompositeOperation = "destination-in";
+        const mask = b.createLinearGradient(0, fadeStart, 0, fadeEnd);
+        mask.addColorStop(0, "rgba(0,0,0,0)");
+        mask.addColorStop(1, "rgba(0,0,0,1)");
+        b.fillStyle = mask;
+        b.fillRect(0, 0, 600, 732);
+        b.globalCompositeOperation = "source-over";
+        ctx.drawImage(blurCanvas, 0, 0, 600, 732);
+      }
+
+      // Progressive bottom fade: the lower it goes, the blurrier it gets
+      function drawPhotoBlurFade(ctx) {
+        if (!playerImage || !blurContext) return;
+        drawBlurLayer(ctx, 4, 380, 500);
+        drawBlurLayer(ctx, 9, 460, 590);
+        drawBlurLayer(ctx, 16, 540, 680);
+      }
+
 function drawCard() {
         const ctx = context;
         const name = nameInput.value.trim();
@@ -663,6 +707,8 @@ function drawCard() {
             Number(photoYInput.value)
           );
           ctx.restore();
+          // Bottom blur-fade: photo melts into the frosted panel
+          drawPhotoBlurFade(ctx);
           // Bottom fade for text readability
           const shade = ctx.createLinearGradient(0, 432, 0, 712);
           shade.addColorStop(0, "rgba(0,0,0,0)");
@@ -711,55 +757,17 @@ function drawCard() {
 
         // OVR label and value (top-left area)
         ctx.font = "800 22px system-ui, sans-serif";
-        ctx.fillText("OVR", 40, 75);
+        ctx.fillText("OVR", 58, 94);
         if (ovr) {
           ctx.font = "900 84px system-ui, sans-serif";
-          ctx.fillText(String(Number(ovr)), 40, 155);
+          ctx.fillText(String(Number(ovr)), 58, 174);
         }
 
         // Position (below OVR)
         ctx.font = "900 34px system-ui, sans-serif";
-        ctx.fillText(position || "POS", 40, 210);
+        ctx.fillText(position || "POS", 58, 229);
 
-        // Nation flag (if selected) - top right area
-        if (nationFlagImage) {
-          const flagSize = 64;
-          ctx.drawImage(nationFlagImage, 500, 30, flagSize, flagSize);
-        }
 
-        // Era badge (top right) - matches .fc-era
-        const eraText = cardTypeInput.value === "icon" ? "L" : "C";
-        ctx.font = "800 22px system-ui, sans-serif";
-        const eraWidth = ctx.measureText(eraText).width + 24;
-        const eraX = 540 - eraWidth;
-        const eraY = 38;
-        ctx.fillStyle = "rgba(0,0,0,0.13)";
-        ctx.beginPath();
-        ctx.roundRect(eraX, eraY, eraWidth, 36, 18);
-        ctx.fill();
-        ctx.strokeStyle = style.c1;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.fillStyle = style.c1;
-        ctx.textAlign = "center";
-        ctx.fillText(eraText, eraX + eraWidth / 2, eraY + 26);
-
-        // Bottom info panel (matches the dark panel at bottom of card)
-        ctx.fillStyle = style.panel;
-        ctx.beginPath();
-        ctx.moveTo(34, 530);
-        ctx.lineTo(566, 530);
-        ctx.lineTo(544, 618);
-        ctx.lineTo(300, 702);
-        ctx.lineTo(56, 618);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.26)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(34, 530);
-        ctx.lineTo(566, 530);
-        ctx.stroke();
         // Name (centered, large, with shadow)
         ctx.textAlign = "center";
         ctx.fillStyle = style.ink;
@@ -893,6 +901,29 @@ function drawCard() {
         updatePhotoControls();
         drawCard();
       }));
+      document.querySelectorAll("[data-nudge]").forEach(button => {
+        const spec = button.dataset.nudge;
+        const separator = spec.lastIndexOf(":");
+        const target = document.getElementById(spec.slice(0, separator));
+        const delta = Number(spec.slice(separator + 1));
+        if (!target || !delta) return;
+        const nudge = () => {
+          const next = Math.min(Number(target.max), Math.max(Number(target.min), Number(target.value) + delta));
+          target.value = String(next);
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+        };
+        let holdTimer = null;
+        const stop = () => {
+          if (holdTimer !== null) { clearTimeout(holdTimer); holdTimer = null; }
+        };
+        button.addEventListener("pointerdown", event => {
+          event.preventDefault();
+          nudge();
+          const repeat = () => { nudge(); holdTimer = window.setTimeout(repeat, 70); };
+          holdTimer = window.setTimeout(repeat, 350);
+        });
+        ["pointerup", "pointerleave", "pointercancel"].forEach(type => button.addEventListener(type, stop));
+      });
       document.getElementById("photo-reset").addEventListener("click", () => {
         zoomInput.value = "50";
         photoXInput.value = "50";
