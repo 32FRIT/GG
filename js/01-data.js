@@ -10,22 +10,67 @@
       !Array.isArray(FUT_DATA.players) || !Array.isArray(FUT_DATA.coaches)) {
       fatalStartup("بيانات اللعبة الأساسية مش موجودة أو غير صالحة.");
     }
-    const P = FUT_DATA.players.map(player => ({
-      n: player.n,
-      p: String(player.p || "").toUpperCase(),
-      role: String(player.role || player.p || "").toUpperCase(),
-      alt: (Array.isArray(player.alt) ? player.alt : player.alt ? [player.alt] : [])
-        .map(role => String(role).toUpperCase()).filter(role => role !== (player.role || player.p)),
-      nat: player.nat,
-      club: player.club,
-      era: player.era,
-      r: player.r,
-      price: player.price,
-      suggestedPrice: player.suggestedPrice,
-      rarity: player.rarity,
-      isIcon: player.isIcon,
-      eaId: player.eaId
-    }));
+    const CUSTOM_POSITION_GROUP = {
+      GK: "G", CB: "D", LB: "D", RB: "D",
+      CDM: "M", CM: "M", CAM: "M", LM: "M", RM: "M",
+      LW: "F", RW: "F", ST: "F"
+    };
+    const playerCatalog = new Map(FUT_DATA.players.map(player =>
+      [String(player.n).trim().toLowerCase(), player]));
+    const customPlayerRecords = window.GG_CUSTOM_PLAYERS;
+    if (!Array.isArray(customPlayerRecords)) {
+      console.warn("Custom player catalog is missing or invalid.");
+    } else {
+      customPlayerRecords.forEach((player, index) => {
+        const name = player && typeof player.n === "string" ? player.n.trim() : "";
+        const role = player && typeof player.role === "string" ? player.role.toUpperCase() : "";
+        const alt = player && Array.isArray(player.alt) ? player.alt.map(value =>
+          typeof value === "string" ? value.toUpperCase() : "") : [];
+        const art = player && typeof player.art === "string" ? player.art : "";
+        const valid = !!name && name.length <= 28 && !!CUSTOM_POSITION_GROUP[role] &&
+          Number.isInteger(player.r) && player.r >= 1 && player.r <= 99 &&
+          Number.isSafeInteger(player.price) && player.price > 0 &&
+          alt.every(value => !!CUSTOM_POSITION_GROUP[value] && value !== role) &&
+          new Set(alt).size === alt.length &&
+          art.startsWith("./assets/custom-cards/") && !art.includes("..") && /\.webp$/i.test(art);
+        if (!valid) {
+          console.warn("Ignoring invalid custom player record:", index + 1);
+          return;
+        }
+        playerCatalog.set(name.toLowerCase(), {
+          ...player,
+          n: name,
+          p: CUSTOM_POSITION_GROUP[role],
+          role,
+          alt,
+          nat: typeof player.nat === "string" ? player.nat : "Custom",
+          club: typeof player.club === "string" ? player.club : "Custom",
+          art,
+          isCustom: true
+        });
+      });
+    }
+    const P = [...playerCatalog.values()].map(player => {
+      const role = String(player.role || player.p || "").toUpperCase();
+      return {
+        n: player.n,
+        p: String(player.p || "").toUpperCase(),
+        role,
+        alt: (Array.isArray(player.alt) ? player.alt : player.alt ? [player.alt] : [])
+          .map(value => String(value).toUpperCase()).filter(value => value !== role),
+        nat: player.nat,
+        club: player.club,
+        era: player.era,
+        r: player.r,
+        price: player.price,
+        suggestedPrice: player.suggestedPrice,
+        rarity: player.rarity,
+        isIcon: player.isIcon,
+        eaId: player.eaId,
+        art: player.art,
+        isCustom: player.isCustom === true
+      };
+    });
     if (P.length === 0 || P.some(player => !Number.isInteger(player.r) || player.r < 1 || player.r > 99 || !player.p || !player.role)) {
       fatalStartup("بيانات اللاعبين غير مكتملة أو تقييماتهم غير صالحة.");
     }
