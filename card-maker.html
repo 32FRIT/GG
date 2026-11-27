@@ -654,6 +654,7 @@
         const ovr = ovrInput.value;
         const style = cardStyles[cardTypeInput.value] || cardStyles.gold;
         const position = positionInput.value;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
@@ -693,7 +694,6 @@
             Number(photoXInput.value),
             Number(photoYInput.value)
           );
-          ctx.restore();
           ctx.restore();
           const shade = ctx.createLinearGradient(0, 430, 0, 680);
           shade.addColorStop(0, "rgba(0,0,0,0)");
