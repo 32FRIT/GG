@@ -7,6 +7,7 @@ const SHELL = [
   "./Icon.png",
   "./manifest.webmanifest",
   "./fut-data.js",
+  "./custom-players.js",
   "./coach-art.js",
   "./hi-cards.js",
   "./js/01-data.js",
