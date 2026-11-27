@@ -1,4 +1,7 @@
 /* ================= NETWORK (PeerJS) ================= */
+    /* الثوابت NET_HEARTBEAT_INTERVAL_MS / NET_SILENCE_TIMEOUT_MS / NET_RESEND_INTERVAL_MS
+       معرّفة في 03-state.js (بيستخدمها الاتنين). */
+    const NET_FAIL_DELAY_MS = 600;            // مهلة قبل الرجوع للشاشة بعد فشل الاتصال
     function killNet() {
       stopNetMonitor();
       stopTeamResultRetry();
@@ -11,7 +14,7 @@
     function netFail(msg, returnScreen = screenModes) {
       killNet();
       toast(msg || "مشكلة في الاتصال");
-      setTimeout(returnScreen, 600);
+      setTimeout(returnScreen, NET_FAIL_DELAY_MS);
     }
     const ROOM_CODE_LENGTH = 6;
     /* No 0/O/1/I/L so a code read aloud or typed by hand stays unambiguous. */
@@ -71,7 +74,10 @@
       return true;
     }
     function validOpponentPick(d) {
+      /* الاختيار لازم يكون للجولة الحالية بالظبط — الاختيارات المتأخرة أو المستقبلة مرفوضة. */
       if (!d || !Number.isInteger(d.i) || d.i < 0 || d.i >= 11) return false;
+      if (S && typeof S.i === "number" && d.i !== S.i) return false;
+      if (!S && OPPK.slice(0, 11).some(Boolean)) return false;
       if (typeof d.n !== "string" || !Array.isArray(d.p)) return false;
       if (d.p.length !== 4 || new Set(d.p).size !== 4) return false;
       const roundRole = formationRoleSlots(opponentFormation)[d.i];

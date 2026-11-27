@@ -134,8 +134,8 @@
         <details class="photo-controls">
           <summary>ضبط موضع وقص الصورة</summary>
           <label class="photo-range" for="photo-zoom">
-            <span>التقريب <output id="photo-zoom-value" for="photo-zoom">100%</output></span>
-            <input id="photo-zoom" type="range" min="100" max="170" value="100">
+            <span>التقريب <output id="photo-zoom-value" for="photo-zoom">50%</output></span>
+            <input id="photo-zoom" type="range" min="50" max="170" value="50">
           </label>
           <label class="photo-range" for="photo-x">
             <span>تحريك أفقي <output id="photo-x-value" for="photo-x">50%</output></span>
@@ -147,13 +147,13 @@
           </label>
           <button class="photo-reset" id="photo-reset" type="button">إرجاع موضع الصورة</button>
         </details>
-        <p class="hint">اختار صورة تملك حق استخدامها. هتتقص تلقائيًا جوه الكارت، والتصدير WebP خفيف بدقة 700×978.</p>
+        <p class="hint">اختار صورة تملك حق استخدامها. هتتقص تلقائيًا جوه الكارت، والتصدير WebP خفيف بدقة 700×854.</p>
         <button id="download" type="submit" disabled>حفظ الكارت وبيانات اللعبة</button>
         <p class="hint">هيتنزّل ملف صورة WebP خفيف وملف custom-players.js. ارفع الصورة إلى assets/custom-cards واستبدل data/custom-players.js لنشر الكارت في اللعبة.</p>
       </form>
       <section class="preview-panel" aria-label="معاينة الكارت">
         <h2 class="preview-title">معاينة مباشرة</h2>
-        <canvas id="card-preview" width="700" height="978" aria-label="معاينة كارت اللاعب"></canvas>
+        <canvas id="card-preview" width="700" height="854" aria-label="معاينة كارت اللاعب"></canvas>
         <p class="status" id="status" role="status" aria-live="polite">املأ البيانات وارفع الصورة.</p>
       </section>
     </div>
@@ -181,7 +181,7 @@
       const context = canvas.getContext("2d");
       const exportCanvas = document.createElement("canvas");
       exportCanvas.width = 700;
-      exportCanvas.height = 978;
+      exportCanvas.height = 854;
       const exportContext = exportCanvas.getContext("2d");
       const status = document.getElementById("status");
       const download = document.getElementById("download");
@@ -210,61 +210,73 @@
       const customCatalogReady = Array.isArray(window.GG_CUSTOM_PLAYERS);
       let stagedCustomPlayers = customCatalogReady ? [...window.GG_CUSTOM_PLAYERS] : [];
       let nationFlagRequest = 0;
-      const cardStyles = {
+const cardStyles = {
         icon: {
-          colors: ["#fffaf0", "#d9c69a", "#f0e5c7", "#927345"],
-          frame: "#f3d48f",
-          metal: ["#73501e", "#c89d50", "#fff0c4"],
-          panel: "rgba(248,244,234,.94)",
-          infoColor: "#4b3825",
-          ink: "#644b2d",
-          patternColor: "#a79068",
-          pattern: "marble"
+          g1: "#1a1206",
+          g2: "#4a3409",
+          c1: "#f7d97a",
+          frame: "#c9a227",
+          metal: ["#1a1206", "#4a3409", "#c9a227"],
+          panel: "rgba(10,6,2,.96)",
+          infoColor: "#1f1503",
+          ink: "#f7d97a",
+          patternColor: "#c9a227",
+          pattern: "icon"
         },
         legendary: {
-          colors: ["#1e2d70", "#603ba0", "#28468f", "#121c4e"],
-          frame: "#f6d875",
-          metal: ["#27124e", "#7040bd", "#e7caff"],
-          panel: "rgba(17,17,50,.94)",
-          infoColor: "#fff0ad",
-          ink: "#ffe28a",
-          patternColor: "#a9c7ff",
+          g1: "#08182f",
+          g2: "#1d4f8c",
+          c1: "#f7d97a",
+          frame: "#8ab4f8",
+          metal: ["#08182f", "#1d4f8c", "#8ab4f8"],
+          panel: "rgba(6,16,36,.96)",
+          infoColor: "#040c18",
+          ink: "#f7d97a",
+          patternColor: "#8ab4f8",
           pattern: "legendary"
         },
         special: {
-          colors: ["#163e67", "#b52d79", "#54268f", "#10244f"],
-          frame: "#65f0e2",
-          metal: ["#103450", "#26c7c4", "#ffd0f0"],
-          panel: "rgba(13,20,48,.94)",
-          infoColor: "#c4fff9",
-          ink: "#a9fff5",
-          patternColor: "#ff9de1",
+          g1: "#5b0e0e",
+          g2: "#c73e3e",
+          c1: "#fff1e0",
+          frame: "#e87722",
+          metal: ["#3d0a0a", "#8b2500", "#e87722"],
+          panel: "rgba(40,10,8,.94)",
+          infoColor: "#2d0808",
+          ink: "#fff1e0",
+          patternColor: "#e87722",
           pattern: "special"
         },
         gold: {
-          colors: ["#d99d24", "#81530f", "#c88f1d", "#422b09"],
-          frame: "#ffd45f",
-          metal: ["#482b08", "#b87912", "#ffe394"],
-          panel: "rgba(46,29,7,.96)",
-          infoColor: "#fff0c2",
-          ink: "#ffdc75",
-          patternColor: "#ffe39b",
+          g1: "#9e771d",
+          g2: "#f5d76e",
+          c1: "#302004",
+          frame: "#f0d575",
+          metal: ["#543e09", "#ba9228", "#fbe28c"],
+          panel: "rgba(31, 20, 4, 0.93)",
+          infoColor: "#362405",
+          ink: "#fbf0c2",
+          patternColor: "#e6b947",
           pattern: "gold"
         },
         silver: {
-          colors: ["#f8fcff", "#9cabb2", "#e7eef1", "#52656e"],
-          frame: "#eaf4f8",
-          metal: ["#374b54", "#aebbc2", "#f3f8fa"],
-          panel: "rgba(19,31,38,.96)",
-          infoColor: "#293940",
+          g1: "#78838b",
+          g2: "#e2eaef",
+          c1: "#1d2429",
+          frame: "#d0dce8",
+          metal: ["#2f3337", "#5c6670", "#d0dce8"],
+          panel: "rgba(30,38,44,.94)",
+          infoColor: "#161c21",
           ink: "#f5fbfd",
           patternColor: "#ffffff",
           pattern: "silver"
         },
         bronze: {
-          colors: ["#f0bf86", "#a75d34", "#d18b53", "#64351f"],
-          frame: "#ffe0bd",
-          metal: ["#572b19", "#b76b3d", "#ffe0bd"],
+          g1: "#74441f",
+          g2: "#d99a63",
+          c1: "#2a1608",
+          frame: "#e6b88c",
+          metal: ["#3d2712", "#64351f", "#e6b88c"],
           panel: "rgba(48,25,17,.94)",
           infoColor: "#492611",
           ink: "#ffe1bf",
@@ -291,18 +303,17 @@
 
       function traceCardShape(ctx) {
         ctx.beginPath();
-        ctx.moveTo(44, 34);
-        ctx.bezierCurveTo(150, 12, 228, 12, 270, 12);
-        ctx.quadraticCurveTo(300, 58, 330, 12);
-        ctx.bezierCurveTo(372, 12, 450, 12, 556, 34);
-        ctx.bezierCurveTo(570, 40, 580, 59, 588, 88);
-        ctx.lineTo(574, 674);
-        ctx.quadraticCurveTo(572, 710, 540, 724);
-        ctx.lineTo(300, 782);
-        ctx.lineTo(60, 724);
-        ctx.quadraticCurveTo(28, 710, 26, 674);
-        ctx.lineTo(12, 88);
-        ctx.bezierCurveTo(20, 59, 30, 40, 44, 34);
+        // FIFA FUT Shield Silhouette: smooth symmetric top crown, parallel vertical sides, tapered shield base
+        ctx.moveTo(300, 18);
+        ctx.lineTo(552, 54);
+        ctx.quadraticCurveTo(576, 58, 576, 82);
+        ctx.lineTo(576, 620);
+        ctx.quadraticCurveTo(574, 644, 548, 658);
+        ctx.lineTo(300, 716);
+        ctx.lineTo(52, 658);
+        ctx.quadraticCurveTo(26, 644, 24, 620);
+        ctx.lineTo(24, 82);
+        ctx.quadraticCurveTo(24, 58, 48, 54);
         ctx.closePath();
       }
 
@@ -350,8 +361,8 @@
         ctx.strokeStyle = style.pattern === "marble" ? "rgba(155,125,72,.55)" : "rgba(255,255,255,.26)";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(24, 598);
-        ctx.lineTo(576, 598);
+        ctx.moveTo(24, 530);
+        ctx.lineTo(576, 530);
         ctx.stroke();
         ctx.stroke();
         ctx.restore();
@@ -366,8 +377,8 @@
         const firstCenter = 300 - (items.length - 1) * gap / 2;
         items.forEach((item, index) => {
           const centerX = firstCenter + index * gap;
-          if (item === "nation") drawNationFlag(ctx, nationFlagImage, centerX, 738);
-          else drawRetiredBadge(ctx, centerX, 738, style);
+          if (item === "nation") drawNationFlag(ctx, nationFlagImage, centerX, 670);
+          else drawRetiredBadge(ctx, centerX, 670, style);
         });
       }
 
@@ -376,12 +387,13 @@
         ctx.save();
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
-        ctx.shadowColor = "rgba(0,0,0,.42)";
+        ctx.shadowColor = "rgba(0,0,0,.45)";
         ctx.shadowBlur = 14;
         ctx.strokeStyle = style.metal[0];
         ctx.lineWidth = 10;
         ctx.stroke();
         ctx.shadowBlur = 0;
+
         const metal = ctx.createLinearGradient(0, 0, 600, 0);
         metal.addColorStop(0, style.metal[2]);
         metal.addColorStop(.12, style.metal[1]);
@@ -393,78 +405,37 @@
         ctx.strokeStyle = metal;
         ctx.lineWidth = 6;
         ctx.stroke();
+
         ctx.strokeStyle = "rgba(255,255,255,.86)";
         ctx.lineWidth = 2;
         ctx.stroke();
+
         ctx.strokeStyle = style.frame;
         ctx.lineWidth = 1;
         ctx.stroke();
 
+        // Elegant inner metallic inset hairline following the card shield contour
         ctx.save();
-        ctx.globalAlpha = .68;
-        ctx.beginPath();
-        ctx.moveTo(88, 52);
-        ctx.bezierCurveTo(160, 34, 224, 36, 286, 47);
-        ctx.moveTo(314, 47);
-        ctx.bezierCurveTo(376, 36, 440, 34, 512, 52);
+        ctx.globalAlpha = 0.55;
         ctx.strokeStyle = style.metal[2];
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        const jewel = ctx.createLinearGradient(292, 37, 308, 53);
-        jewel.addColorStop(0, style.metal[2]);
-        jewel.addColorStop(1, style.metal[1]);
-        ctx.beginPath();
-        ctx.moveTo(300, 36);
-        ctx.lineTo(309, 45);
-        ctx.lineTo(300, 54);
-        ctx.lineTo(291, 45);
-        ctx.closePath();
-        ctx.fillStyle = jewel;
-        ctx.fill();
-        ctx.strokeStyle = style.metal[0];
         ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(300, 28);
+        ctx.lineTo(542, 62);
+        ctx.quadraticCurveTo(566, 66, 566, 88);
+        ctx.lineTo(566, 614);
+        ctx.quadraticCurveTo(564, 634, 540, 648);
+        ctx.lineTo(300, 702);
+        ctx.lineTo(60, 648);
+        ctx.quadraticCurveTo(36, 634, 34, 614);
+        ctx.lineTo(34, 88);
+        ctx.quadraticCurveTo(34, 66, 58, 62);
+        ctx.closePath();
         ctx.stroke();
         ctx.restore();
 
-        const railMetal = ctx.createLinearGradient(0, 110, 0, 680);
-        railMetal.addColorStop(0, style.metal[2]);
-        railMetal.addColorStop(.28, style.metal[1]);
-        railMetal.addColorStop(.55, style.metal[2]);
-        railMetal.addColorStop(.82, style.metal[0]);
-        railMetal.addColorStop(1, style.metal[2]);
-        ctx.strokeStyle = style.metal[0];
-        ctx.lineWidth = 10;
-        [[25, 115, 160], [25, 188, 240], [25, 525, 586], [25, 616, 665],
-          [575, 115, 160], [575, 188, 240], [575, 525, 586], [575, 616, 665]]
-          .forEach(([x, top, bottom]) => {
-            ctx.beginPath();
-            ctx.moveTo(x, top);
-            ctx.lineTo(x, bottom);
-            ctx.stroke();
-          });
-        ctx.strokeStyle = railMetal;
-        ctx.lineWidth = 6;
-        [[25, 115, 160], [25, 188, 240], [25, 525, 586], [25, 616, 665],
-          [575, 115, 160], [575, 188, 240], [575, 525, 586], [575, 616, 665]]
-          .forEach(([x, top, bottom]) => {
-            ctx.beginPath();
-            ctx.moveTo(x, top);
-            ctx.lineTo(x, bottom);
-            ctx.stroke();
-          });
-        ctx.strokeStyle = "rgba(255,255,255,.75)";
-        ctx.lineWidth = 1.5;
-        [176, 514, 605].forEach(y => {
-          ctx.beginPath();
-          ctx.moveTo(16, y);
-          ctx.lineTo(34, y + 12);
-          ctx.moveTo(584, y);
-          ctx.lineTo(566, y + 12);
-          ctx.stroke();
-        });
         ctx.restore();
       }
-
       function initializeAlternatePositions() {
         alternatePositionInputs = Array.from(positionInput.options)
           .filter(option => option.value)
@@ -648,7 +619,7 @@
         ctx.restore();
       }
 
-      function drawCard() {
+function drawCard() {
         const ctx = context;
         const name = nameInput.value.trim();
         const ovr = ovrInput.value;
@@ -658,137 +629,143 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        ctx.scale(canvas.width / 600, canvas.height / 800);
-        ctx.save();
+        ctx.scale(canvas.width / 600, canvas.height / 732);
+
+        // Clip to the FIFA card shape (matches CSS clip-path)
         traceCardShape(ctx);
         ctx.clip();
 
-        const background = ctx.createLinearGradient(35, 40, 565, 760);
-        background.addColorStop(0, style.colors[0]);
-        background.addColorStop(.38, style.colors[1]);
-        background.addColorStop(.72, style.colors[2]);
-        background.addColorStop(1, style.colors[3]);
-        ctx.fillStyle = background;
-        ctx.fillRect(0, 0, 600, 800);
+        // Background gradient matching CSS: linear-gradient(160deg, var(--g1), var(--g2) 52%, var(--g1))
+        const bg = ctx.createLinearGradient(0, 0, 600 * Math.cos(160 * Math.PI / 180), 600 * Math.sin(160 * Math.PI / 180));
+        bg.addColorStop(0, style.g1);
+        bg.addColorStop(0.52, style.g2);
+        bg.addColorStop(1, style.g1);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, 600, 732);
+
+        // Pattern overlay (matches .fc::before in CSS)
         drawPattern(ctx, style);
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(92, 76);
-        ctx.lineTo(568, 76);
-        ctx.lineTo(568, 650);
-        ctx.lineTo(92, 650);
-        ctx.closePath();
-        ctx.clip();
+        // Player photo area (top portion, leaving space for info panel at bottom)
         if (playerImage) {
           ctx.save();
           ctx.filter = "saturate(1.08) contrast(1.04)";
+          // Photo fills most of the card, clipped by card shape
           drawCover(
             ctx,
             playerImage,
-            92,
-            76,
-            476,
-            604,
+            0,
+            0,
+            600,
+            732,
             Number(zoomInput.value) / 100,
             Number(photoXInput.value),
             Number(photoYInput.value)
           );
           ctx.restore();
-          const shade = ctx.createLinearGradient(0, 430, 0, 680);
+          // Bottom fade for text readability
+          const shade = ctx.createLinearGradient(0, 432, 0, 712);
           shade.addColorStop(0, "rgba(0,0,0,0)");
-          shade.addColorStop(.64, "rgba(0,0,0,.12)");
-          shade.addColorStop(1, "rgba(0,0,0,.58)");
+          shade.addColorStop(0.5, "rgba(0,0,0,0.15)");
+          shade.addColorStop(1, "rgba(0,0,0,0.65)");
           ctx.fillStyle = shade;
-          ctx.fillRect(92, 430, 476, 250);
+          ctx.fillRect(0, 432, 600, 280);
         } else {
+          // Placeholder
           ctx.save();
-          ctx.globalAlpha = .16;
+          ctx.globalAlpha = 0.16;
           ctx.fillStyle = style.infoColor;
           ctx.beginPath();
-          ctx.arc(363, 270, 72, 0, Math.PI * 2);
+          ctx.arc(300, 320, 80, 0, Math.PI * 2);
           ctx.fill();
           ctx.beginPath();
-          ctx.moveTo(258, 610);
-          ctx.bezierCurveTo(266, 430, 302, 382, 363, 382);
-          ctx.bezierCurveTo(424, 382, 460, 430, 468, 610);
+          ctx.moveTo(200, 650);
+          ctx.bezierCurveTo(210, 500, 260, 440, 300, 440);
+          ctx.bezierCurveTo(340, 440, 390, 500, 400, 650);
           ctx.closePath();
           ctx.fill();
           ctx.restore();
-          ctx.fillStyle = "rgba(255,255,255,.92)";
-          ctx.font = "700 26px system-ui, sans-serif";
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = "700 28px system-ui, sans-serif";
           ctx.textAlign = "center";
-          ctx.fillText("ارفع صورة اللاعب", 363, 390);
+          ctx.fillText("ارفع صورة اللاعب", 300, 440);
         }
-        ctx.restore();
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(568, 76);
-        ctx.lineTo(568, 650);
-        ctx.lineTo(92, 650);
-        ctx.lineTo(92, 76);
-        ctx.strokeStyle = "rgba(255,255,255,.16)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-
-        getAlternatePositions().forEach((alternatePosition, index) => {
-          drawPositionBadge(ctx, alternatePosition, 482, 108 + index * 34, style);
-        });
-
-        ctx.fillStyle = style.panel;
-        ctx.beginPath();
-        ctx.moveTo(24, 598);
-        ctx.lineTo(576, 598);
-        ctx.lineTo(566, 705);
-        ctx.lineTo(300, 775);
-        ctx.lineTo(34, 705);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = style.pattern === "marble" ? "rgba(155,125,72,.55)" : "rgba(255,255,255,.26)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(24, 598);
-        ctx.lineTo(576, 598);
-        ctx.stroke();
-        ctx.save();
-        ctx.clip();
-        if (style.pattern === "marble") {
-          ctx.globalAlpha = .12;
-          ctx.strokeStyle = "#b89558";
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(18, 700);
-          ctx.bezierCurveTo(115, 620, 178, 735, 278, 650);
-          ctx.bezierCurveTo(374, 575, 442, 715, 582, 626);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(42, 756);
-          ctx.bezierCurveTo(145, 682, 210, 742, 300, 690);
-          ctx.bezierCurveTo(392, 638, 472, 720, 558, 658);
-          ctx.stroke();
-        }
-        ctx.restore();
-
+        // Metal frame (matches .fc-border and .fc-rails in CSS)
         drawMetalFrame(ctx, style);
 
-        ctx.fillStyle = style.infoColor;
-        ctx.textAlign = "center";
+        // Subtle overlay shine (matches .fc::after in CSS)
+        const shine = ctx.createLinearGradient(0, 0, 600, 732);
+        shine.addColorStop(0, "rgba(255,255,255,0.22)");
+        shine.addColorStop(0.38, "transparent");
+        shine.addColorStop(0.62, "transparent");
+        shine.addColorStop(1, "rgba(255,255,255,0.1)");
+        ctx.fillStyle = shine;
+        ctx.globalCompositeOperation = "overlay";
+        ctx.fillRect(0, 0, 600, 732);
+        ctx.globalCompositeOperation = "source-over";
+
+        // Top section: OVR, Position, Nation badge (left), Era badge (right)
+        ctx.textAlign = "left";
+        ctx.fillStyle = style.c1;
+
+        // OVR label and value (top-left area)
         ctx.font = "800 22px system-ui, sans-serif";
-        ctx.fillText("OVR", 96, 83);
+        ctx.fillText("OVR", 40, 75);
         if (ovr) {
-          ctx.font = "900 82px system-ui, sans-serif";
-          ctx.fillText(String(Number(ovr)), 96, 159);
+          ctx.font = "900 84px system-ui, sans-serif";
+          ctx.fillText(String(Number(ovr)), 40, 155);
         }
 
-        ctx.fillStyle = style.infoColor;
-        ctx.font = "900 31px system-ui, sans-serif";
-        ctx.fillText(position || "POS", 96, 208);
+        // Position (below OVR)
+        ctx.font = "900 34px system-ui, sans-serif";
+        ctx.fillText(position || "POS", 40, 210);
+
+        // Nation flag (if selected) - top right area
+        if (nationFlagImage) {
+          const flagSize = 64;
+          ctx.drawImage(nationFlagImage, 500, 30, flagSize, flagSize);
+        }
+
+        // Era badge (top right) - matches .fc-era
+        const eraText = cardTypeInput.value === "icon" ? "L" : "C";
+        ctx.font = "800 22px system-ui, sans-serif";
+        const eraWidth = ctx.measureText(eraText).width + 24;
+        const eraX = 540 - eraWidth;
+        const eraY = 38;
+        ctx.fillStyle = "rgba(0,0,0,0.13)";
+        ctx.beginPath();
+        ctx.roundRect(eraX, eraY, eraWidth, 36, 18);
+        ctx.fill();
+        ctx.strokeStyle = style.c1;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = style.c1;
+        ctx.textAlign = "center";
+        ctx.fillText(eraText, eraX + eraWidth / 2, eraY + 26);
+
+        // Bottom info panel (matches the dark panel at bottom of card)
+        ctx.fillStyle = style.panel;
+        ctx.beginPath();
+        ctx.moveTo(34, 530);
+        ctx.lineTo(566, 530);
+        ctx.lineTo(544, 618);
+        ctx.lineTo(300, 702);
+        ctx.lineTo(56, 618);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.26)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(34, 530);
+        ctx.lineTo(566, 530);
+        ctx.stroke();
+        // Name (centered, large, with shadow)
         ctx.textAlign = "center";
         ctx.fillStyle = style.ink;
-        ctx.shadowColor = "rgba(0,0,0,.72)";
-        ctx.shadowBlur = style.pattern === "marble" ? 0 : 10;
+        ctx.shadowColor = "rgba(0,0,0,0.72)";
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 2;
         const nameWidth = 480;
         let nameSize = 44;
         ctx.font = `900 ${nameSize}px system-ui, sans-serif`;
@@ -796,21 +773,32 @@
           nameSize -= 2;
           ctx.font = `900 ${nameSize}px system-ui, sans-serif`;
         }
-        ctx.fillText(name || "اسم اللاعب", 300, 642, nameWidth);
+        ctx.fillText(name || "اسم اللاعب", 300, 574, nameWidth);
         ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Accent line under name
         ctx.save();
-        ctx.globalAlpha = .6;
+        ctx.globalAlpha = 0.6;
         ctx.strokeStyle = style.patternColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(170, 696);
-        ctx.lineTo(278, 696);
-        ctx.lineTo(300, 681);
-        ctx.lineTo(322, 696);
-        ctx.lineTo(430, 696);
+        ctx.moveTo(170, 628);
+        ctx.lineTo(278, 628);
+        ctx.lineTo(300, 613);
+        ctx.lineTo(322, 628);
+        ctx.lineTo(430, 628);
         ctx.stroke();
         ctx.restore();
+
+        // Alternate positions (top right, below era badge)
+        getAlternatePositions().forEach((alternatePosition, index) => {
+          drawPositionBadge(ctx, alternatePosition, 482, 108 + index * 34, style);
+        });
+
+        // Card type badges (icon/legendary/gold/silver/bronze indicator)
         drawCardBadges(ctx, style);
+
         ctx.restore();
       }
 
@@ -906,7 +894,7 @@
         drawCard();
       }));
       document.getElementById("photo-reset").addEventListener("click", () => {
-        zoomInput.value = "100";
+        zoomInput.value = "50";
         photoXInput.value = "50";
         photoYInput.value = "35";
         updatePhotoControls();

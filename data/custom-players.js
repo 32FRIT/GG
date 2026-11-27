@@ -1,5 +1,4 @@
 window.GG_CUSTOM_PLAYERS = [
-
   {
     "n": "LEO MESSI",
     "p": "F",
@@ -39,5 +38,6 @@ window.GG_CUSTOM_PLAYERS = [
     "eaId": null,
     "art": "./assets/custom-cards/custom-diego-armando-maradona-1fe6jvy.webp",
     "isCustom": true
-  }
+  },
+
 ];

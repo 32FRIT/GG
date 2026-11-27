@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GG · اختبارات الدخان</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07130d; --card:#0d1f16; --line:#1d3a29; --ac:#2ee08a; --bad:#ff5d5d; --mu:#8ba79a; --tx:#e9f5ee; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:24px 16px 60px; background:var(--bg); color:var(--tx); font-family:system-ui,"Segoe UI",Tahoma,sans-serif; }
+    main { max-width:760px; margin:0 auto; }
+    h1 { font-size:22px; margin:0 0 4px; }
+    p { color:var(--mu); font-size:13.5px; line-height:1.7; margin:0 0 16px; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
+    button { background:var(--ac); color:#04140c; border:0; border-radius:10px; padding:10px 16px; font-weight:800; font-size:13px; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:default; }
+    label { font-size:13px; color:var(--mu); display:flex; gap:6px; align-items:center; }
+    #summary { font-size:14px; font-weight:800; padding:12px 14px; border:1px solid var(--line); background:var(--card); border-radius:12px; margin-bottom:12px; }
+    #summary.ok { border-color:rgba(46,224,138,.5); color:var(--ac); }
+    #summary.fail { border-color:rgba(255,93,93,.5); color:var(--bad); }
+    .row { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); background:var(--card); border-radius:10px; margin-bottom:8px; }
+    .tag { flex:0 0 auto; font-size:11px; font-weight:900; padding:3px 8px; border-radius:999px; }
+    .tag.ok { background:rgba(46,224,138,.15); color:var(--ac); }
+    .tag.fail { background:rgba(255,93,93,.15); color:var(--bad); }
+    .name { flex:1; font-size:13px; line-height:1.6; }
+    .detail { display:block; color:var(--mu); font-size:11.5px; margin-top:2px; word-break:break-word; }
+    #status { color:var(--mu); font-size:12.5px; min-height:18px; margin-bottom:10px; }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>اختبارات الدخان · GG</h1>
+    <p>الاختبارات بتشتغل داخل نسخة حقيقية من اللعبة في iframe مخفي: بيانات اللاعبين والمدربين، صور الكروت، التشكيلات، محاكاة المباراة، أكواد الغرف، والتحقق من اختيارات الخصم.</p>
+    <div class="toolbar">
+      <button id="run" type="button">إعادة التشغيل</button>
+      <label><input type="checkbox" id="deep"> افحص كل صور الكروت (أبطأ)</label>
+    </div>
+    <div id="summary">جاهز للتشغيل...</div>
+    <div id="status"></div>
+    <div id="out"></div>
+  </main>
+  <iframe id="frame" hidden title="GG app under test"></iframe>
+
+  <script>
+    const out = document.getElementById("out");
+    const summary = document.getElementById("summary");
+    const statusLine = document.getElementById("status");
+    const runButton = document.getElementById("run");
+    const deep = document.getElementById("deep");
+    const frame = document.getElementById("frame");
+    let running = false;
+
+    function auditApp() {
+      const checks = [];
+      const add = (name, ok, detail) => checks.push({ name, ok: !!ok, detail: detail == null ? "" : String(detail) });
+      const uniq = list => new Set(list).size === list.length;
+
+      add("بيانات اللاعبين موجودة", P.length > 0, P.length + " لاعب");
+      add("أسماء اللاعبين فريدة", uniq(P.map(p => p.n)), uniq(P.map(p => p.n)) ? "" : "في تكرار في الأسماء");
+      add("تقييمات اللاعبين صالحة", P.every(p => Number.isInteger(p.r) && p.r >= 1 && p.r <= 99));
+      add("بيانات المدربين موجودة", COACHES.length >= 40, COACHES.length + " مدرب");
+      add("أسماء المدربين فريدة", uniq(COACHES.map(c => c.n)));
+      add("تقييمات المدربين صالحة", COACHES.every(c => Number.isInteger(c.r) && c.r >= 1 && c.r <= 99));
+
+      const missingCards = P.filter(p => !p.art && !CARD_ART[p.eaId]).map(p => p.n);
+      add("كل اللاعبين عندهم صورة كارت", missingCards.length === 0, missingCards.slice(0, 5).join(", "));
+      const invalidCustomCards = P.filter(p => p.isCustom &&
+        (!p.art || !Number.isSafeInteger(p.price) || p.price <= 0 ||
+          !Number.isInteger(p.r) || !p.role || !Array.isArray(p.alt)));
+      add("كروت المطور الإضافية بياناتها سليمة", invalidCustomCards.length === 0,
+        invalidCustomCards.map(player => player.n).slice(0, 5).join(", "));
+      const customRecords = Array.isArray(window.GG_CUSTOM_PLAYERS) ? window.GG_CUSTOM_PLAYERS : [];
+      const invalidCustomRecords = customRecords.filter(record => {
+        const player = record && PLAYER_BY_NAME.get(record.n);
+        return !player || !player.isCustom || player.r !== record.r ||
+          player.price !== record.price || player.role !== record.role || player.art !== record.art;
+      });
+      add("كروت المطور الإضافية موجودة في بيانات اللعبة",
+        Array.isArray(window.GG_CUSTOM_PLAYERS) && invalidCustomRecords.length === 0,
+        invalidCustomRecords.map(record => record && record.n).slice(0, 5).join(", "));
+      const measureCardWidth = player => {
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = "position:fixed;left:-10000px;top:0;width:200px";
+        wrapper.innerHTML = cardHTML(player);
+        document.body.appendChild(wrapper);
+        const card = wrapper.firstElementChild;
+        const width = card ? parseFloat(getComputedStyle(card).width) : 0;
+        wrapper.remove();
+        return width;
+      };
+      const customCard = P.find(player => player.isCustom && player.art);
+      const standardCard = P.find(player => !player.isCustom && CARD_ART[player.eaId]);
+      const customCardWidth = customCard ? measureCardWidth(customCard) : null;
+      const standardCardWidth = standardCard ? measureCardWidth(standardCard) : null;
+      add("كروت المطور أصغر دون تغيير الكروت العادية",
+        !customCard || !standardCard || customCardWidth < standardCardWidth,
+        customCard ? `مخصص ${customCardWidth}px · عادي ${standardCardWidth}px` : "لا يوجد كارت مخصص");
+      const missingCoaches = COACHES.filter(c => !COACH_ART[c.id]).map(c => c.n);
+      add("كل المدربين عندهم صورة", missingCoaches.length === 0, missingCoaches.slice(0, 5).join(", "));
+
+      const assetUrls = typeof assetManager !== "undefined" ? assetManager.urls : [];
+      add("قائمة تحميل الأصول جاهزة", assetUrls.length >= 480 && uniq(assetUrls), assetUrls.length + " صورة");
+
+      const formationIssues = [];
+      FORMATIONS.forEach(f => {
+        const roles = formationRoleSlots(f.id), slots = formationSlots(f.id);
+        if (roles.length !== 11 || slots.length !== 11) { formationIssues.push(f.id + " (عدد)"); return; }
+        roles.forEach((role, index) => {
+          if (!POSITION_GROUP[role] || POSITION_GROUP[role] !== slots[index]) formationIssues.push(f.id + ":" + index);
+        });
+      });
+      add("التشكيلات متوازنة (11 مركز)", formationIssues.length === 0, formationIssues.slice(0, 5).join(", "));
+
+      const thinRoles = [];
+      [...new Set(FORMATIONS.flatMap(f => formationRoleSlots(f.id)))].forEach(role => {
+        const count = P.filter(p => playsRole(p, role) || playsGroup(p, POSITION_GROUP[role])).length;
+        if (count < 4) thinRoles.push(role + " (" + count + ")");
+      });
+      add("كل مركز عنده 4 كروت على الأقل", thinRoles.length === 0, thinRoles.join(", "));
+
+      const aiFailures = [];
+      FORMATIONS.forEach(f => {
+        try {
+          const team = aiTeam(f.id);
+          if (team.names.length !== 11 || new Set(team.names).size !== 11 || !Number.isInteger(team.avg)) aiFailures.push(f.id);
+        } catch (error) {
+          aiFailures.push(f.id + ": " + error.message);
+        }
+      });
+      add("الكمبيوتر يكوّن فريق كامل لكل تشكيلة", aiFailures.length === 0, aiFailures.slice(0, 5).join(", "));
+
+      const centerBacksLevel = EVENT_TOURNAMENTS["center-backs"] && EVENT_TOURNAMENTS["center-backs"].level;
+      let centerBacksRatings = [];
+      try { centerBacksRatings = aiClubTeam(centerBacksLevel).names.map(name => findPlayer(name)).filter(Boolean).map(player => player.r); } catch (_) { }
+      add("كمبيوتر بطولة قلوب الدفاع من 88 لـ91",
+        !!centerBacksLevel && centerBacksLevel.min === 88 && centerBacksLevel.max === 91 &&
+        centerBacksRatings.length === 11 && centerBacksRatings.every(rating => rating >= 88 && rating <= 91),
+        centerBacksRatings.length ? Math.min(...centerBacksRatings) + "–" + Math.max(...centerBacksRatings) : "غير متاح");
+
+      const me = aiTeam("4-3-3"), opp = aiTeam("4-4-2");
+      me.seed = 123456789;
+      opp.seed = 987654321;
+      const sim1 = simulate(me, opp), sim2 = simulate(me, opp);
+      add("نتيجة المحاكاة ثابتة لنفس الفريقين", JSON.stringify(sim1) === JSON.stringify(sim2));
+      const goals = sim1.ev.filter(e => e.type === "goal").length;
+      add("المباراة تنتج أحداث وأهداف منطقية", goals <= 12 && sim1.ev.length >= goals, sim1.ev.length + " حدث / " + goals + " هدف");
+      const ratingValues = Object.values(sim1.ratings).flatMap(group => Object.values(group));
+      add("تقييمات المحاكاة بين 1 و 10", ratingValues.length === 22 && ratingValues.every(r => r >= 1 && r <= 10), ratingValues.length + " تقييم");
+
+      const coachBad = COACHES.filter(c => {
+        const value = coachAdjustedPower(50, c);
+        return !Number.isInteger(value) || value < 1 || value > 99;
+      });
+      add("تأثير المدرب في النطاق", coachBad.length === 0, coachBad.map(c => c.n).slice(0, 3).join(", "));
+
+      const codes = Array.from({ length: 200 }, () => newRoomCode());
+      add("كود الغرفة 6 حروف وآمن للقراءة",
+        codes.every(c => c.length === ROOM_CODE_LENGTH && [...c].every(ch => ROOM_CODE_ALPHABET.includes(ch))),
+        "طول " + ROOM_CODE_LENGTH);
+      add("أكواد الغرف عشوائية", new Set(codes).size >= 195, new Set(codes).size + "/200 فريد");
+
+      const savedFormation = opponentFormation, savedPicks = OPPK.slice();
+      opponentFormation = "4-3-3";
+      OPPK = [];
+      const role = formationRoleSlots("4-3-3")[0];
+      const exact = P.filter(p => playsRole(p, role));
+      const pool = (exact.length >= 4 ? exact : P.filter(p => playsGroup(p, POSITION_GROUP[role]))).slice(0, 4);
+      const outsider = P.find(p => !playsRole(p, role) && !playsGroup(p, POSITION_GROUP[role]));
+      const good = { i: 0, n: pool[0].n, s: null, p: pool.map(p => p.n) };
+      add("اختيار صالح للخصم يُقبل", validOpponentPick(good) === true);
+      add("اختيار خارج المركز يُرفض", validOpponentPick({ ...good, p: [pool[0].n, pool[1].n, pool[2].n, outsider.n] }) === false);
+      add("كروت مكررة تُرفض", validOpponentPick({ ...good, p: [pool[0].n, pool[0].n, pool[1].n, pool[2].n] }) === false);
+      add("تبديل بكارت خارج البول يُرفض", validOpponentPick({ ...good, s: outsider.n }) === false);
+      OPPK[5] = good.n;
+      add("تكرار لاعب مختار سابقًا يُرفض", validOpponentPick(good) === false);
+      OPPK = [];
+      opponentFormation = savedFormation;
+      OPPK = savedPicks;
+
+      const packDefs = Object.values(window.GG_PACKS || {});
+      const packIssues = [];
+      packDefs.forEach(pack => {
+        if (!validPack(pack)) { packIssues.push((pack && pack.id || "?") + " (تعريف)"); return; }
+        pack.players.forEach(player => {
+          if (!validNetworkPlayer(player)) packIssues.push(pack.id + ":" + player.n);
+          else if (player.art && (!/^\.\//.test(player.art) || /\.\./.test(player.art))) packIssues.push(pack.id + ":" + player.n + " (مسار)");
+        });
+      });
+      add("ملف الحزم سليم وكروته صالحة", packDefs.length > 0 && packIssues.length === 0,
+        packDefs.length + " حزمة" + (packIssues.length ? " · " + packIssues.slice(0, 5).join(", ") : ""));
+      add("أسماء كروت الباك مش متعارضة مع الكتالوج",
+        packDefs.every(pack => pack.players.every(player => !PLAYER_BY_NAME.has(player.n))),
+        packDefs.map(pack => pack.id).join(", "));
+
+      return {
+        checks,
+        bootError: window.__GG_BOOT_ERROR || null,
+        cards: [...new Set([...Object.values(CARD_ART), ...P.map(player => player.art).filter(Boolean)])],
+        coaches: Object.values(COACH_ART),
+        background: "./Background.jpg",
+        roomCodeLength: ROOM_CODE_LENGTH
+      };
+    }
+
+    function renderCheck(check) {
+      const row = document.createElement("div");
+      row.className = "row";
+      const tag = document.createElement("span");
+      tag.className = "tag " + (check.ok ? "ok" : "fail");
+      tag.textContent = check.ok ? "نجح" : "فشل";
+      const text = document.createElement("span");
+      text.className = "name";
+      text.textContent = check.name;
+      if (check.detail) {
+        const detail = document.createElement("span");
+        detail.className = "detail";
+        detail.textContent = check.detail;
+        text.appendChild(detail);
+      }
+      row.append(tag, text);
+      out.appendChild(row);
+    }
+
+    async function urlOk(url) {
+      try {
+        const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+        return response.ok;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function checkImages(urls, label) {
+      const failed = [];
+      const batchSize = 24;
+      for (let index = 0; index < urls.length; index += batchSize) {
+        const batch = urls.slice(index, index + batchSize);
+        const results = await Promise.all(batch.map(urlOk));
+        results.forEach((ok, offset) => { if (!ok) failed.push(batch[offset]); });
+        statusLine.textContent = label + ": " + Math.min(index + batchSize, urls.length) + "/" + urls.length;
+      }
+      return failed;
+    }
+
+    function loadFrame() {
+      return new Promise(resolve => {
+        frame.onload = () => setTimeout(resolve, 150);
+        frame.src = "../index.html?smoke=" + Date.now();
+      });
+    }
+
+    async function run() {
+      if (running) return;
+      running = true;
+      runButton.disabled = true;
+      out.textContent = "";
+      summary.className = "";
+      summary.textContent = "جاري التشغيل...";
+      statusLine.textContent = "بنحمّل اللعبة...";
+      try {
+        await loadFrame();
+        const win = frame.contentWindow;
+        try { await win.eval("loadPacks().then(packs => Object.keys(packs || {}).length, () => 0)") } catch (_) { }
+        const data = win.eval("(" + auditApp.toString() + ")()");
+        data.checks.forEach(renderCheck);
+        if (data.bootError) renderCheck({ name: "بدء التشغيل بدون أخطاء", ok: false, detail: data.bootError });
+
+        statusLine.textContent = "بنفحص الصور...";
+        const appRoot = new URL("../", location.href);
+        const absolute = paths => paths.map(path => new URL(path, appRoot).href);
+        const coachUrls = [...new Set(data.coaches)];
+        const cardUrls = deep.checked
+          ? [...new Set(data.cards)]
+          : [...new Set(data.cards)].filter((_, index, list) => index % Math.ceil(list.length / 45) === 0);
+        const imageFailures = [
+          ...await checkImages(absolute(coachUrls), "صور المدربين"),
+          ...await checkImages(absolute([...cardUrls, data.background]), "صور الكروت والخلفية")
+        ];
+        statusLine.textContent = "";
+        renderCheck({
+          name: deep.checked ? "كل صور الكروت والمدربين بتفتح" : "عينة صور الكروت وكل صور المدربين بتفتح",
+          ok: imageFailures.length === 0,
+          detail: imageFailures.length ? imageFailures.slice(0, 8).join(", ") : cardUrls.length + " كارت + " + coachUrls.length + " مدرب"
+        });
+
+        const manifestResponse = await fetch("../manifest.webmanifest", { cache: "no-store" });
+        const manifest = manifestResponse.ok ? await manifestResponse.json() : null;
+        renderCheck({
+          name: "ملف PWA صالح وفيه أيقونات",
+          ok: !!manifest && manifest.name && Array.isArray(manifest.icons) &&
+            manifest.icons.some(icon => icon.sizes === "192x192") && manifest.icons.some(icon => icon.sizes === "512x512"),
+          detail: manifest ? manifest.icons.length + " أيقونة" : "الملف مش موجود"
+        });
+        renderCheck({
+          name: "Service Worker متاح",
+          ok: "serviceWorker" in win.navigator,
+          detail: "نطاق " + location.origin
+        });
+
+        const failed = [...out.querySelectorAll(".tag.fail")].length;
+        const passed = [...out.querySelectorAll(".tag.ok")].length;
+        summary.className = failed ? "fail" : "ok";
+        summary.textContent = failed ? "فيه " + failed + " اختبار فاشل من " + (failed + passed) : "كل الاختبارات نجحت (" + passed + ")";
+      } catch (error) {
+        summary.className = "fail";
+        summary.textContent = "الاختبارات وقعت: " + error.message;
+        console.error(error);
+      } finally {
+        running = false;
+        runButton.disabled = false;
+        statusLine.textContent = "";
+      }
+    }
+
+    runButton.onclick = run;
+    deep.onchange = run;
+    run();
+  </script>
+</body>
+
+</html>

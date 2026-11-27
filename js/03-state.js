@@ -1,4 +1,9 @@
 /* ================= STATE ================= */
+    const NET_HEARTBEAT_INTERVAL_MS = 3000;   // فترة الـ ping لكل 3 ثواني
+    const NET_SILENCE_TIMEOUT_MS = 12000;     // انقطاع بعد 12 ثانية صمت
+    const NET_RESEND_INTERVAL_MS = 2000;      // إعادة إرسال نتيجة الفريق كل ثانيتين
+    const PHASE_ADVANCE_TICK_MS = 200;        // دورة عداد الانتقال بين الجولات
+    const TIMER_TICK_MS = 200;                // دورة عداد التايمر الرئيسي
     let S = null;
     let TM = 30;                 // seconds per pick
     let tmr = null, tEnd = 0, tCb = null;
@@ -33,7 +38,7 @@
       stopTeamResultRetry();
       localTeamResult = result;
       pendingTeamResult = result;
-      teamRetryTimer = setInterval(() => sendTeamResult(connection), 2000);
+      teamRetryTimer = setInterval(() => sendTeamResult(connection), NET_RESEND_INTERVAL_MS);
       sendTeamResult(connection);
     }
 
@@ -63,13 +68,13 @@
           stopNetMonitor();
           return;
         }
-        if (!connection.open || Date.now() - lastNetMessage > 12000) {
+        if (!connection.open || Date.now() - lastNetMessage > NET_SILENCE_TIMEOUT_MS) {
           handleOpponentDisconnect(connection);
           return;
         }
         try { connection.send({ t: "ping" }) }
         catch (e) { handleOpponentDisconnect(connection) }
-      }, 3000);
+      }, NET_HEARTBEAT_INTERVAL_MS);
     }
     function gameInProgress() {
       return gameLive && !!S;
@@ -176,14 +181,14 @@
         }
       };
       tick();
-      if (S && S.phase === "opp") advanceTimer = setInterval(tick, 200);
+      if (S && S.phase === "opp") advanceTimer = setInterval(tick, PHASE_ADVANCE_TICK_MS);
     }
     function startTimer(sec, cb) {
       stopTimer();
       tEnd = Date.now() + sec * 1000;
       tCb = cb;
       paintTimer();
-      tmr = setInterval(paintTimer, 200);
+      tmr = setInterval(paintTimer, TIMER_TICK_MS);
     }
     function paintTimer() {
       const left = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));

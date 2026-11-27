@@ -8,12 +8,14 @@
     }
 
     function round() {
+      if (!S) return; /* حارس ضد استدعاء مزدوج بعد انتهاء اللعبة */
       clearInterval(advanceTimer);
       advanceTimer = null;
       clearTimeout(phaseTimeout);
       phaseTimeout = null;
       if (S.i >= 11) return startCoachDraft();
-      S.multiSeen = S.multiSeen || new Set();
+      /* reset عند كل جولة — عشان restart متورث بيانات قديمة */
+      S.multiSeen = new Set();
       S.pool = mkPool(S.roles[S.i], new Set([...S.used, ...S.multiSeen]));
       S.pool.forEach(x => { if (x.alt.length) S.multiSeen.add(x.n); });
       S.shown = new Set();
@@ -283,7 +285,7 @@
           S.starters[captainIndex] = S.captain;
           S.choiceStrongCount = 1;
           buzz(10);
-          drawChoiceLineup();
+          drawChoiceLineup(true);
         };
       });
     }
@@ -306,7 +308,36 @@
       });
     }
 
-    function drawChoiceLineup() {
+    /* بناء زر خانة اللاعب الأساسي — مشترك بين الرسم الكامل والتحديث الجزئي */
+    function choicePitchSlotHTML(index, role, player) {
+      if (!player) return `<button class="pitch-player squad-slot empty" data-choice-role="${role}" data-choice-index="${index}" type="button" aria-label="اختار لاعب ${POS_NAME[role]}">
+                ${emptySlotCardHTML(role)}
+              </button>`;
+      const isCaptain = player.n === (S.captain && S.captain.n);
+      const label = isCaptain ? `الكابتن ${esc(player.n)}` : `تبديل ${esc(player.n)} في مركز ${POS_NAME[role]}`;
+      return `<button class="pitch-player squad-slot has-player-card ${S.choiceSelectedIndex === index ? "selected" : ""}" data-choice-edit="${index}" data-choice-role="${role}" type="button" aria-label="${label}">
+                ${cardHTML(player, "choice-slot-card")}
+                ${role ? `<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span>` : ""}
+              </button>`;
+    }
+
+    function choiceBenchSlotHTML(index, position) {
+      if (index >= 4) return `<button class="bench-slot choice-bench-lock" type="button" disabled aria-label="مكان احتياطي مقفل">🔒<small>مقفل</small></button>`;
+      const player = S.bench[index];
+      const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
+      return `<button class="bench-slot ${player ? "owned-slot" : ""} ${S.choiceBenchSelectedIndex === index ? "selected" : ""}" data-choice-bench-slot="${index}" data-position="${position || "ANY"}" type="button" aria-label="${player ? `تبديل ${esc(player.n)}` : `إضافة ${esc(label)}`}">
+              ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `${emptySlotCardHTML(position || "M")}`}
+            </button>`;
+    }
+
+    function replaceOuterHTMLIfChanged(node, html) {
+      if (!node || node.outerHTML === html) return;
+      const t = document.createElement("template");
+      t.innerHTML = html.trim();
+      node.replaceWith(t.content.firstChild);
+    }
+
+    function drawChoiceLineup(full) {
       if (!S) return;
       S.phase = "choice-position";
       const filled = S.starters.filter(Boolean).length;
@@ -331,25 +362,41 @@
       const rows = formation.lines.map(([position, count]) => {
         const cells = Array.from({ length: count }, () => {
           const index = offsets[position] + used[position]++;
-          const role = S.roles[index];
-          const player = S.starters[index];
-          return player
-            ? player.n === (S.captain && S.captain.n)
-              ? `<button class="pitch-player squad-slot has-player-card ${S.choiceSelectedIndex === index ? "selected" : ""}" data-choice-edit="${index}" data-choice-role="${role}" type="button" aria-label="الكابتن ${esc(player.n)}">
-                ${cardHTML(player, "choice-slot-card")}
-                ${role ? `<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span>` : ""}
-              </button>`
-              : `<button class="pitch-player squad-slot has-player-card ${S.choiceSelectedIndex === index ? "selected" : ""}" data-choice-edit="${index}" data-choice-role="${role}" type="button" aria-label="تبديل ${esc(player.n)} في مركز ${POS_NAME[role]}">
-                ${cardHTML(player, "choice-slot-card")}
-                ${role ? `<span class="match-role-tag" dir="ltr"><i>${POS_SHORT[role]}</i><b>◆</b></span>` : ""}
-              </button>`
-            : `<button class="pitch-player squad-slot empty" data-choice-role="${role}" data-choice-index="${index}" type="button" aria-label="اختار لاعب ${POS_NAME[role]}">
-                ${emptySlotCardHTML(role)}
-              </button>`;
+          return choicePitchSlotHTML(index, S.roles[index], S.starters[index]);
         }).join("");
         return `<div class="pitch-row">${cells}</div>`;
       }).join("");
-      app.innerHTML = `<div class="choice-draft-screen">
+      const sheetHTML = S.choiceBenchVisible ? `<div class="choice-bench-sheet"><div class="bench-grid">
+          ${BENCH_SLOT_POSITIONS.map((position, index) => choiceBenchSlotHTML(index, position)).join("")}
+        </div></div>` : "";
+      const shell = document.querySelector(".choice-draft-screen");
+      /* التحديث الجزئي: نغيّر النصوص والخانات اللي اتغيرت بس بدل إعادة بناء الشاشة كلها.
+         اللي بيفرق: التبديل بين اللاعبين، الاختيار، عداد الأساسي، الـ OVR، وزر مستعد. */
+      const canPatch = !full && shell &&
+        (shell.querySelector(".choice-bench-sheet") !== null) === S.choiceBenchVisible;
+      if (canPatch) {
+        const cnt = shell.querySelector(".hdr .cnt");
+        if (cnt) cnt.innerHTML = `الأساسي ${filled} من 11 · <b dir="ltr">${esc(S.formation)}</b>`;
+        const ovr = shell.querySelector(".choice-live-ovr b");
+        if (ovr) ovr.textContent = String(liveOverall);
+        shell.querySelectorAll("[data-choice-edit]").forEach(btn => {
+          const index = +btn.dataset.choiceEdit;
+          replaceOuterHTMLIfChanged(btn, choicePitchSlotHTML(index, S.roles[index], S.starters[index]));
+        });
+        shell.querySelectorAll(".pitch-player.squad-slot.empty[data-choice-index]").forEach(btn => {
+          const index = +btn.dataset.choiceIndex;
+          replaceOuterHTMLIfChanged(btn, choicePitchSlotHTML(index, S.roles[index], S.starters[index]));
+        });
+        if (S.choiceBenchVisible) {
+          const grid = shell.querySelector(".bench-grid");
+          if (grid) BENCH_SLOT_POSITIONS.forEach((position, index) =>
+            replaceOuterHTMLIfChanged(grid.children[index], choiceBenchSlotHTML(index, position)));
+        }
+        const actions = shell.querySelector(".choice-draft-actions");
+        if (actions) actions.innerHTML = `<button class="choice-bench-inline" id="choice-bench-inline" type="button">${S.choiceBenchVisible ? "إخفاء الاحتياطي" : "الاحتياطي"}</button>
+          ${teamReady ? `<button class="choice-ready-inline" id="choice-ready-inline" type="button">${choiceReadyLocal ? "مستعد ✓" : "مستعد"}</button>` : ""}`;
+      } else {
+        app.innerHTML = `<div class="choice-draft-screen">
         <div class="hdr"><div class="l"><span class="pos">تشكيلتي</span><span class="cnt">الأساسي ${filled} من 11 · <b dir="ltr">${S.formation}</b></span></div><button class="btn g sm" id="quit">انسحاب</button></div>
         <div class="choice-draft-top">
           <span>مدربك: <b>${esc(S.coach.n)}</b></span>
@@ -357,21 +404,13 @@
           <span class="choice-live-ovr">OVR <b dir="ltr">${liveOverall}</b></span>
         </div>
         <div class="pitch squad-pitch choice-draft-pitch">${rows}</div>
-        ${S.choiceBenchVisible ? `<div class="choice-bench-sheet"><div class="bench-grid">
-          ${BENCH_SLOT_POSITIONS.map((position, index) => {
-            if (index >= 4) return `<button class="bench-slot choice-bench-lock" type="button" disabled aria-label="مكان احتياطي مقفل">🔒<small>مقفل</small></button>`;
-            const player = S.bench[index];
-            const label = position ? `بديل ${POS_NAME[position]}` : "احتياطي مرن";
-            return `<button class="bench-slot ${player ? "owned-slot" : ""} ${S.choiceBenchSelectedIndex === index ? "selected" : ""}" data-choice-bench-slot="${index}" data-position="${position || "ANY"}" type="button" aria-label="${player ? `تبديل ${esc(player.n)}` : `إضافة ${esc(label)}`}">
-              ${player ? `<small>${label}</small>${cardHTML(player, "bench-player-card")}` : `${emptySlotCardHTML(position || "M")}`}
-            </button>`;
-          }).join("")}
-        </div></div>` : ""}
+        ${sheetHTML}
         <div class="choice-draft-actions" dir="ltr">
           <button class="choice-bench-inline" id="choice-bench-inline" type="button">${S.choiceBenchVisible ? "إخفاء الاحتياطي" : "الاحتياطي"}</button>
           ${teamReady ? `<button class="choice-ready-inline" id="choice-ready-inline" type="button">${choiceReadyLocal ? "مستعد ✓" : "مستعد"}</button>` : ""}
         </div>
       </div>`;
+      }
       bindQuitButton();
       app.querySelectorAll("[data-choice-role]").forEach(button => {
         button.onclick = () => {
@@ -541,7 +580,7 @@
       if (player.r >= 90) S.choiceStrongCount++;
       buzz(10); sfxGood();
       setTimeout(() => {
-        if (S && S.phase === "choice-player") drawChoiceLineup();
+        if (S && S.phase === "choice-player") drawChoiceLineup(true);
       }, 350);
     }
 
@@ -554,7 +593,7 @@
         try { conn.send({ t: "choice-ready" }); } catch (_) { return netFail("تعذر إرسال حالة الاستعداد", screenModes); }
         toast(choiceReadyRemote ? "الطرفان مستعدان — بنبدأ المباراة" : "انت مستعد — مستني خصمك");
       }
-      drawChoiceLineup();
+      drawChoiceLineup(true);
       if (!conn || !conn.open) finishChoiceDraft();
       else if (choiceReadyRemote) finishChoiceDraft();
     }
@@ -587,7 +626,7 @@
     function drawChoiceBenchRound() {
       if (!S) return;
       S.choiceBenchVisible = true;
-      drawChoiceLineup();
+      drawChoiceLineup(true);
     }
 
     function drawChoiceBenchPlayerRound(benchIndex) {

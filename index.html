@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     (function () {
       var shown = false;
@@ -54,13 +54,18 @@
 <body>
   <div id="app" aria-live="polite"></div>
 <script>
+  /* تحميل غير حاجب للـ parser: السكريبتات تتحمل بالتوازي وتتنفذ بنفس الترتيب. */
   var V = Math.floor(Date.now() / 3600000); // يتغير كل ساعة
   ["data/fut-data.js", "data/custom-players.js", "data/coach-art.js", "data/hi-cards.js",
    "js/01-data.js", "js/02-helpers.js", "js/03-state.js", "js/04-card-render.js",
-   "js/05-screens.js", "js/06-game-flow.js", "js/07-game-end.js", "js/08-simulation.js",
+   "js/05a-home.js", "js/05b-club.js", "js/05c-market.js", "js/05d-packs.js", "js/05e-events.js",
+   "js/06-game-flow.js", "js/07-game-end.js", "js/08-simulation.js",
    "js/09-ai-opponent.js", "js/10-network.js", "js/11-navigation-boot.js",
    "js/12-assets.js"].forEach(function (f) {
-    document.write('<script src="./' + f + '?v=' + V + '"><\/script>');
+    var script = document.createElement("script");
+    script.src = "./" + f + "?v=" + V;
+    script.async = false; // يحفظ ترتيب التنفيذ زي document.write بالظبط
+    document.body.appendChild(script);
   });
 </script>
 <script>

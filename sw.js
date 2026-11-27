@@ -1,5 +1,5 @@
 /* Offline shell for the GG static app. */
-const CACHE = "gg-app-v2";
+const CACHE = "gg-app-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -16,7 +16,11 @@ const SHELL = [
   "./js/02-helpers.js",
   "./js/03-state.js",
   "./js/04-card-render.js",
-  "./js/05-screens.js",
+  "./js/05a-home.js",
+  "./js/05b-club.js",
+  "./js/05c-market.js",
+  "./js/05d-packs.js",
+  "./js/05e-events.js",
   "./js/06-game-flow.js",
   "./js/07-game-end.js",
   "./js/08-simulation.js",
@@ -58,8 +62,12 @@ async function networkFirst(request) {
     }
     return response;
   } catch (error) {
-    const cached = await caches.match(request, { ignoreSearch: true });
+    /* ننظر في الكاش بنفس الـ query كمان، مش بس ignoreSearch — عشان مترجعش
+       سكريبت بنسخة قديمة (?v= قديمة) وهو النسخة الجديدة لسه ما اتحملتش. */
+    const cached = await caches.match(request);
     if (cached) return cached;
+    const stale = await caches.match(request, { ignoreSearch: true });
+    if (stale) return stale;
     throw error;
   }
 }
@@ -105,6 +113,8 @@ self.addEventListener("fetch", event => {
   }
   if (url.origin === self.location.origin) {
     const isImage = request.destination === "image" || /\.(?:png|jpe?g|webp|gif|svg|ico)$/i.test(url.pathname);
+    /* السكريبتات بتاتي بعلامة نسخة ?v= بتتغير كل ساعة، فنتعامل معها كـ network-first
+       عشان الكاش ميعرضش نسخة قديمة من الكود عند تحديث اللعبة. */
     event.respondWith(isImage ? cacheFirst(request) : networkFirst(request));
     return;
   }

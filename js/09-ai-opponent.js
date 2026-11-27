@@ -23,7 +23,7 @@
         let i = 0;
         if (c[0] && c[0].r < 80 && c[1]) i = 1;
         const x = c[i] || c[0];
-        sws.push(i ? c[0].n : null);
+        sws.push(i && c[0] ? c[0].n : null);
         pools.push(c.map(z => z.n));
         used.add(x.n);
         names.push(x.n);
