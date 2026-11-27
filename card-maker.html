@@ -673,10 +673,10 @@
 
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(174, 76);
-        ctx.lineTo(553, 76);
-        ctx.lineTo(553, 635);
-        ctx.lineTo(174, 680);
+        ctx.moveTo(92, 76);
+        ctx.lineTo(568, 76);
+        ctx.lineTo(568, 650);
+        ctx.lineTo(92, 650);
         ctx.closePath();
         ctx.clip();
         if (playerImage) {
@@ -685,9 +685,9 @@
           drawCover(
             ctx,
             playerImage,
-            174,
+            92,
             76,
-            379,
+            476,
             604,
             Number(zoomInput.value) / 100,
             Number(photoXInput.value),
@@ -700,7 +700,7 @@
           shade.addColorStop(.64, "rgba(0,0,0,.12)");
           shade.addColorStop(1, "rgba(0,0,0,.58)");
           ctx.fillStyle = shade;
-          ctx.fillRect(174, 430, 379, 250);
+          ctx.fillRect(92, 430, 476, 250);
         } else {
           ctx.save();
           ctx.globalAlpha = .16;
@@ -724,10 +724,10 @@
 
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(553, 76);
-        ctx.lineTo(553, 635);
-        ctx.lineTo(174, 680);
-        ctx.lineTo(174, 76);
+        ctx.moveTo(568, 76);
+        ctx.lineTo(568, 650);
+        ctx.lineTo(92, 650);
+        ctx.lineTo(92, 76);
         ctx.strokeStyle = "rgba(255,255,255,.16)";
         ctx.lineWidth = 1;
         ctx.stroke();
